@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/:file", "destination": "/:file.html" },
+    { "source": "/:folder/:file", "destination": "/:folder/:file.html" }
+  ]
+}
