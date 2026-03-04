@@ -100,8 +100,8 @@
             
             console.log('Login status set, redirecting to dashboard');
             
-            // 跳转到 dashboard
-            window.location.href = 'dashboard.html';
+            // 跳转到 dashboard - 使用完整路径避免路径问题
+            window.location.href = window.location.origin + '/dashboard.html';
         }
     </script>
 </body>

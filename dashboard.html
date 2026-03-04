@@ -16,7 +16,7 @@
         
         if (!isLoggedIn || isLoggedIn !== 'true') {
             console.log('Not logged in, redirecting to index.html');
-            window.location.href = 'index.html';
+            window.location.href = window.location.origin + '/index.html';
             return;
         }
         console.log('User is logged in, showing dashboard');

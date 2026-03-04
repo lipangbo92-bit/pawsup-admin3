@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script>
     if (!localStorage.getItem('adminLoggedIn')) {
-        window.location.href = 'index.html';
+        window.location.href = window.location.origin + '/index.html';
     }
     </script>
 </head>
@@ -107,7 +107,7 @@
         // 检查登录状态
         (function() {
             if (!localStorage.getItem('adminLoggedIn')) {
-                window.location.href = 'index.html';
+                window.location.href = window.location.origin + '/index.html';
             }
         })();
     </script>
