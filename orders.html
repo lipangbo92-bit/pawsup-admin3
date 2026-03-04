@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script>
     if (!localStorage.getItem('adminLoggedIn')) {
-        window.location.href = ./index.html;
+        window.location.href = "./index";
     }
     </script>
 </head>
@@ -30,11 +30,11 @@
         <div class="dashboard-layout">
             <nav class="sidebar">
                 <ul class="nav-menu">
-                    <li><a href="dashboard.html">📊 仪表盘</a></li>
-                    <li class="active"><a href="orders.html">📋 订单管理</a></li>
-                    <li><a href="services.html">🛁 服务管理</a></li>
-                    <li><a href="technicians.html">👨‍🔧 技师管理</a></li>
-                    <li><a href="statistics.html">📈 数据统计</a></li>
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li class="active"><a href="orders">📋 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="technicians">👨‍🔧 技师管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
                 </ul>
             </nav>
             
@@ -93,7 +93,7 @@
         // 检查登录状态
         (function() {
             if (!localStorage.getItem('adminLoggedIn')) {
-                window.location.href = ./index.html;
+                window.location.href = "./index";
             }
         })();
     </script>

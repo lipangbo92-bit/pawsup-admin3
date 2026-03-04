@@ -1,6 +1,10 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/orders", "destination": "/orders.html" },
+    { "source": "/services", "destination": "/services.html" },
+    { "source": "/statistics", "destination": "/statistics.html" },
+    { "source": "/technicians", "destination": "/technicians.html" }
   ],
   "headers": [
     {
