@@ -4,35 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PawsUp 爪哇宠屋 - 管理登录</title>
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e67e22 0%, #9b59b6 100%);
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .login-card {
+            background: white;
+            width: 380px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .logo { margin-bottom: 10px; font-size: 60px; }
+        .title { font-size: 24px; color: #333; margin-bottom: 15px; font-weight: 600; }
+        .role-badge {
+            background: linear-gradient(to right, #ff8a4c, #a855f7);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+        .input-group { text-align: left; margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 14px; color: #444; margin-bottom: 8px; }
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: none;
+            background-color: #f3f4f6;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-group input::placeholder { color: #bbb; }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #ff7e1a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .login-btn:hover { background-color: #e66e10; }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-section">
-                <div class="logo">🐾</div>
-                <h1 class="title">PawsUp 爪哇宠屋</h1>
-                <span class="role-badge">管理员入口</span>
-            </div>
-            
-            <form class="login-form" id="loginForm">
-                <div class="input-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" name="username" placeholder="请输入用户名">
-                </div>
-                
-                <div class="input-group">
-                    <label for="password">密码</label>
-                    <input type="password" id="password" name="password" placeholder="请输入密码">
-                </div>
-                
-                <button type="button" class="login-btn" id="loginBtn">登 录</button>
-            </form>
+    <div class="login-card">
+        <div class="logo">🐾</div>
+        <h1 class="title">PawsUp 爪哇宠屋</h1>
+        <span class="role-badge">管理员入口</span>
+        
+        <div class="input-group">
+            <label>用户名</label>
+            <input type="text" id="username" placeholder="请输入用户名">
         </div>
+        
+        <div class="input-group">
+            <label>密码</label>
+            <input type="password" id="password" placeholder="请输入密码">
+        </div>
+        
+        <button class="login-btn" onclick="doLogin()">登 录</button>
     </div>
     
     <script>
-        document.getElementById('loginBtn').onclick = function() {
+        function doLogin() {
             var username = document.getElementById('username').value.trim();
             var password = document.getElementById('password').value;
             
@@ -41,10 +89,13 @@
                 return;
             }
             
+            // 保存登录状态
             localStorage.setItem('adminLoggedIn', 'true');
             localStorage.setItem('adminUser', username);
-            window.location.href = 'dashboard.html';
-        };
+            
+            // 跳转到 dashboard
+            window.location.href = './dashboard.html';
+        }
     </script>
 </body>
 </html>
