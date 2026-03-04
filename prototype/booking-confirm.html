@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>确认预约 - 爪哇宠屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        'primary-light': '#FFF7ED',
+                        'primary-dark': '#EA580C',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 shadow-2xl overflow-hidden pb-44">
+        
+        <!-- 顶部导航栏 -->
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600">
+            <div class="px-4 pt-12 pb-4 flex items-center justify-center relative">
+                <button onclick="window.history.back()" class="absolute left-4 text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="text-lg font-semibold text-white">确认预约</h1>
+            </div>
+        </div>
+        
+        <!-- 预约信息卡片 -->
+        <div class="p-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>📋</span> 预约信息
+                </h3>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务项目</span>
+                    <span class="text-sm font-medium text-gray-800">狗狗洗护套餐</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务技师</span>
+                    <span class="text-sm font-medium text-gray-800">小美</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务宠物</span>
+                    <span class="text-sm font-medium text-gray-800">豆豆</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">预约时间</span>
+                    <span class="text-sm font-medium text-gray-800">2024年2月27日 15:30</span>
+                </div>
+                <div class="flex justify-between py-3">
+                    <span class="text-sm text-gray-500">服务时长</span>
+                    <span class="text-sm font-medium text-gray-800">约60分钟</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 支付金额 -->
+        <div class="px-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+                <span class="text-base font-semibold text-white">应付金额</span>
+                <span class="text-2xl font-bold text-primary">¥99</span>
+            </div>
+        </div>
+        
+        <!-- 取消政策 -->
+        <div class="px-4 mt-4">
+            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-4 border border-orange-100">
+                <p class="text-xs text-gray-600 leading-relaxed">
+                    <span class="text-primary font-medium">⚠️ 取消政策：</span>预约时间前3小时可取消，全额退款；3小时内取消，不退款。请合理安排您的时间。
+                </p>
+            </div>
+        </div>
+        
+        <!-- 确认支付按钮 - 固定在Tab栏上方 -->
+        <div class="fixed bottom-[72px] left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 p-4 z-40">
+            <button onclick="window.location.href='booking-success.html'" class="w-full bg-primary text-white py-4 rounded-full text-base font-semibold shadow-lg active:scale-95 transition-transform">
+                确认支付 ¥99
+            </button>
+        </div>
+        
+        <!-- 底部Tab导航栏 - 固定在页面最底部 -->
+        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 z-50">
+            <div class="flex items-center justify-around py-2">
+                <a href="index-new.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 font-medium">首页</span>
+                </a>
+                <a href="services.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">服务</span>
+                </a>
+                <a href="orders.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">订单</span>
+                </a>
+                <a href="profile.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">我的</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

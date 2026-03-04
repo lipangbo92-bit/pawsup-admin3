@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawsUp 爪哇宠屋 - 管理仪表盘</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li class="active"><a href="dashboard.html">📊 仪表盘</a></li>
+                    <li><a href="orders.html">📋 订单管理</a></li>
+                    <li><a href="services.html">🛁 服务管理</a></li>
+                    <li><a href="technicians.html">👨‍🔧 技师管理</a></li>
+                    <li><a href="statistics.html">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>欢迎回来，<span id="adminName">管理员</span></h2>
+                    <p class="subtitle">今天是 <span id="currentDate"></span></p>
+                </div>
+                
+                <div class="stats-cards-row">
+                    <div class="stat-card-large clickable" onclick="location.href='orders.html'">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <span class="stat-label">今日订单</span>
+                            <span class="stat-value" id="todayOrders">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-large clickable" onclick="location.href='orders.html?status=pending'">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-info">
+                            <span class="stat-label">待处理</span>
+                            <span class="stat-value" id="pendingOrders">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-large clickable" onclick="location.href='statistics.html'">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <span class="stat-label">今日收入</span>
+                            <span class="stat-value" id="todayRevenue">¥0.00</span>
+                        </div>
+                    </div>
+                    <div class="stat-card-large clickable" onclick="location.href='technicians.html'">
+                        <div class="stat-icon">👨‍🔧</div>
+                        <div class="stat-info">
+                            <span class="stat-label">在职技师</span>
+                            <span class="stat-value" id="activeTechs">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>📋 最近订单</h3>
+                            <a href="orders.html" class="view-all">查看全部</a>
+                        </div>
+                        <div class="recent-list" id="recentOrders"></div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h3>🛁 热门服务</h3>
+                            <a href="services.html" class="view-all">管理</a>
+                        </div>
+                        <div class="service-rank" id="topServices"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script src="https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

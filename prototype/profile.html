@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的 - 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FCE7F3;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --text-light: #BE185D;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+            --shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 40px 20px 30px;
+            text-align: center;
+        }
+        
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--white);
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .username {
+            color: var(--white);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .user-level {
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .stats-bar {
+            display: flex;
+            background: var(--white);
+            margin: -20px 16px 20px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            border-right: 1px solid var(--gray-100);
+        }
+        
+        .stat-item:last-child { border-right: none; }
+        
+        .stat-num {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .menu-section {
+            padding: 0 16px;
+        }
+        
+        .menu-title {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+        
+        .menu-list {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+        }
+        
+        .menu-item:last-child { border-bottom: none; }
+        
+        .menu-item .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 12px;
+        }
+        
+        .menu-item .label {
+            flex: 1;
+            font-size: 15px;
+        }
+        
+        .menu-item .arrow {
+            color: #D1D5DB;
+            font-size: 14px;
+        }
+        
+        .logout-btn {
+            display: block;
+            width: calc(100% - 32px);
+            margin: 0 16px 20px;
+            padding: 14px;
+            background: var(--white);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9CA3AF;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .tab-item.active {
+            color: var(--primary);
+        }
+        
+        .tab-item .icon {
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-header">
+        <div class="avatar">🐱</div>
+        <div class="username">萌宠主人</div>
+        <div class="user-level">⭐ 金卡会员</div>
+    </div>
+    
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-num">12</div>
+            <div class="stat-label">预约次数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">3</div>
+            <div class="stat-label">我的宠物</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">¥580</div>
+            <div class="stat-label">余额</div>
+        </div>
+    </div>
+    
+    <div class="menu-section">
+        <div class="menu-title">我的订单</div>
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="icon">📝</div>
+                <div class="label">预约记录</div>
+                <div class="arrow">›</div>
+            </div>
+            <div class="menu-item">
+                <div class="icon">🐾</div>
+                <div class="label">我的宠物</div>
+                <div class="arrow">›</div>
+            </div>
+            <div class="menu-item">
+                <div class="icon">❤️</div>
+                <div class="label">收藏技师</div>
+                <div class="arrow">›</div>
+            </div>
+        </div>
+        
+        <div class="menu-title">会员中心</div>
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="icon">💳</div>
+                <div class="label">会员卡</div>
+                <div class="arrow">›</div>
+            </div>
+            <div class="menu-item">
+                <div class="icon">🎫</div>
+                <div class="label">优惠券</div>
+                <div class="arrow">›</div>
+            </div>
+            <div class="menu-item">
+                <div class="icon">💰</div>
+                <div class="label">余额充值</div>
+                <div class="arrow">›</div>
+            </div>
+        </div>
+        
+        <div class="menu-title">其他</div>
+        <div class="menu-list">
+            <div class="menu-item">
+                <div class="icon">⚙️</div>
+                <div class="label">设置</div>
+                <div class="arrow">›</div>
+            </div>
+            <div class="menu-item">
+                <div class="icon">📞</div>
+                <div class="label">联系客服</div>
+                <div class="arrow">›</div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="logout-btn">退出登录</button>
+    
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='index-new.html'">
+            <span class="icon">🏠</span>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='services.html'">
+            <span class="icon">📋</span>
+            <span>服务</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='orders.html'">
+            <span class="icon">📝</span>
+            <span>订单</span>
+        </div>
+        <div class="tab-item active">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

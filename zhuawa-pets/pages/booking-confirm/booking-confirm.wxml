@@ -1,0 +1,89 @@
+<!--pages/booking-confirm/booking-confirm.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-back" bindtap="handleBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="nav-title">确认预约</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 主内容区域 -->
+  <view class="content">
+    <!-- 预约信息卡片 -->
+    <view class="booking-card">
+      <!-- 卡片标题栏 -->
+      <view class="card-header">
+        <text class="header-icon">📋</text>
+        <text class="header-title">预约信息</text>
+      </view>
+      
+      <!-- 卡片内容 -->
+      <view class="card-body">
+        <view class="info-item">
+          <text class="item-label">服务项目</text>
+          <view class="item-value">
+            <text class="item-icon">{{info.service.icon}}</text>
+            <text class="item-text">{{info.service.name}}</text>
+          </view>
+        </view>
+        
+        <view class="info-item">
+          <text class="item-label">服务技师</text>
+          <view class="item-value">
+            <text class="item-avatar">{{info.technician.avatar}}</text>
+            <text class="item-text">{{info.technician.name}}</text>
+          </view>
+        </view>
+        
+        <view class="info-item">
+          <text class="item-label">服务宠物</text>
+          <view class="item-value">
+            <text class="item-text">{{info.pet.name}}</text>
+            <text class="pet-type">({{info.pet.type}})</text>
+          </view>
+        </view>
+        
+        <view class="info-item">
+          <text class="item-label">预约时间</text>
+          <view class="item-value">
+            <text class="item-text highlight">{{info.date.fullDate}} {{info.time}}</text>
+          </view>
+        </view>
+        
+        <view class="info-item last-item">
+          <text class="item-label">服务时长</text>
+          <view class="item-value">
+            <text class="item-text">约{{info.duration}}分钟</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 支付金额卡片 -->
+    <view class="payment-card">
+      <text class="payment-label">应付金额</text>
+      <view class="payment-amount">
+        <text class="currency">¥</text>
+        <text class="amount">{{info.service.price}}</text>
+      </view>
+    </view>
+
+    <!-- 取消政策提示 -->
+    <view class="policy-notice">
+      <text class="notice-icon">⚠️</text>
+      <text class="notice-text">取消政策：预约时间前3小时可取消，全额退款；3小时内取消，不退款。请合理安排您的时间。</text>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="pay-btn" bindtap="handleConfirm">
+      <text class="btn-text">确认支付 ¥{{info.service.price}}</text>
+    </button>
+  </view>
+</view>

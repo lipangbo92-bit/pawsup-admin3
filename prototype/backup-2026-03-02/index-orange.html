@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>栖游记宠物店</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f5f5f5;
+        }
+        .safe-top {
+            padding-top: constant(safe-area-inset-top);
+            padding-top: env(safe-area-inset-top);
+        }
+        .safe-bottom {
+            padding-bottom: constant(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .pulse-soft {
+            animation: pulse-soft 2s ease-in-out infinite;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .gradient-orange {
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FDBA74 100%);
+        }
+        .gradient-orange-dark {
+            background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(249, 115, 22, 0.2);
+        }
+        .tech-card:hover {
+            transform: scale(1.02);
+        }
+        .nav-item.active {
+            color: #F97316;
+        }
+        .nav-item.active .nav-icon {
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .wave-decoration {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23f5f5f5' fill-opacity='1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        .paw-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23F97316' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .avatar-ring {
+            background: linear-gradient(135deg, #F97316, #FB923C, #FDBA74);
+            padding: 3px;
+            border-radius: 50%;
+        }
+        .badge-glow {
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Main Container - Mobile Width -->
+    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative pb-20">
+        
+        <!-- Header Section with Gradient Background -->
+        <div class="gradient-orange relative overflow-hidden">
+            <!-- Decorative Circles -->
+            <div class="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+            <div class="absolute bottom-20 left-0 w-24 h-24 bg-white opacity-10 rounded-full translate-x-[-30%]"></div>
+            <div class="absolute top-10 left-10 w-8 h-8 bg-white opacity-20 rounded-full float-animation"></div>
+            
+            <!-- Top Bar -->
+            <div class="safe-top px-4 pt-12 pb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="text-white/80 text-xs">当前定位</div>
+                        <div class="text-white font-medium text-sm flex items-center gap-1">
+                            北京市朝阳区 <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm relative">
+                        <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+                        <div class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-[10px] text-white font-bold">3</div>
+                    </div>
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store Name & Welcome -->
+            <div class="px-4 pb-16 relative">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-2xl">🐾</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white tracking-wide">栖游记</h1>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-white/90 text-xs bg-white/20 px-2 py-0.5 rounded-full">宠物生活馆</span>
+                            <div class="flex items-center gap-0.5">
+                                <i data-lucide="star" class="w-3 h-3 text-yellow-300 fill-yellow-300"></i>
+                                <span class="text-white text-xs">4.9</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-white/80 text-sm mt-3">给毛孩子最温暖的呵护 💕</p>
+            </div>
+            
+            <!-- Wave Decoration -->
+            <div class="wave-decoration"></div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-4 -mt-8 relative z-10">
+            <div class="bg-white rounded-2xl shadow-lg flex items-center gap-3 px-4 py-3.5">
+                <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                <input type="text" placeholder="搜索服务、商品、技师..." class="flex-1 text-sm text-gray-700 outline-none placeholder-gray-400">
+                <div class="w-8 h-8 gradient-orange rounded-lg flex items-center justify-center">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4 text-white"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions (金刚区) -->
+        <div class="px-4 mt-6">
+            <div class="bg-white rounded-2xl p-5 card-shadow">
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-2xl gradient-orange flex items-center justify-center shadow-lg shadow-orange-200 transform transition-transform active:scale-95">
+                            <i data-lucide="scissors" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <span class="text-xs text-gray-700 font-medium">宠物美容</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center shadow-lg shadow-blue-200 transform transition-transform active:scale-95">
+                            <i data-lucide="stethoscope" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <span class="text-xs text-gray-700 font-medium">医疗健康</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 to-pink-500 flex items-center justify-center shadow-lg shadow-pink-200 transform transition-transform active:scale-95">
+                            <i data-lucide="bath" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <span class="text-xs text-gray-700 font-medium">洗护SPA</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center shadow-lg shadow-green-200 transform transition-transform active:scale-95">
+                            <i data-lucide="shopping-bag" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <span class="text-xs text-gray-700 font-medium">宠物商城</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotion Banner -->
+        <div class="px-4 mt-5">
+            <div class="bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 rounded-2xl p-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full translate-x-1/3 -translate-y-1/3"></div>
+                <div class="absolute bottom-0 left-10 w-16 h-16 bg-white opacity-10 rounded-full translate-y-1/2"></div>
+                <div class="relative flex items-center justify-between">
+                    <div>
+                        <div class="text-white/90 text-xs mb-1">新人专享</div>
+                        <div class="text-white font-bold text-lg">首单立减 ¥30</div>
+                        <div class="text-white/80 text-xs mt-1">注册即送优惠券礼包</div>
+                    </div>
+                    <button class="bg-white text-orange-500 px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                        立即领取
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技师推荐区 -->
+        <div class="px-4 mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-5 gradient-orange rounded-full"></div>
+                    <h2 class="font-bold text-gray-800 text-lg">星级技师</h2>
+                </div>
+                <a href="#" class="text-gray-400 text-sm flex items-center gap-1">
+                    全部 <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+            
+            <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+                <!-- Tech Card 1 -->
+                <div class="tech-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 card-shadow transition-transform cursor-pointer">
+                    <div class="relative">
+                        <div class="avatar-ring">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="技师" class="w-16 h-16 rounded-full bg-gray-100">
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center badge-glow">
+                            <span class="text-white text-[10px] font-bold">No.1</span>
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mt-3 text-center">小林</h3>
+                    <div class="flex items-center justify-center gap-1 mt-1">
+                        <i data-lucide="star" class="w-3 h-3 text-orange-400 fill-orange-400"></i>
+                        <span class="text-xs text-gray-600">4.9</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2 justify-center">
+                        <span class="text-[10px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded">资深美容师</span>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span class="text-xs text-gray-400">服务 2,340+</span>
+                    </div>
+                </div>
+
+                <!-- Tech Card 2 -->
+                <div class="tech-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 card-shadow transition-transform cursor-pointer">
+                    <div class="relative">
+                        <div class="avatar-ring">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Luna&backgroundColor=ffdfbf" alt="技师" class="w-16 h-16 rounded-full bg-gray-100">
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                            <span class="text-white text-[10px] font-bold">No.2</span>
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mt-3 text-center">阿雅</h3>
+                    <div class="flex items-center justify-center gap-1 mt-1">
+                        <i data-lucide="star" class="w-3 h-3 text-orange-400 fill-orange-400"></i>
+                        <span class="text-xs text-gray-600">4.8</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2 justify-center">
+                        <span class="text-[10px] bg-pink-50 text-pink-600 px-1.5 py-0.5 rounded">萌宠造型</span>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span class="text-xs text-gray-400">服务 1,890+</span>
+                    </div>
+                </div>
+
+                <!-- Tech Card 3 -->
+                <div class="tech-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 card-shadow transition-transform cursor-pointer">
+                    <div class="relative">
+                        <div class="avatar-ring">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=c0aede" alt="技师" class="w-16 h-16 rounded-full bg-gray-100">
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center">
+                            <span class="text-white text-[10px] font-bold">No.3</span>
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mt-3 text-center">大鹏</h3>
+                    <div class="flex items-center justify-center gap-1 mt-1">
+                        <i data-lucide="star" class="w-3 h-3 text-orange-400 fill-orange-400"></i>
+                        <span class="text-xs text-gray-600">4.8</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2 justify-center">
+                        <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">大型犬 specialist</span>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span class="text-xs text-gray-400">服务 1,560+</span>
+                    </div>
+                </div>
+
+                <!-- Tech Card 4 -->
+                <div class="tech-card flex-shrink-0 bg-white rounded-2xl p-4 w-36 card-shadow transition-transform cursor-pointer">
+                    <div class="relative">
+                        <div class="avatar-ring">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Daisy&backgroundColor=ffd5dc" alt="技师" class="w-16 h-16 rounded-full bg-gray-100">
+                        </div>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 mt-3 text-center">小雯</h3>
+                    <div class="flex items-center justify-center gap-1 mt-1">
+                        <i data-lucide="star" class="w-3 h-3 text-orange-400 fill-orange-400"></i>
+                        <span class="text-xs text-gray-600">4.7</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-2 justify-center">
+                        <span class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">洗护专家</span>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span class="text-xs text-gray-400">服务 1,230+</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 热门服务区 -->
+        <div class="px-4 mt-6 pb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-5 gradient-orange rounded-full"></div>
+                    <h2 class="font-bold text-gray-800 text-lg">热门服务</h2>
+                </div>
+                <div class="flex gap-2">
+                    <button class="text-xs bg-orange-500 text-white px-3 py-1 rounded-full">全部</button>
+                    <button class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">美容</button>
+                    <button class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">医疗</button>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Service Card 1 -->
+                <div class="service-card bg-white rounded-2xl p-4 card-shadow transition-all cursor-pointer">
+                    <div class="flex gap-4">
+                        <div class="w-24 h-24 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center flex-shrink-0">
+                            <span class="text-4xl">🐕</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <h3 class="font-bold text-gray-800">精致洗护套餐</h3>
+                                <div class="flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded-full">
+                                    <i data-lucide="flame" class="w-3 h-3 text-orange-500 fill-orange-500"></i>
+                                    <span class="text-[10px] text-orange-600 font-medium">热销</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">洗澡、吹干、梳理、剪指甲、清洁耳朵，一站式护理</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">适用: 中小型犬</span>
+                                <span class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">约60分钟</span>
+                            </div>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-lg font-bold text-orange-500">¥128</span>
+                                    <span class="text-xs text-gray-400 line-through">¥168</span>
+                                </div>
+                                <button class="gradient-orange text-white text-xs px-4 py-2 rounded-full font-medium">
+                                    预约
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Card 2 -->
+                <div class="service-card bg-white rounded-2xl p-4 card-shadow transition-all cursor-pointer">
+                    <div class="flex gap-4">
+                        <div class="w-24 h-24 rounded-xl bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center flex-shrink-0">
+                            <span class="text-4xl">🐈</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <h3 class="font-bold text-gray-800">猫咪SPA护理</h3>
+                                <div class="flex items-center gap-1 bg-pink-50 px-2 py-0.5 rounded-full">
+                                    <i data-lucide="heart" class="w-3 h-3 text-pink-500 fill-pink-500"></i>
+                                    <span class="text-[10px] text-pink-600 font-medium">推荐</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">专业猫咪洗护，舒缓压力，精油按摩，去油护理</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">适用: 全猫种</span>
+                                <span class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">约90分钟</span>
+                            </div>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-lg font-bold text-orange-500">¥198</span>
+                                    <span class="text-xs text-gray-400 line-through">¥258</span>
+                                </div>
+                                <button class="gradient-orange text-white text-xs px-4 py-2 rounded-full font-medium">
+                                    预约
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Card 3 -->
+                <div class="service-card bg-white rounded-2xl p-4 card-shadow transition-all cursor-pointer">
+                    <div class="flex gap-4">
+                        <div class="w-24 h-24 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0">
+                            <span class="text-4xl">✂️</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <h3 class="font-bold text-gray-800">泰迪造型美容</h3>
+                                <div class="flex items-center gap-1 bg-purple-50 px-2 py-0.5 rounded-full">
+                                    <i data-lucide="award" class="w-3 h-3 text-purple-500"></i>
+                                    <span class="text-[10px] text-purple-600 font-medium">专业</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">日系韩系造型，专业修剪，萌系造型，个性化设计</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[10px] bg-orange-50 text-orange-600 px-1.5 py-0.5 rounded">适用: 泰迪/比熊</span>
+                                <span class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">约120分钟</span>
+                            </div>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-lg font-bold text-orange-500">¥288</span>
+                                    <span class="text-xs text-gray-400 line-through">¥368</span>
+                                </div>
+                                <button class="gradient-orange text-white text-xs px-4 py-2 rounded-full font-medium">
+                                    预约
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Card 4 -->
+                <div class="service-card bg-white rounded-2xl p-4 card-shadow transition-all cursor-pointer">
+                    <div class="flex gap-4">
+                        <div class="w-24 h-24 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                            <span class="text-4xl">🏥</span>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between">
+                                <h3 class="font-bold text-gray-800">健康体检套餐</h3>
+                                <div class="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-full">
+                                    <i data-lucide="shield-check" class="w-3 h-3 text-green-500"></i>
+                                    <span class="text-[10px] text-green-600 font-medium">保障</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">全面体检、疫苗接种、驱虫服务，守护宠物健康</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">适用: 全宠种</span>
+                                <span class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded">约45分钟</span>
+                            </div>
+                            <div class="flex items-center justify-between mt-3">
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-lg font-bold text-orange-500">¥158</span>
+                                    <span class="text-xs text-gray-400 line-through">¥228</span>
+                                </div>
+                                <button class="gradient-orange text-white text-xs px-4 py-2 rounded-full font-medium">
+                                    预约
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Spacing -->
+        <div class="h-8"></div>
+
+        <!-- Tab Bar -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-50">
+            <div class="max-w-md mx-auto flex items-center justify-around py-2">
+                <div class="nav-item active flex flex-col items-center gap-1 py-1 px-4 cursor-pointer">
+                    <i data-lucide="home" class="nav-icon w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">首页</span>
+                </div>
+                <div class="nav-item flex flex-col items-center gap-1 py-1 px-4 cursor-pointer text-gray-400">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">预约</span>
+                </div>
+                <div class="nav-item flex flex-col items-center gap-1 py-1 px-4 cursor-pointer text-gray-400">
+                    <div class="w-12 h-12 gradient-orange rounded-full flex items-center justify-center -mt-6 shadow-lg shadow-orange-200">
+                        <i data-lucide="plus" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+                <div class="nav-item flex flex-col items-center gap-1 py-1 px-4 cursor-pointer text-gray-400">
+                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">商城</span>
+                </div>
+                <div class="nav-item flex flex-col items-center gap-1 py-1 px-4 cursor-pointer text-gray-400">
+                    <i data-lucide="user" class="w-6 h-6"></i>
+                    <span class="text-[10px] font-medium">我的</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

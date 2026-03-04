@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技师详情 - 栖游记</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --secondary: #F9A8D4;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 40px 20px 60px;
+            text-align: center;
+            position: relative;
+        }
+        .back {
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--white);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+        .name {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 22px;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+        .level {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .card {
+            background: var(--white);
+            margin: -30px 16px 16px;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        .stat { text-align: center; }
+        .stat-num { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 12px; color: #9CA3AF; }
+        
+        .section-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .tag {
+            background: var(--gray-100);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+        }
+        .desc { font-size: 13px; color: #6B7280; line-height: 1.6; }
+        
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 16px 20px 30px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .book-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back">←</div>
+        <div class="avatar">👩‍🦱</div>
+        <div class="name">小美</div>
+        <div class="level">高级美容师</div>
+    </div>
+    
+    <div class="card">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-num">4.9</div>
+                <div class="stat-label">评分</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">328</div>
+                <div class="stat-label">预约</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">3年</div>
+                <div class="stat-label">经验</div>
+            </div>
+        </div>
+        
+        <div class="section-title">🎯 擅长服务</div>
+        <div class="tags">
+            <span class="tag">狗狗洗护</span>
+            <span class="tag">猫咪护理</span>
+            <span class="tag">萌系造型</span>
+            <span class="tag">染色造型</span>
+        </div>
+        
+        <div class="section-title">📝 个人简介</div>
+        <div class="desc">从事宠物美容行业3年，擅长各类宠物造型设计，对待宠物有耐心有爱心，已服务超过300只宠物。</div>
+    </div>
+    
+    <div class="fixed-bottom">
+        <button class="book-btn">立即预约</button>
+    </div>
+</body>
+</html>

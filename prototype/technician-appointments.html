@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今日预约 - 技师端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-500: #EA580C;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 40px 20px 80px;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .user-name {
+            color: var(--white);
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .user-role {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px 16px;
+            flex: 1;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-value {
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .content {
+            margin-top: -50px;
+            padding: 0 16px;
+        }
+        
+        .date-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .date-tabs::-webkit-scrollbar { display: none; }
+        
+        .date-tab {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 70px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+        
+        .date-tab.active {
+            background: var(--primary);
+        }
+        
+        .date-tab .day {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        
+        .date-tab.active .day {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .date-tab .date {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-top: 2px;
+        }
+        
+        .date-tab.active .date {
+            color: var(--white);
+        }
+        
+        .date-tab .count {
+            font-size: 10px;
+            color: var(--primary);
+            background: var(--gray-100);
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        
+        .date-tab.active .count {
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+        }
+        
+        .section-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 17px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .appointment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .appointment-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .app-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .time-badge {
+            background: var(--gray-100);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .app-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        .app-status.upcoming {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+        
+        .app-status.in-progress {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        
+        .app-status.completed {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        
+        .app-body {
+            padding: 12px 0;
+            border-top: 1px solid var(--gray-100);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .service-detail {
+            flex: 1;
+        }
+        
+        .service-name {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        
+        .service-meta {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        
+        .pet-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F9FAFB;
+            padding: 10px 12px;
+            border-radius: 10px;
+        }
+        
+        .pet-avatar {
+            font-size: 20px;
+        }
+        
+        .pet-detail {
+            flex: 1;
+        }
+        
+        .pet-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .pet-type {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        
+        .app-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+        
+        .app-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-outline {
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+        }
+        
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 375px;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9CA3AF;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .tab-item.active {
+            color: var(--primary);
+        }
+        
+        .tab-item .icon {
+            font-size: 22px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <div class="user-info">
+                <div class="user-avatar">👩‍🦱</div>
+                <div>
+                    <div class="user-name">小美</div>
+                    <div class="user-role">高级美容师</div>
+                </div>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">今日预约</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">2</div>
+                <div class="stat-label">待服务</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">已完成</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="date-tabs">
+            <div class="date-tab">
+                <div class="day">昨天</div>
+                <div class="date">26</div>
+            </div>
+            <div class="date-tab active">
+                <div class="day">今天</div>
+                <div class="date">27</div>
+                <div class="count">5单</div>
+            </div>
+            <div class="date-tab">
+                <div class="day">明天</div>
+                <div class="date">28</div>
+                <div class="count">3单</div>
+            </div>
+            <div class="date-tab">
+                <div class="day">周六</div>
+                <div class="date">01</div>
+            </div>
+            <div class="date-tab">
+                <div class="day">周日</div>
+                <div class="date">02</div>
+            </div>
+        </div>
+        
+        <h3 class="section-title">📋 今日预约</h3>
+        
+        <div class="appointment-list">
+            <div class="appointment-card">
+                <div class="app-header">
+                    <div class="app-time">
+                        <span class="time-badge">10:00</span>
+                    </div>
+                    <span class="app-status upcoming">待服务</span>
+                </div>
+                <div class="app-body">
+                    <div class="service-info">
+                        <div class="service-icon">🐕</div>
+                        <div class="service-detail">
+                            <div class="service-name">狗狗洗护套餐</div>
+                            <div class="service-meta">约60分钟 · ¥99</div>
+                        </div>
+                    </div>
+                    <div class="pet-info">
+                        <span class="pet-avatar">🐶</span>
+                        <div class="pet-detail">
+                            <div class="pet-name">豆豆</div>
+                            <div class="pet-type">金毛 · 3岁 · 25kg</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-footer">
+                    <div class="customer-info">
+                        <span>👤 王先生</span>
+                        <span>📱 138****8888</span>
+                    </div>
+                    <div class="app-actions">
+                        <button class="btn-sm btn-outline">联系</button>
+                        <button class="btn-sm btn-primary">开始服务</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="appointment-card">
+                <div class="app-header">
+                    <div class="app-time">
+                        <span class="time-badge">14:30</span>
+                    </div>
+                    <span class="app-status upcoming">待服务</span>
+                </div>
+                <div class="app-body">
+                    <div class="service-info">
+                        <div class="service-icon">✂️</div>
+                        <div class="service-detail">
+                            <div class="service-name">宠物美容造型</div>
+                            <div class="service-meta">约120分钟 · ¥199</div>
+                        </div>
+                    </div>
+                    <div class="pet-info">
+                        <span class="pet-avatar">🐩</span>
+                        <div class="pet-detail">
+                            <div class="pet-name">小白</div>
+                            <div class="pet-type">比熊 · 2岁 · 6kg</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-footer">
+                    <div class="customer-info">
+                        <span>👤 李女士</span>
+                        <span>📱 139****6666</span>
+                    </div>
+                    <div class="app-actions">
+                        <button class="btn-sm btn-outline">联系</button>
+                        <button class="btn-sm btn-primary">开始服务</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="appointment-card">
+                <div class="app-header">
+                    <div class="app-time">
+                        <span class="time-badge">09:00</span>
+                    </div>
+                    <span class="app-status completed">已完成</span>
+                </div>
+                <div class="app-body">
+                    <div class="service-info">
+                        <div class="service-icon">🐈</div>
+                        <div class="service-detail">
+                            <div class="service-name">猫咪洗护套餐</div>
+                            <div class="service-meta">约90分钟 · ¥129</div>
+                        </div>
+                    </div>
+                    <div class="pet-info">
+                        <span class="pet-avatar">🐱</span>
+                        <div class="pet-detail">
+                            <div class="pet-name">咪咪</div>
+                            <div class="pet-type">英短 · 1岁 · 4kg</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-footer">
+                    <div class="customer-info">
+                        <span>👤 张女士</span>
+                        <span>⭐ 已评价 5.0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab-item active">
+            <span class="icon">📋</span>
+            <span>预约</span>
+        </div>
+        <div class="tab-item">
+            <span class="icon">📅</span>
+            <span>排班</span>
+        </div>
+        <div class="tab-item">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

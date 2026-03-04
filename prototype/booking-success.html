@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>预约成功 - 爪哇宠屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        'primary-light': '#FFF7ED',
+                        'primary-dark': '#EA580C',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+        @keyframes pop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .success-icon { animation: pop 0.5s ease-out; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 shadow-2xl overflow-hidden">
+        
+        <!-- 成功图标 -->
+        <div class="flex flex-col items-center pt-16 pb-8">
+            <div class="success-icon w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mt-6">预约成功</h1>
+            <p class="text-sm text-gray-500 mt-2">已发送通知到您的微信</p>
+        </div>
+        
+        <!-- 预约详情卡片 -->
+        <div class="px-4 pb-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <span>📋</span> 预约详情
+                </h3>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">订单编号</span>
+                    <span class="text-sm font-medium text-gray-800">202402271530</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务项目</span>
+                    <span class="text-sm font-medium text-gray-800">狗狗洗护套餐</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务技师</span>
+                    <span class="text-sm font-medium text-gray-800">小美</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">预约时间</span>
+                    <span class="text-sm font-medium text-gray-800">02月27日 15:30</span>
+                </div>
+                <div class="flex justify-between py-3 border-b border-gray-100">
+                    <span class="text-sm text-gray-500">服务宠物</span>
+                    <span class="text-sm font-medium text-gray-800">豆豆</span>
+                </div>
+                <div class="flex justify-between py-3">
+                    <span class="text-sm text-gray-500">支付金额</span>
+                    <span class="text-lg font-bold text-primary">¥99</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 按钮组 -->
+        <div class="px-4 pt-4 space-y-3">
+            <button class="w-full bg-primary text-white py-4 rounded-full text-base font-semibold shadow-lg active:scale-95 transition-transform">
+                查看预约
+            </button>
+            <button onclick="window.location.href='index-new.html'" class="w-full bg-white text-gray-700 border-2 border-gray-200 py-4 rounded-full text-base font-semibold active:scale-95 transition-transform">
+                返回首页
+            </button>
+        </div>
+        
+        <!-- 底部导航栏 -->
+        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100">
+            <div class="flex items-center justify-around py-2">
+                <a href="index-new.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h3m6-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 font-medium">首页</span>
+                </a>
+                <a href="services.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">服务</span>
+                </a>
+                <a href="orders.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">订单</span>
+                </a>
+                <a href="profile.html" class="flex flex-col items-center py-1 text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5">我的</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
