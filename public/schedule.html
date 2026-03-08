@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>PawsUp 爪哇宠屋 - 排班管理</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .schedule-container {
+            padding: 20px;
+        }
+        
+        .date-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+        
+        .date-selector input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .schedule-grid {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .tech-schedule-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tech-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tech-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tech-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .tech-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        .time-slot {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .time-slot:hover {
+            border-color: #4CAF50;
+        }
+        
+        .time-slot.available {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+        }
+        
+        .time-slot.booked {
+            background: #ffebee;
+            border-color: #f44336;
+            cursor: not-allowed;
+        }
+        
+        .time-slot.selected {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .slot-time {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .slot-status {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        
+        .legend-box.available {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+        }
+        
+        .legend-box.booked {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+        
+        .btn-save {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-save:hover {
+            background: #45a049;
+        }
+        
+        .btn-cancel {
+            background: white;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="orders">📋 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="technicians">👨‍🔧 技师管理</a></li>
+                    <li class="active"><a href="schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="schedule-container">
+                    <div class="page-header">
+                        <h2>排班管理</h2>
+                    </div>
+                    
+                    <div class="date-selector">
+                        <label>选择日期：</label>
+                        <input type="date" id="scheduleDate" onchange="loadSchedule()">
+                        <button class="btn-primary" onclick="saveAllSchedules()">保存排班</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box available"></div>
+                            <span>可预约</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box booked"></div>
+                            <span>已预约</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box" style="border-color:#ddd;"></div>
+                            <span>未开放</span>
+                        </div>
+                    </div>
+                    
+                    <div id="scheduleGrid" class="schedule-grid">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/schedule.js"></script>
+</body>
+</html>

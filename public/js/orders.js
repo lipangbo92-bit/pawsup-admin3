@@ -1,7 +1,7 @@
 // Orders Management Module
-// Cloud environment configuration
-const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
-const API_BASE = `https://${CLOUD_ENV}.bastionpay.cn/v2/wx/q/cloudfunction`;
+// 订单管理 - 使用 API 连接云数据库
+
+const API_BASE = '/api';
 
 let currentPage = 1;
 let pageSize = 10;
@@ -14,45 +14,22 @@ document.addEventListener('DOMContentLoaded', function() {
     setDefaultDate();
 });
 
-// Cloud function call helper
-async function cloudCall(functionName, data = {}, method = 'GET') {
-    // Build query string for GET requests
-    let url = `${API_BASE}/${functionName}`;
-    
-    const options = {
-        method: method,
+// API 调用封装
+async function apiCall(endpoint, data) {
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-        }
-    };
-    
-    if (method === 'POST' || method === 'PUT') {
-        options.body = JSON.stringify(data);
-    } else if (method === 'GET' && Object.keys(data).length > 0) {
-        const params = new URLSearchParams();
-        Object.keys(data).forEach(key => {
-            if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-                params.append(key, data[key]);
-            }
-        });
-        if (params.toString()) {
-            url += '?' + params.toString();
-        }
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
     }
-    
-    try {
-        const response = await fetch(url, options);
-        const result = await response.json();
-        
-        if (result.errCode) {
-            throw new Error(result.errMsg || '请求失败');
-        }
-        
-        return result;
-    } catch (err) {
-        console.error('Cloud call error:', err);
-        throw err;
-    }
+
+    return await response.json();
 }
 
 // Set default date filter
@@ -71,85 +48,51 @@ async function loadOrders(page = 1) {
     try {
         showLoading();
         
-        const skip = (page - 1) * pageSize;
-        
-        // Build query parameters
-        const params = {
-            page: page,
-            pageSize: pageSize,
-            orderBy: 'createdAt',
-            order: 'desc'
-        };
-        
-        // Apply filters
+        // 获取筛选条件
         const statusFilter = document.getElementById('statusFilter');
         const dateFilter = document.getElementById('dateFilter');
+        
+        const params = {
+            action: 'list'
+        };
         
         if (statusFilter && statusFilter.value) {
             params.status = statusFilter.value;
         }
-        
         if (dateFilter && dateFilter.value) {
-            params.appointmentDate = dateFilter.value;
+            params.date = dateFilter.value;
         }
         
-        const result = await cloudCall('orders-api', params, 'GET');
+        const result = await apiCall('orders', params);
         
-        currentOrders = result.data || [];
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        
+        currentOrders = (result.data || []).map(order => ({
+            ...order,
+            _id: order._id || order.id,
+            orderNo: order.orderNo || order._id,
+            customerName: order.customerName || '未知',
+            customerPhone: order.customerPhone || '',
+            serviceName: order.serviceName || '未知服务',
+            amount: order.price || order.amount || 0,
+            appointmentDate: order.appointmentDate || '',
+            appointmentTime: order.appointmentTime || ''
+        }));
         
         renderOrdersTable(currentOrders);
         renderPagination();
         
     } catch (err) {
         console.error('Load orders error:', err);
-        showMessage('加载订单失败', 'error');
-        // Load mock data for demo
-        loadMockOrders();
-    } finally {
-        hideLoading();
+        document.getElementById('ordersTableBody').innerHTML = `
+            <tr><td colspan="7" class="empty-cell">
+                加载失败: ${err.message}<br>
+                <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
+            </td></tr>
+        `;
     }
-}
-
-// Load mock orders for demo
-function loadMockOrders() {
-    const mockOrders = [
-        {
-            _id: '1',
-            orderNo: 'ORD20240301001',
-            customerName: '张先生',
-            customerPhone: '138****1234',
-            serviceName: '基础洗护',
-            appointmentDate: '2024-03-01',
-            appointmentTime: '10:00',
-            amount: 99.00,
-            status: 'pending'
-        },
-        {
-            _id: '2',
-            orderNo: 'ORD20240301002',
-            customerName: '李女士',
-            customerPhone: '139****5678',
-            serviceName: '美容造型',
-            appointmentDate: '2024-03-01',
-            appointmentTime: '14:00',
-            amount: 168.00,
-            status: 'confirmed'
-        },
-        {
-            _id: '3',
-            orderNo: 'ORD20240301003',
-            customerName: '王先生',
-            customerPhone: '137****9012',
-            serviceName: 'SPA护理',
-            appointmentDate: '2024-03-01',
-            appointmentTime: '16:00',
-            amount: 238.00,
-            status: 'completed'
-        }
-    ];
-    
-    currentOrders = mockOrders;
-    renderOrdersTable(mockOrders);
 }
 
 // Render orders table
@@ -168,21 +111,21 @@ function renderOrdersTable(orders) {
     
     tbody.innerHTML = orders.map(order => `
         <tr>
-            <td><span class="order-no">${order.orderNo || order._id}</span></td>
+            <td><span class="order-no">${order.orderNo}</span></td>
             <td>
                 <div class="customer-info">
-                    <span class="customer-name">${order.customerName || '未知'}</span>
-                    <span class="customer-phone">${order.customerPhone || ''}</span>
+                    <span class="customer-name">${order.customerName}</span>
+                    <span class="customer-phone">${order.customerPhone}</span>
                 </div>
             </td>
-            <td>${order.serviceName || '未知服务'}</td>
+            <td>${order.serviceName}</td>
             <td>
                 <div class="appointment-time">
-                    <span class="date">${order.appointmentDate || ''}</span>
-                    <span class="time">${order.appointmentTime || ''}</span>
+                    <span class="date">${order.appointmentDate}</span>
+                    <span class="time">${order.appointmentTime}</span>
                 </div>
             </td>
-            <td><span class="amount">¥${(order.amount || 0).toFixed(2)}</span></td>
+            <td><span class="amount">¥${order.amount.toFixed(2)}</span></td>
             <td><span class="status-tag ${order.status}">${getStatusText(order.status)}</span></td>
             <td>
                 <div class="action-btns">
@@ -211,12 +154,12 @@ function getActionButtons(order) {
     const buttons = [];
     
     if (order.status === 'pending') {
-        buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'confirmed')" title="确认">✓</button>`);
-        buttons.push(`<button class="btn-icon danger" onclick="cancelOrder('${order._id}')" title="取消">✕</button>`);
+        buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'confirmed', event)" title="确认">✓</button>`);
+        buttons.push(`<button class="btn-icon danger" onclick="cancelOrder('${order._id}', event)" title="取消">✕</button>`);
     } else if (order.status === 'confirmed') {
-        buttons.push(`<button class="btn-icon primary" onclick="updateOrderStatus('${order._id}', 'in_service')" title="开始服务">▶</button>`);
+        buttons.push(`<button class="btn-icon primary" onclick="updateOrderStatus('${order._id}', 'in_service', event)" title="开始服务">▶</button>`);
     } else if (order.status === 'in_service') {
-        buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'completed')" title="完成">✓</button>`);
+        buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'completed', event)" title="完成">✓</button>`);
     }
     
     return buttons.join('');
@@ -235,7 +178,7 @@ function viewOrder(orderId) {
             <h4>订单信息</h4>
             <div class="detail-row">
                 <span class="label">订单号：</span>
-                <span class="value">${selectedOrder.orderNo || selectedOrder._id}</span>
+                <span class="value">${selectedOrder.orderNo}</span>
             </div>
             <div class="detail-row">
                 <span class="label">创建时间：</span>
@@ -250,26 +193,22 @@ function viewOrder(orderId) {
             <h4>客户信息</h4>
             <div class="detail-row">
                 <span class="label">客户姓名：</span>
-                <span class="value">${selectedOrder.customerName || '-'}</span>
+                <span class="value">${selectedOrder.customerName}</span>
             </div>
             <div class="detail-row">
                 <span class="label">联系电话：</span>
                 <span class="value">${selectedOrder.customerPhone || '-'}</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">宠物信息：</span>
-                <span class="value">${selectedOrder.petName || '-'} (${selectedOrder.petType || '-'}, ${selectedOrder.petBreed || '-'})</span>
             </div>
         </div>
         <div class="detail-section">
             <h4>服务信息</h4>
             <div class="detail-row">
                 <span class="label">服务项目：</span>
-                <span class="value">${selectedOrder.serviceName || '-'}</span>
+                <span class="value">${selectedOrder.serviceName}</span>
             </div>
             <div class="detail-row">
                 <span class="label">预约时间：</span>
-                <span class="value">${selectedOrder.appointmentDate || '-'} ${selectedOrder.appointmentTime || ''}</span>
+                <span class="value">${selectedOrder.appointmentDate} ${selectedOrder.appointmentTime}</span>
             </div>
             <div class="detail-row">
                 <span class="label">指定技师：</span>
@@ -277,9 +216,15 @@ function viewOrder(orderId) {
             </div>
             <div class="detail-row">
                 <span class="label">订单金额：</span>
-                <span class="value highlight">¥${(selectedOrder.amount || 0).toFixed(2)}</span>
+                <span class="value highlight">¥${selectedOrder.amount.toFixed(2)}</span>
             </div>
         </div>
+        ${selectedOrder.address ? `
+        <div class="detail-section">
+            <h4>地址</h4>
+            <p class="remark">${selectedOrder.address}</p>
+        </div>
+        ` : ''}
         ${selectedOrder.remark ? `
         <div class="detail-section">
             <h4>备注</h4>
@@ -317,34 +262,54 @@ function getModalActionButtons(order) {
 }
 
 // Update order status
-async function updateOrderStatus(orderId, status) {
+async function updateOrderStatus(orderId, status, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
     try {
-        await cloudCall('orders-api', {
-            status: status
-        }, 'PUT');
+        const result = await apiCall('orders', {
+            action: 'updateStatus',
+            id: orderId,
+            data: { status }
+        });
         
-        showMessage('状态更新成功', 'success');
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        
+        alert('状态更新成功');
         loadOrders(currentPage);
     } catch (err) {
         console.error('Update order status error:', err);
-        showMessage('更新失败，请重试', 'error');
+        alert('更新失败：' + err.message);
     }
 }
 
 // Cancel order
-async function cancelOrder(orderId) {
+async function cancelOrder(orderId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    
     if (!confirm('确定要取消该订单吗？')) return;
     
     try {
-        await cloudCall('orders-api', {
-            status: 'cancelled'
-        }, 'PUT');
+        const result = await apiCall('orders', {
+            action: 'updateStatus',
+            id: orderId,
+            data: { status: 'cancelled' }
+        });
         
-        showMessage('订单已取消', 'success');
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        
+        alert('订单已取消');
         loadOrders(currentPage);
     } catch (err) {
         console.error('Cancel order error:', err);
-        showMessage('取消失败，请重试', 'error');
+        alert('取消失败：' + err.message);
     }
 }
 
@@ -367,7 +332,7 @@ function filterOrders() {
 function searchOrders() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     if (!keyword) {
-        loadOrders(currentPage);
+        renderOrdersTable(currentOrders);
         return;
     }
     
@@ -400,7 +365,8 @@ function showLoading() {
     }
 }
 
-// Hide loading
-function hideLoading() {
-    // Handled by renderOrdersTable
+// Logout function
+function logout() {
+    localStorage.removeItem('adminLoggedIn');
+    window.location.href = 'index.html';
 }
