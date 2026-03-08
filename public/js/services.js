@@ -216,22 +216,41 @@ async function saveService() {
     }
 }
 
-// Delete service
-async function deleteService(serviceId, event) {
-    // 阻止事件冒泡和默认行为
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
+// 全局变量存储待删除的ID
+let pendingDeleteId = null;
+
+// 显示自定义确认对话框
+function showDeleteConfirm(serviceId) {
+    pendingDeleteId = serviceId;
+    const confirmHtml = `
+        <div id="deleteConfirmModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center;">
+            <div style="background:white; padding:24px; border-radius:8px; max-width:360px; width:90%; text-align:center;">
+                <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
+                <h3 style="margin:0 0 12px 0; font-size:18px;">确认删除</h3>
+                <p style="margin:0 0 24px 0; color:#666;">确定要删除该服务吗？此操作不可恢复。</p>
+                <div style="display:flex; gap:12px; justify-content:center;">
+                    <button onclick="closeDeleteConfirm()" style="padding:10px 24px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">取消</button>
+                    <button onclick="confirmDelete()" style="padding:10px 24px; border:none; background:#f44336; color:white; border-radius:4px; cursor:pointer;">删除</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', confirmHtml);
+}
+
+// 关闭确认对话框
+function closeDeleteConfirm() {
+    pendingDeleteId = null;
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) modal.remove();
+}
+
+// 确认删除
+async function confirmDelete() {
+    if (!pendingDeleteId) return;
     
-    // 使用 setTimeout 确保对话框正常显示
-    const confirmed = await new Promise(resolve => {
-        setTimeout(() => {
-            resolve(confirm('确定要删除该服务吗？此操作不可恢复。'));
-        }, 10);
-    });
-    
-    if (!confirmed) return;
+    const serviceId = pendingDeleteId;
+    closeDeleteConfirm();
     
     try {
         await apiCall('services', { action: 'delete', id: serviceId });
@@ -241,6 +260,16 @@ async function deleteService(serviceId, event) {
         console.error('Delete service error:', err);
         alert('删除失败：' + (err.message || '请重试'));
     }
+}
+
+// Delete service
+function deleteService(serviceId, event) {
+    // 阻止事件冒泡
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    showDeleteConfirm(serviceId);
 }
 
 // Close modal when clicking outside
