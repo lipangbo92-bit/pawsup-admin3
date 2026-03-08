@@ -2,13 +2,11 @@
   "version": 2,
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/services", "dest": "/services.html" },
-    { "src": "/technicians", "dest": "/technicians.html" },
+    { "src": "/services", "dest": "/pawsup-services.html" },
+    { "src": "/technicians", "dest": "/pawsup-technicians.html" },
     { "src": "/orders", "dest": "/orders.html" },
     { "src": "/dashboard", "dest": "/dashboard.html" },
     { "src": "/statistics", "dest": "/statistics.html" },
-    { "src": "/pawsup-services", "dest": "/pawsup-services.html" },
-    { "src": "/pawsup-technicians", "dest": "/pawsup-technicians.html" },
     { "src": "/", "dest": "/index.html" }
   ]
 }
