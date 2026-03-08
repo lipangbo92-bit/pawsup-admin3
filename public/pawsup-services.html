@@ -531,7 +531,20 @@
                     throw new Error(result.error || '加载失败');
                 }
 
-                services = (result.data || []).map(s => ({...s, id: s._id || s.id}));
+                services = (result.data || []).map(s => ({
+                    ...s, 
+                    id: s._id || s.id,
+                    // 字段兼容处理
+                    name: s.name || s.title || '未命名服务',
+                    desc: s.desc || s.description || s.intro || '',
+                    icon: s.icon || '🐾',
+                    category: s.category || 'wash',
+                    price: s.price || 0,
+                    priceUnit: s.priceUnit || s.unit || '次',
+                    duration: s.duration || s.time || '约60分钟',
+                    status: s.status || 'active',
+                    bookings: s.bookings || s.orderCount || s.sales || 0
+                }));
                 
                 console.log('Parsed services:', services);
 
