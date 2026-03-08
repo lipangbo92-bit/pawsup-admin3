@@ -1,17 +1,27 @@
 {
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/index", "destination": "/index.html" },
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/orders", "destination": "/orders.html" },
-    { "source": "/services", "destination": "/services.html" },
-    { "source": "/technicians", "destination": "/technicians.html" },
-    { "source": "/statistics", "destination": "/statistics.html" }
-  ],
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 10
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
     }
-  }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/index", "dest": "/index.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/orders", "dest": "/orders.html" },
+    { "src": "/services", "dest": "/services.html" },
+    { "src": "/technicians", "dest": "/technicians.html" },
+    { "src": "/statistics", "dest": "/statistics.html" },
+    { "src": "/pawsup-services", "dest": "/pawsup-services.html" },
+    { "src": "/pawsup-technicians", "dest": "/pawsup-technicians.html" },
+    { "src": "/css/(.*)", "dest": "/css/$1" },
+    { "src": "/js/(.*)", "dest": "/js/$1" }
+  ]
 }
