@@ -129,7 +129,7 @@ function renderServicesGrid(services) {
             </div>
             <div class="service-actions">
                 <button class="btn-icon" onclick="editService('${service._id}')" title="编辑">✏️</button>
-                <button class="btn-icon danger" onclick="deleteService('${service._id}')" title="删除">🗑️</button>
+                <button class="btn-icon danger" onclick="deleteService('${service._id}', event)" title="删除">🗑️</button>
             </div>
         </div>
     `).join('');
@@ -217,16 +217,29 @@ async function saveService() {
 }
 
 // Delete service
-async function deleteService(serviceId) {
-    if (!confirm('确定要删除该服务吗？此操作不可恢复。')) return;
+async function deleteService(serviceId, event) {
+    // 阻止事件冒泡和默认行为
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    // 使用 setTimeout 确保对话框正常显示
+    const confirmed = await new Promise(resolve => {
+        setTimeout(() => {
+            resolve(confirm('确定要删除该服务吗？此操作不可恢复。'));
+        }, 10);
+    });
+    
+    if (!confirmed) return;
     
     try {
         await apiCall('services', { action: 'delete', id: serviceId });
-        showMessage('服务已删除', 'success');
+        alert('服务已删除');
         loadServices();
     } catch (err) {
         console.error('Delete service error:', err);
-        showMessage('删除失败：' + (err.message || '请重试'), 'error');
+        alert('删除失败：' + (err.message || '请重试'));
     }
 }
 

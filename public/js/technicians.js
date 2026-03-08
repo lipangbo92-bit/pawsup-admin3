@@ -124,7 +124,7 @@ function renderTechniciansGrid(technicians) {
             </div>
             <div class="tech-actions">
                 <button class="btn-icon" onclick="editTechnician('${tech._id}')" title="编辑">✏️</button>
-                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}')" title="删除">🗑️</button>
+                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)" title="删除">🗑️</button>
             </div>
         </div>
     `).join('');
@@ -220,16 +220,29 @@ async function saveTechnician() {
 }
 
 // Delete technician
-async function deleteTechnician(techId) {
-    if (!confirm('确定要删除该技师吗？此操作不可恢复。')) return;
+async function deleteTechnician(techId, event) {
+    // 阻止事件冒泡和默认行为
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    // 使用 setTimeout 确保对话框正常显示
+    const confirmed = await new Promise(resolve => {
+        setTimeout(() => {
+            resolve(confirm('确定要删除该技师吗？此操作不可恢复。'));
+        }, 10);
+    });
+    
+    if (!confirmed) return;
     
     try {
         await apiCall('technicians', { action: 'delete', id: techId });
-        showMessage('技师已删除', 'success');
+        alert('技师已删除');
         loadTechnicians();
     } catch (err) {
         console.error('Delete technician error:', err);
-        showMessage('删除失败：' + (err.message || '请重试'), 'error');
+        alert('删除失败：' + (err.message || '请重试'));
     }
 }
 
