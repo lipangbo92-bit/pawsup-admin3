@@ -525,11 +525,15 @@
             try {
                 const result = await apiCall('services', { action: 'list' });
                 
+                console.log('API Response:', result);
+                
                 if (!result.success) {
                     throw new Error(result.error || '加载失败');
                 }
 
                 services = (result.data || []).map(s => ({...s, id: s._id || s.id}));
+                
+                console.log('Parsed services:', services);
 
                 // 如果没有数据，初始化默认数据
                 if (services.length === 0) {
