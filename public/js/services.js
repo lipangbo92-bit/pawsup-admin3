@@ -1,6 +1,7 @@
 // Services Management Module
-// 使用本地存储 + 云函数混合模式
-const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
+// 使用 API 连接云开发数据库
+
+const API_BASE = '/api';
 const STORAGE_KEY = 'pawsup_services';
 
 let currentService = null;
@@ -11,76 +12,83 @@ document.addEventListener('DOMContentLoaded', function() {
     loadServices();
 });
 
-// 从本地存储加载
-function loadFromStorage() {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : null;
-}
+// API 调用封装
+async function apiCall(endpoint, data) {
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
 
-// 保存到本地存储
-function saveToStorage(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-// Load services
-async function loadServices() {
-    // 先尝试从本地存储加载
-    const localData = loadFromStorage();
-    
-    if (localData && localData.length > 0) {
-        servicesList = localData;
-        renderServicesGrid(servicesList);
-        console.log('Loaded from local storage');
-        return;
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
     }
-    
-    // 没有本地数据，加载初始数据
-    loadInitialServices();
+
+    return await response.json();
 }
 
-// 初始数据
-function loadInitialServices() {
-    const initialServices = [
-        {
-            _id: '1',
-            name: '基础洗护',
-            price: 99.00,
-            category: 'bath',
-            description: '包含洗澡、吹干、梳毛、剪指甲、清洁耳朵'
-        },
-        {
-            _id: '2',
-            name: '美容造型',
-            price: 168.00,
-            category: 'grooming',
-            description: '包含基础洗护+专业造型修剪'
-        },
-        {
-            _id: '3',
-            name: 'SPA护理',
-            price: 238.00,
-            category: 'spa',
-            description: '包含精油SPA、按摩、护毛护理'
-        },
-        {
-            _id: '4',
-            name: '宠物寄养',
-            price: 150.00,
-            category: 'boarding',
-            description: '提供舒适寄养环境，包含每日喂食、遛狗'
-        },
-        {
-            _id: '5',
-            name: '上门服务',
-            price: 200.00,
-            category: 'visiting',
-            description: '专业技师上门服务'
+// Load services from API
+async function loadServices() {
+    try {
+        const result = await apiCall('services', { action: 'list' });
+        
+        console.log('API Response:', result);
+        
+        if (!result.success) {
+            throw new Error(result.error || '加载失败');
         }
-    ];
-    
-    servicesList = initialServices;
-    saveToStorage(servicesList);
-    renderServicesGrid(servicesList);
+
+        servicesList = (result.data || []).map(s => ({
+            ...s,
+            _id: s._id || s.id,
+            // 字段兼容处理
+            name: s.name || s.title || '未命名服务',
+            description: s.description || s.desc || s.intro || '',
+            category: s.category || 'bath',
+            price: s.price || 0
+        }));
+        
+        console.log('Parsed services:', servicesList);
+
+        // 如果没有数据，初始化默认数据
+        if (servicesList.length === 0) {
+            const defaultServices = [
+                { name: '洗护套餐', category: 'bath', price: 99, description: '基础洗护服务' },
+                { name: '美容造型', category: 'grooming', price: 168, description: '专业美容修剪' },
+                { name: '驱虫保健', category: 'medical', price: 80, description: '体内外驱虫' }
+            ];
+            
+            for (const service of defaultServices) {
+                await apiCall('services', { action: 'add', data: service });
+            }
+            
+            // 重新加载
+            const reloadResult = await apiCall('services', { action: 'list' });
+            servicesList = (reloadResult.data || []).map(s => ({
+                ...s,
+                _id: s._id || s.id,
+                name: s.name || s.title || '未命名服务',
+                description: s.description || s.desc || '',
+                category: s.category || 'bath',
+                price: s.price || 0
+            }));
+        }
+
+        renderServicesGrid(servicesList);
+    } catch (error) {
+        console.error('Load services error:', error);
+        // 失败时显示空状态
+        document.getElementById('servicesGrid').innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1; text-align:center; padding:40px;">
+                <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+                <div>加载失败: ${error.message}</div>
+                <button onclick="location.reload()" style="margin-top:16px; padding:8px 16px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">刷新重试</button>
+            </div>
+        `;
+    }
 }
 
 // Render services grid
@@ -93,7 +101,7 @@ function renderServicesGrid(services) {
     }
     
     if (services.length === 0) {
-        container.innerHTML = '<div class="empty-state">暂无服务，请添加</div>';
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无服务，请添加</div>';
         return;
     }
     
@@ -104,6 +112,8 @@ function renderServicesGrid(services) {
         'medical': '医疗护理',
         'boarding': '寄养服务',
         'visiting': '上门服务',
+        'wash': '洗护美容',
+        'groom': '美容造型',
         'other': '其他服务'
     };
     
@@ -177,36 +187,26 @@ async function saveService() {
     }
     
     try {
+        const serviceData = {
+            name,
+            price,
+            category,
+            description
+        };
+        
         if (currentService) {
             // Update existing
-            const index = servicesList.findIndex(s => s._id === currentService._id);
-            if (index !== -1) {
-                servicesList[index] = {
-                    ...servicesList[index],
-                    name,
-                    price,
-                    category,
-                    description,
-                    updatedAt: new Date().toISOString()
-                };
-            }
+            await apiCall('services', { 
+                action: 'update', 
+                id: currentService._id, 
+                data: serviceData 
+            });
             showMessage('服务更新成功', 'success');
         } else {
             // Add new
-            const newService = {
-                _id: Date.now().toString(),
-                name,
-                price,
-                category,
-                description,
-                createdAt: new Date().toISOString()
-            };
-            servicesList.push(newService);
+            await apiCall('services', { action: 'add', data: serviceData });
             showMessage('服务添加成功', 'success');
         }
-        
-        // Save to local storage
-        saveToStorage(servicesList);
         
         closeServiceModal();
         loadServices();
@@ -221,8 +221,7 @@ async function deleteService(serviceId) {
     if (!confirm('确定要删除该服务吗？此操作不可恢复。')) return;
     
     try {
-        servicesList = servicesList.filter(s => s._id !== serviceId);
-        saveToStorage(servicesList);
+        await apiCall('services', { action: 'delete', id: serviceId });
         showMessage('服务已删除', 'success');
         loadServices();
     } catch (err) {
@@ -238,3 +237,12 @@ window.onclick = function(event) {
         closeServiceModal();
     }
 };
+
+// Show message helper (兼容 app.js 中的函数)
+function showMessage(message, type = 'info') {
+    if (typeof window.showMessage === 'function' && window.showMessage !== showMessage) {
+        window.showMessage(message, type);
+    } else {
+        alert(message);
+    }
+}
