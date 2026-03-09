@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>预约管理 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --primary-light: #FED7AA;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-300: #FB923C;
+            --gray-500: #EA580C;
+            --green: #10B981;
+            --green-light: #D1FAE5;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --red-light: #FEE2E2;
+            --purple: #8B5CF6;
+            --purple-light: #EDE9FE;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item .icon { font-size: 18px; }
+
+        /* 主内容区 */
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .page-desc {
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        /* 顶部操作栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-selector label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .date-input {
+            padding: 10px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--white);
+            cursor: pointer;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: var(--gray-500);
+        }
+
+        /* 汇总卡片 */
+        .summary-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            min-height: 500px;
+        }
+
+        .loading, .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9CA3AF;
+        }
+
+        .empty-state button {
+            margin-top: 12px;
+        }
+
+        /* 汇总头部 */
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-100);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .summary-date {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .summary-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        /* 表格 */
+        .summary-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--gray-100);
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .summary-table th {
+            background: var(--gray-100);
+            padding: 12px 8px;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .summary-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .summary-table tbody tr:hover {
+            background: var(--gray-100);
+        }
+
+        .summary-table tbody tr.inactive {
+            opacity: 0.6;
+            background: #F9FAFB;
+        }
+
+        /* 列宽 */
+        .tech-col {
+            min-width: 140px;
+            text-align: left !important;
+            padding-left: 16px !important;
+        }
+
+        .status-col {
+            min-width: 80px;
+        }
+
+        .time-col {
+            min-width: 40px;
+            font-size: 11px;
+            color: #6B7280;
+        }
+
+        .count-col {
+            min-width: 60px;
+            font-weight: 600;
+        }
+
+        /* 单元格样式 */
+        .tech-cell {
+            text-align: left !important;
+        }
+
+        .tech-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tech-avatar-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .tech-avatar-sm img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .tech-info-text {
+            min-width: 0;
+        }
+
+        .tech-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tech-status-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .tech-status-badge.active {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .tech-status-badge.inactive {
+            background: var(--gray-200);
+            color: #6B7280;
+        }
+
+        /* 状态徽章 */
+        .rest-badge {
+            background: var(--gray-100);
+            color: #6B7280;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .work-badge {
+            background: var(--green-light);
+            color: var(--green);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* 时间段单元格 */
+        .slot-cell {
+            font-size: 11px;
+            cursor: default;
+        }
+
+        .slot-cell.available {
+            color: var(--green);
+        }
+
+        .slot-cell.booked {
+            color: var(--purple);
+            font-weight: 700;
+        }
+
+        .slot-cell.closed {
+            background: #F3F4F6;
+        }
+
+        .slot-cell.empty {
+            color: #E5E7EB;
+        }
+
+        .rest-row {
+            background: #F9FAFB;
+            color: #9CA3AF;
+            font-size: 13px;
+        }
+
+        .order-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* 图例 */
+        .summary-legend {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .legend-dot.available {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .legend-dot.booked {
+            background: var(--purple-light);
+            color: var(--purple);
+        }
+
+        .legend-dot.closed {
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+        }
+
+        .legend-dot.empty {
+            background: var(--white);
+            border: 1px dashed #E5E7EB;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+            .summary-table-wrapper {
+                font-size: 11px;
+            }
+            .time-col {
+                min-width: 32px;
+                padding: 8px 4px !important;
+            }
+            .summary-stats {
+                gap: 16px;
+            }
+            .stat-value {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>爪哇后台管理</span>
+            </div>
+        </div>
+        <nav>
+            <a href="dashboard.html" class="nav-item">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </a>
+            <a href="admin-appointments.html" class="nav-item active">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </a>
+            <a href="orders.html" class="nav-item">
+                <span class="icon">📦</span>
+                <span>订单管理</span>
+            </a>
+            <a href="services.html" class="nav-item">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </a>
+            <a href="technicians.html" class="nav-item">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </a>
+            <a href="admin-schedule.html" class="nav-item ">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </a>
+            <a href="statistics.html" class="nav-item">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">📋 预约管理</h1>
+            <p class="page-desc">按技师查看每天的预约情况汇总</p>
+        </div>
+
+        <div class="top-bar">
+            <div class="date-selector">
+                <label>选择日期：</label>
+                <input type="date" class="date-input" id="summaryDate" onchange="onSummaryDateChange()">
+            </div>
+            <a href="orders.html" class="btn-primary">📋 查看订单列表</a>
+        </div>
+
+        <div class="summary-card" id="summaryContainer">
+            <div class="loading">加载数据...</div>
+        </div>
+    </div>
+
+    <script src="js/appointment-summary.js"></script>
+</body>
+</html>
