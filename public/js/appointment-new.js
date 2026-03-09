@@ -125,7 +125,6 @@ function renderTimeSlots() {
         let appointmentInfo = '';
         
         if (selectedTechId === 'all') {
-            // 显示所有技师的汇总
             const availableTechs = techniciansList.filter(tech => isTimeAvailable(tech._id, time));
             const bookedOrders = ordersData.filter(o => o.appointmentTime === time);
             
@@ -150,7 +149,6 @@ function renderTimeSlots() {
                 statusText = '暂无可用技师';
             }
         } else {
-            // 显示单个技师
             const order = ordersData.find(o => o.technicianId === selectedTechId && o.appointmentTime === time);
             const isAvailable = isTimeAvailable(selectedTechId, time);
             
@@ -246,7 +244,6 @@ async function loadAvailableTimes() {
             .filter(o => o.technicianId === techId)
             .map(o => o.appointmentTime);
         
-        // 计算需要连续的时间段数
         const slotsNeeded = Math.ceil(selectedServiceDuration / 30);
         
         let availableSlots = [];
@@ -280,10 +277,13 @@ async function loadAvailableTimes() {
             }
             
             if (allAvailable) {
-                const endTime = TIME_SLOTS[endIndex - 1];
-                const endHour = parseInt(endTime.split(':')[0]);
-                const endMin = parseInt(endTime.split(':')[1]) + 30;
-                const finalEndTime = endMin >= 60 ? `${String(endHour + 1).padStart(2,'0')}:00` : `${String(endHour).padStart(2,'0')}:${endMin}`;
+                // 计算结束时间 - 修复格式化
+                const startHour = parseInt(startTime.split(':')[0]);
+                const startMin = parseInt(startTime.split(':')[1]);
+                const totalMinutes = startHour * 60 + startMin + selectedServiceDuration;
+                const endHour = Math.floor(totalMinutes / 60);
+                const endMin = totalMinutes % 60;
+                const finalEndTime = `${String(endHour).padStart(2,'0')}:${String(endMin).padStart(2,'0')}`;
                 availableSlots.push({ value: startTime, label: `${startTime} - ${finalEndTime}` });
             }
         }
