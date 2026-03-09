@@ -21,22 +21,28 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const { action = 'list', data, id } = req.body || {};
-  
+  const { action = 'list', data, id, status } = req.body || {};
+
   console.log(`[API Technicians] Action: ${action}`);
 
   try {
     let result;
-    
+
     switch (action) {
       case 'list':
         result = await getTechniciansList();
+        break;
+      case 'listActive':
+        result = await getActiveTechnicians();
         break;
       case 'add':
         result = await addTechnician(data);
         break;
       case 'update':
         result = await updateTechnician(id, data);
+        break;
+      case 'toggleStatus':
+        result = await toggleTechnicianStatus(id, status);
         break;
       case 'delete':
         result = await deleteTechnician(id);
@@ -64,10 +70,20 @@ async function getTechniciansList() {
   };
 }
 
+// 获取在职技师列表
+async function getActiveTechnicians() {
+  const result = await db.collection('technicians').where({ status: 'active' }).get();
+  return {
+    success: true,
+    data: result.data
+  };
+}
+
 // 添加技师
 async function addTechnician(data) {
   const result = await db.collection('technicians').add({
     ...data,
+    status: data.status || 'active',
     createTime: new Date()
   });
   return {
@@ -80,6 +96,17 @@ async function addTechnician(data) {
 async function updateTechnician(id, data) {
   await db.collection('technicians').doc(id).update({
     ...data,
+    updateTime: new Date()
+  });
+  return {
+    success: true
+  };
+}
+
+// 切换技师状态（在职/离职）
+async function toggleTechnicianStatus(id, status) {
+  await db.collection('technicians').doc(id).update({
+    status: status,
     updateTime: new Date()
   });
   return {

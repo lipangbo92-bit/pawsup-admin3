@@ -135,41 +135,46 @@ async function getAvailableSlots(date, technicianId) {
 
 // 创建排班
 async function createSchedule(data) {
-  const { technicianId, technicianName, date, timeSlots } = data;
-  
-  if (!technicianId || !date || !timeSlots) {
+  const { technicianId, technicianName, date, timeSlots, isRestDay, workStart, workEnd } = data;
+
+  if (!technicianId || !date) {
     return { success: false, error: 'Missing required fields' };
   }
-  
+
   // 检查是否已存在该日期该技师的排班
   const existing = await db.collection('schedules')
     .where({ technicianId, date })
     .get();
-  
+
+  const scheduleData = {
+    timeSlots: timeSlots || [],
+    isRestDay: isRestDay || false,
+    updatedAt: new Date()
+  };
+
+  if (workStart) scheduleData.workStart = workStart;
+  if (workEnd) scheduleData.workEnd = workEnd;
+
   if (existing.data.length > 0) {
     // 更新现有排班
     const id = existing.data[0]._id;
-    await db.collection('schedules').doc(id).update({
-      timeSlots,
-      updatedAt: new Date()
-    });
+    await db.collection('schedules').doc(id).update(scheduleData);
     return {
       success: true,
       message: 'Schedule updated',
       id
     };
   }
-  
+
   // 创建新排班
   const result = await db.collection('schedules').add({
     technicianId,
     technicianName,
     date,
-    timeSlots,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    ...scheduleData,
+    createdAt: new Date()
   });
-  
+
   return {
     success: true,
     id: result.id
