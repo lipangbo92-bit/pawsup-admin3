@@ -72,7 +72,7 @@ function renderTechFilter() {
     const container = document.getElementById('techFilter');
     if (!container) return;
     
-    let html = `<button class="tech-filter-btn ${selectedTechId === 'all' ? 'active' : ''}" onclick="selectTechFilter('all')">全部技师</button>`;
+    let html = `<button class="tech-filter-btn ${selectedTechId === 'all' ? 'active' : ''}" onclick="selectTechFilter('all')">全部美容师</button>`;
     html += techniciansList.map(tech => 
         `<button class="tech-filter-btn ${selectedTechId === tech._id ? 'active' : ''}" onclick="selectTechFilter('${tech._id}')">${tech.name}</button>`
     ).join('');
@@ -167,11 +167,11 @@ function renderTimeSlots() {
             } else if (availableTechs.length > 0) {
                 slotClass += ' available';
                 statusClass = 'available';
-                statusText = `可预约 (${availableTechs.length}位技师)`;
+                statusText = `可预约 (${availableTechs.length}位美容师)`;
             } else {
                 slotClass += ' rest';
                 statusClass = 'booked';
-                statusText = '暂无可用技师';
+                statusText = '暂无可用美容师';
             }
         } else {
             const coveringOrder = ordersData.find(o => {
@@ -241,7 +241,7 @@ async function loadTechniciansForSelect() {
         const select = document.getElementById('techId');
         if (!select) return;
         const activeTechs = techniciansList.filter(t => t.status !== 'inactive');
-        select.innerHTML = '<option value="">请选择技师</option>' +
+        select.innerHTML = '<option value="">请选择美容师</option>' +
             activeTechs.map(t => `<option value="${t._id}">${t.name}</option>`).join('');
     } catch (e) { console.error('Load technicians error:', e); }
 }
@@ -293,7 +293,7 @@ async function loadAvailableTimes() {
         let availableSlots = [];
         
         if (schedule?.isRestDay) {
-            timeSelect.innerHTML = '<option value="">该技师今日休息</option>';
+            timeSelect.innerHTML = '<option value="">该美容师今日休息</option>';
             return;
         }
         
@@ -332,7 +332,7 @@ async function loadAvailableTimes() {
         }
         
         if (availableSlots.length === 0) {
-            timeSelect.innerHTML = '<option value="">该技师今日无可用时间</option>';
+            timeSelect.innerHTML = '<option value="">该美容师今日无可用时间</option>';
         } else {
             timeSelect.innerHTML = '<option value="">请选择时间</option>' +
                 availableSlots.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
@@ -349,7 +349,7 @@ function openNewAppointmentModal() {
     if (modal) {
         document.getElementById('appointmentForm')?.reset();
         document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('appointmentTime').innerHTML = '<option value="">请先选择技师和日期</option>';
+        document.getElementById('appointmentTime').innerHTML = '<option value="">请先选择美容师和日期</option>';
         document.getElementById('serviceDurationHint').textContent = '';
         document.getElementById('durationHint').textContent = '';
         modal.style.display = 'flex';
@@ -376,7 +376,7 @@ async function saveAppointment() {
     if (!customerPhone) { alert('请输入联系电话'); return; }
     if (!petType) { alert('请选择宠物类型'); return; }
     if (!serviceId) { alert('请选择服务'); return; }
-    if (!technicianId) { alert('请选择技师'); return; }
+    if (!technicianId) { alert('请选择美容师'); return; }
     if (!appointmentDate) { alert('请选择预约日期'); return; }
     if (!appointmentTime) { alert('请选择预约时间'); return; }
     

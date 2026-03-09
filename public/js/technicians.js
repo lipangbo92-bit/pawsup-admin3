@@ -44,7 +44,7 @@ async function loadTechnicians() {
             ...t,
             _id: t._id || t.id,
             // 字段兼容处理
-            name: t.name || '未命名技师',
+            name: t.name || '未命名美容师',
             specialty: t.specialty || t.skills || t.tags?.join(', ') || '暂无',
             rating: t.rating || 5,
             orderCount: t.orderCount || t.orders || 0
@@ -69,7 +69,7 @@ async function loadTechnicians() {
             techniciansList = (reloadResult.data || []).map(t => ({
                 ...t,
                 _id: t._id || t.id,
-                name: t.name || '未命名技师',
+                name: t.name || '未命名美容师',
                 specialty: t.specialty || t.skills || '暂无',
                 rating: t.rating || 5,
                 orderCount: t.orderCount || t.orders || 0
@@ -99,7 +99,7 @@ function renderTechniciansGrid(technicians) {
     }
     
     if (technicians.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无技师，请添加</div>';
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无美容师，请添加</div>';
         return;
     }
     
@@ -133,7 +133,7 @@ function renderTechniciansGrid(technicians) {
 // Open technician modal for add
 function openTechnicianModal() {
     currentTechnician = null;
-    document.getElementById('technicianModalTitle').textContent = '添加技师';
+    document.getElementById('technicianModalTitle').textContent = '添加美容师';
     document.getElementById('technicianForm').reset();
     document.getElementById('technicianId').value = '';
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
@@ -151,7 +151,7 @@ function editTechnician(techId) {
     currentTechnician = techniciansList.find(t => t._id === techId);
     if (!currentTechnician) return;
     
-    document.getElementById('technicianModalTitle').textContent = '编辑技师';
+    document.getElementById('technicianModalTitle').textContent = '编辑美容师';
     document.getElementById('technicianId').value = currentTechnician._id;
     document.getElementById('techName').value = currentTechnician.name || '';
     document.getElementById('techSpecialty').value = currentTechnician.specialty || '';
@@ -177,7 +177,7 @@ async function saveTechnician() {
     
     // Validation
     if (!name) {
-        showMessage('请输入技师姓名', 'error');
+        showMessage('请输入美容师姓名', 'error');
         return;
     }
     if (!specialty) {
@@ -204,11 +204,11 @@ async function saveTechnician() {
                 id: currentTechnician._id, 
                 data: techData 
             });
-            showMessage('技师信息更新成功', 'success');
+            showMessage('美容师信息更新成功', 'success');
         } else {
             // Add new
             await apiCall('technicians', { action: 'add', data: techData });
-            showMessage('技师添加成功', 'success');
+            showMessage('美容师添加成功', 'success');
         }
         
         closeTechnicianModal();
@@ -230,7 +230,7 @@ function showDeleteTechConfirm(techId) {
             <div style="background:white; padding:24px; border-radius:8px; max-width:360px; width:90%; text-align:center;">
                 <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
                 <h3 style="margin:0 0 12px 0; font-size:18px;">确认删除</h3>
-                <p style="margin:0 0 24px 0; color:#666;">确定要删除该技师吗？此操作不可恢复。</p>
+                <p style="margin:0 0 24px 0; color:#666;">确定要删除该美容师吗？此操作不可恢复。</p>
                 <div style="display:flex; gap:12px; justify-content:center;">
                     <button onclick="closeDeleteTechConfirm()" style="padding:10px 24px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">取消</button>
                     <button onclick="confirmTechDelete()" style="padding:10px 24px; border:none; background:#f44336; color:white; border-radius:4px; cursor:pointer;">删除</button>
@@ -257,7 +257,7 @@ async function confirmTechDelete() {
     
     try {
         await apiCall('technicians', { action: 'delete', id: techId });
-        alert('技师已删除');
+        alert('美容师已删除');
         loadTechnicians();
     } catch (err) {
         console.error('Delete technician error:', err);

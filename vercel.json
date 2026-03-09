@@ -6,7 +6,7 @@
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/orders", "destination": "/orders.html" },
     { "source": "/services", "destination": "/services.html" },
-    { "source": "/technicians", "destination": "/technicians.html" },
+    { "source": "/groomers", "destination": "/groomers.html" },
     { "source": "/statistics", "destination": "/statistics.html" },
     { "source": "/schedule", "destination": "/schedule.html" },
     { "source": "/admin-schedule", "destination": "/admin-schedule.html" },

@@ -20,7 +20,7 @@
 <body>
     <h1>排班管理 - 简易测试版</h1>
     <div id="status" class="test-box">加载中...</div>
-    <div id="techList" class="test-box">技师列表区域</div>
+    <div id="techList" class="test-box">美容师列表区域</div>
     <div id="scheduleGrid" class="test-box">排班设置区域</div>
     
     <script>
@@ -41,10 +41,10 @@
                 const result = await apiCall('technicians', { action: 'listActive' });
                 if (result.success) {
                     statusEl.className = 'test-box success';
-                    statusEl.innerHTML = '<h3>✅ API 连接正常</h3><p>技师数量: ' + result.data.length + '</p>';
+                    statusEl.innerHTML = '<h3>✅ API 连接正常</h3><p>美容师数量: ' + result.data.length + '</p>';
                     
                     const techEl = document.getElementById('techList');
-                    techEl.innerHTML = '<h3>技师列表</h3>' + result.data.map(t => 
+                    techEl.innerHTML = '<h3>美容师列表</h3>' + result.data.map(t => 
                         '<div style="padding:10px;margin:5px 0;background:white;border-radius:4px;">' + 
                         (t.name || '未命名') + '</div>'
                     ).join('');

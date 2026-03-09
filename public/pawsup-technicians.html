@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>技师管理 - PawsUp 管理端</title>
+    <title>美容师管理 - PawsUp 管理端</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .stats-row {
@@ -435,9 +435,9 @@
                     <span class="nav-icon">✂️</span>
                     <span>服务管理</span>
                 </a>
-                <a href="technicians.html" class="nav-item active">
+                <a href="groomers.html" class="nav-item active">
                     <span class="nav-icon">👨‍✂️</span>
-                    <span>技师管理</span>
+                    <span>美容师管理</span>
                 </a>
                 <a href="statistics.html" class="nav-item">
                     <span class="nav-icon">📈</span>
@@ -458,11 +458,11 @@
         <!-- 主内容区 -->
         <main class="main-content">
             <header class="topbar">
-                <h1 class="page-title">技师管理</h1>
+                <h1 class="page-title">美容师管理</h1>
                 <div class="topbar-actions">
                     <button class="btn-primary" onclick="openModal()">
                         <span>+</span>
-                        <span>添加技师</span>
+                        <span>添加美容师</span>
                     </button>
                 </div>
             </header>
@@ -471,7 +471,7 @@
                 <div class="stats-row">
                     <div class="stat-box">
                         <div class="stat-box-value" id="statTotal">0</div>
-                        <div class="stat-box-label">总技师数</div>
+                        <div class="stat-box-label">总美容师数</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-box-value" id="statActive">0</div>
@@ -498,7 +498,7 @@
     <div id="techModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">添加技师</h3>
+                <h3 id="modalTitle">添加美容师</h3>
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -519,7 +519,7 @@
                 </div>
                 <div class="form-group">
                     <label>姓名 *</label>
-                    <input type="text" id="techName" placeholder="技师姓名">
+                    <input type="text" id="techName" placeholder="美容师姓名">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -546,7 +546,7 @@
                 </div>
                 <div class="form-group">
                     <label>个人简介</label>
-                    <textarea id="techBio" placeholder="请输入技师简介..."></textarea>
+                    <textarea id="techBio" placeholder="请输入美容师简介..."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -638,7 +638,7 @@
                 renderTechnicians();
             } catch (error) {
                 console.error('Load technicians error:', error);
-                showError('加载技师数据失败: ' + error.message);
+                showError('加载美容师数据失败: ' + error.message);
             }
         }
 
@@ -663,8 +663,8 @@
                 grid.innerHTML = `
                     <div class="empty-state" style="grid-column: 1/-1;">
                         <div class="empty-state-icon">👤</div>
-                        <div>暂无技师数据</div>
-                        <div style="font-size: 14px; margin-top: 8px;">点击"添加技师"创建第一个技师</div>
+                        <div>暂无美容师数据</div>
+                        <div style="font-size: 14px; margin-top: 8px;">点击"添加美容师"创建第一个美容师</div>
                     </div>
                 `;
                 updateStats();
@@ -772,7 +772,7 @@
                 const tech = technicians.find(t => t.id === techId);
                 if (!tech) return;
 
-                title.textContent = '编辑技师';
+                title.textContent = '编辑美容师';
                 document.getElementById('techId').value = tech.id;
                 document.getElementById('techName').value = tech.name;
                 document.getElementById('techLevel').value = tech.level;
@@ -790,7 +790,7 @@
                 selectedTags = [...(tech.tags || [])];
                 renderTags();
             } else {
-                title.textContent = '添加技师';
+                title.textContent = '添加美容师';
                 document.getElementById('techId').value = '';
                 document.getElementById('techName').value = '';
                 document.getElementById('techLevel').value = '中级美容师';
@@ -818,7 +818,7 @@
             const name = document.getElementById('techName').value.trim();
 
             if (!name) {
-                alert('请输入技师姓名');
+                alert('请输入美容师姓名');
                 return;
             }
 

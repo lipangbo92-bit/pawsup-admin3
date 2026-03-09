@@ -21,7 +21,7 @@ async function debugLoadTimes() {
     const resultDiv = document.getElementById('debugResult');
     
     if (!techId || !date) {
-        resultDiv.innerHTML = '请选择技师和日期';
+        resultDiv.innerHTML = '请选择美容师和日期';
         return;
     }
     
@@ -37,7 +37,7 @@ async function debugLoadTimes() {
             .map(o => o.appointmentTime);
         
         let html = '<h3>调试信息</h3>';
-        html += '<p><strong>技师ID:</strong> ' + techId + '</p>';
+        html += '<p><strong>美容师ID:</strong> ' + techId + '</p>';
         html += '<p><strong>日期:</strong> ' + date + '</p>';
         html += '<p><strong>排班数据:</strong> ' + (schedule ? '有' : '无') + '</p>';
         
@@ -51,7 +51,7 @@ async function debugLoadTimes() {
         
         let availableSlots = [];
         if (schedule && schedule.isRestDay) {
-            html += '<p style="color:red;"><strong>结果:</strong> 该技师今日休息</p>';
+            html += '<p style="color:red;"><strong>结果:</strong> 该美容师今日休息</p>';
         } else if (schedule && schedule.timeSlots && schedule.timeSlots.length > 0) {
             availableSlots = schedule.timeSlots
                 .filter(slot => slot.available !== false && !bookedTimes.includes(slot.time))

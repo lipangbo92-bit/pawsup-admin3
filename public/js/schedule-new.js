@@ -38,7 +38,7 @@ async function apiCall(endpoint, data) {
 
 async function loadTechnicians() {
     const container = document.getElementById('techList');
-    if (container) container.innerHTML = '<div class="loading">加载技师列表...</div>';
+    if (container) container.innerHTML = '<div class="loading">加载美容师列表...</div>';
     
     try {
         let result = await apiCall('technicians', { action: 'listActive' });
@@ -56,14 +56,14 @@ async function loadTechnicians() {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div style="font-size:32px; margin-bottom:8px;">👥</div>
-                        <div>暂无技师</div>
+                        <div>暂无美容师</div>
                         <div style="font-size:12px; color:#999; margin-top:8px;">
-                            请先在<a href="technicians" style="color:var(--primary);">技师管理</a>中添加
+                            请先在<a href="groomers" style="color:var(--primary);">美容师管理</a>中添加
                         </div>
                     </div>
                 `;
             }
-            document.getElementById('scheduleGrid').innerHTML = '<div class="empty-state">请先添加技师</div>';
+            document.getElementById('scheduleGrid').innerHTML = '<div class="empty-state">请先添加美容师</div>';
             return;
         }
         
@@ -141,7 +141,7 @@ function renderScheduleGrid() {
     
     const currentTech = techniciansList.find(t => t._id === currentTechId);
     if (!currentTech) {
-        container.innerHTML = '<div class="empty-state">请先选择技师</div>';
+        container.innerHTML = '<div class="empty-state">请先选择美容师</div>';
         return;
     }
     

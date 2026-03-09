@@ -15,7 +15,7 @@
 <body>
     <h1>调试 - 可用时间查询</h1>
     <div class="form-group">
-        <label>技师:</label>
+        <label>美容师:</label>
         <select id="debugTechId">
             <option value="">加载中...</option>
         </select>
@@ -44,7 +44,7 @@
             return await response.json();
         }
         
-        // 加载技师列表
+        // 加载美容师列表
         async function loadTechs() {
             try {
                 const result = await apiCall('technicians', { action: 'list' });
@@ -67,7 +67,7 @@
             const resultDiv = document.getElementById('debugResult');
             
             if (!techId || !date) {
-                resultDiv.innerHTML = '<p style="color:red">请选择技师和日期</p>';
+                resultDiv.innerHTML = '<p style="color:red">请选择美容师和日期</p>';
                 return;
             }
             
@@ -83,7 +83,7 @@
                     .map(o => o.appointmentTime);
                 
                 let html = '<h3>调试结果</h3>';
-                html += '<p><strong>技师ID:</strong> ' + techId + '</p>';
+                html += '<p><strong>美容师ID:</strong> ' + techId + '</p>';
                 html += '<p><strong>日期:</strong> ' + date + '</p>';
                 html += '<hr>';
                 
@@ -103,7 +103,7 @@
                 
                 let availableSlots = [];
                 if (schedule && schedule.isRestDay) {
-                    html += '<hr><p style="color:red;font-size:18px;"><strong>结果:</strong> 该技师今日休息</p>';
+                    html += '<hr><p style="color:red;font-size:18px;"><strong>结果:</strong> 该美容师今日休息</p>';
                 } else if (schedule && schedule.timeSlots && schedule.timeSlots.length > 0) {
                     availableSlots = schedule.timeSlots
                         .filter(slot => slot.available !== false && !bookedTimes.includes(slot.time))

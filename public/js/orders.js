@@ -211,7 +211,7 @@ function viewOrder(orderId) {
                 <span class="value">${selectedOrder.appointmentDate} ${selectedOrder.appointmentTime}</span>
             </div>
             <div class="detail-row">
-                <span class="label">指定技师：</span>
+                <span class="label">指定美容师：</span>
                 <span class="value">${selectedOrder.technicianName || '不指定'}</span>
             </div>
             <div class="detail-row">

@@ -1,5 +1,5 @@
 // Schedule Management Module
-// 排班管理 - 设置技师可预约时间
+// 排班管理 - 设置美容师可预约时间
 
 const API_BASE = '/api';
 
@@ -50,7 +50,7 @@ async function loadSchedule() {
     container.innerHTML = '<div class="loading">加载中...</div>';
     
     try {
-        // 1. 加载技师列表
+        // 1. 加载美容师列表
         const techResult = await apiCall('technicians', { action: 'list' });
         if (!techResult.success) throw new Error(techResult.error);
         
@@ -93,7 +93,7 @@ function renderScheduleGrid() {
     const container = document.getElementById('scheduleGrid');
     
     if (techniciansList.length === 0) {
-        container.innerHTML = '<div class="empty-state">暂无技师，请先添加技师</div>';
+        container.innerHTML = '<div class="empty-state">暂无美容师，请先添加美容师</div>';
         return;
     }
     

@@ -67,7 +67,7 @@ function renderSummary(scheduleMap) {
     const container = document.getElementById('summaryContainer');
     if (!container) return;
     if (techniciansList.length === 0) {
-        container.innerHTML = '<div class="empty-state">暂无技师数据</div>';
+        container.innerHTML = '<div class="empty-state">暂无美容师数据</div>';
         return;
     }
     
@@ -89,14 +89,14 @@ function renderSummary(scheduleMap) {
         <div class="summary-header">
             <div class="summary-date">${currentDate} 预约汇总</div>
             <div class="summary-stats">
-                <div class="stat-item"><span class="stat-value">${techniciansList.length}</span><span class="stat-label">技师总数</span></div>
+                <div class="stat-item"><span class="stat-value">${techniciansList.length}</span><span class="stat-label">美容师总数</span></div>
                 <div class="stat-item"><span class="stat-value">${ordersData.length}</span><span class="stat-label">订单总数</span></div>
                 <div class="stat-item"><span class="stat-value">${ordersData.filter(o => o.status === 'completed').length}</span><span class="stat-label">已完成</span></div>
             </div>
         </div>
         <div class="summary-table-wrapper">
             <table class="summary-table">
-                <thead><tr><th class="tech-col">技师</th><th class="status-col">状态</th>${timeSlots.map(t => `<th class="time-col">${t}</th>`).join('')}<th class="count-col">订单数</th></tr></thead>
+                <thead><tr><th class="tech-col">美容师</th><th class="status-col">状态</th>${timeSlots.map(t => `<th class="time-col">${t}</th>`).join('')}<th class="count-col">订单数</th></tr></thead>
                 <tbody>`;
     
     techniciansList.forEach(tech => {
