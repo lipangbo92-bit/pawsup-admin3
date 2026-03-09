@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>调试 - 可用时间</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .form-group { margin: 10px 0; }
+        label { display: inline-block; width: 100px; }
+        select, input, button { padding: 8px; margin: 5px; }
+        #debugResult { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+        pre { background: #fff; padding: 10px; border: 1px solid #ddd; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>调试 - 可用时间查询</h1>
+    <div class="form-group">
+        <label>技师:</label>
+        <select id="debugTechId">
+            <option value="">加载中...</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>日期:</label>
+        <input type="date" id="debugDate">
+    </div>
+    <button onclick="debugLoadTimes()">查询</button>
+    <div id="debugResult"></div>
+    
+    <script>
+        const API_BASE = '/api';
+        const TIME_SLOTS = [];
+        for (let h = 8; h <= 22; h++) {
+            TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
+            if (h < 22) TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
+        }
+        
+        async function apiCall(endpoint, data) {
+            const response = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+        
+        // 加载技师列表
+        async function loadTechs() {
+            try {
+                const result = await apiCall('technicians', { action: 'list' });
+                const select = document.getElementById('debugTechId');
+                if (result.success && result.data) {
+                    select.innerHTML = '<option value="">请选择</option>' +
+                        result.data.map(t => `<option value="${t._id || t.id}">${t.name}</option>`).join('');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        
+        // 设置默认日期
+        document.getElementById('debugDate').value = new Date().toISOString().split('T')[0];
+        
+        async function debugLoadTimes() {
+            const techId = document.getElementById('debugTechId').value;
+            const date = document.getElementById('debugDate').value;
+            const resultDiv = document.getElementById('debugResult');
+            
+            if (!techId || !date) {
+                resultDiv.innerHTML = '<p style="color:red">请选择技师和日期</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>加载中...</p>';
+            
+            try {
+                const scheduleResult = await apiCall('schedules', { action: 'list', date, technicianId: techId });
+                const schedule = scheduleResult.data?.[0];
+                
+                const orderResult = await apiCall('orders', { action: 'list', date });
+                const bookedTimes = (orderResult.data || [])
+                    .filter(o => o.technicianId === techId)
+                    .map(o => o.appointmentTime);
+                
+                let html = '<h3>调试结果</h3>';
+                html += '<p><strong>技师ID:</strong> ' + techId + '</p>';
+                html += '<p><strong>日期:</strong> ' + date + '</p>';
+                html += '<hr>';
+                
+                if (!schedule) {
+                    html += '<p style="color:orange"><strong>排班数据:</strong> 无</p>';
+                    html += '<p>将使用默认时间段（08:00-22:00）</p>';
+                } else {
+                    html += '<p><strong>排班数据:</strong> 有</p>';
+                    html += '<p><strong>是否休息:</strong> ' + (schedule.isRestDay ? '<span style="color:red">是</span>' : '否') + '</p>';
+                    html += '<p><strong>时间段数量:</strong> ' + (schedule.timeSlots ? schedule.timeSlots.length : 0) + '</p>';
+                    if (schedule.timeSlots && schedule.timeSlots.length > 0) {
+                        html += '<pre>' + JSON.stringify(schedule.timeSlots.slice(0, 5), null, 2) + '...</pre>';
+                    }
+                }
+                
+                html += '<hr><p><strong>已预约时间:</strong> ' + (bookedTimes.length > 0 ? bookedTimes.join(', ') : '无') + '</p>';
+                
+                let availableSlots = [];
+                if (schedule && schedule.isRestDay) {
+                    html += '<hr><p style="color:red;font-size:18px;"><strong>结果:</strong> 该技师今日休息</p>';
+                } else if (schedule && schedule.timeSlots && schedule.timeSlots.length > 0) {
+                    availableSlots = schedule.timeSlots
+                        .filter(slot => slot.available !== false && !bookedTimes.includes(slot.time))
+                        .map(slot => slot.time);
+                    html += '<hr><p style="color:green;font-size:18px;"><strong>可用时间:</strong> ' + availableSlots.join(', ') + '</p>';
+                } else {
+                    availableSlots = TIME_SLOTS.filter(t => !bookedTimes.includes(t));
+                    html += '<hr><p style="color:green;font-size:18px;"><strong>默认可用时间:</strong> ' + availableSlots.join(', ') + '</p>';
+                }
+                
+                resultDiv.innerHTML = html;
+            } catch (e) {
+                resultDiv.innerHTML = '<p style="color:red">错误: ' + e.message + '</p>';
+            }
+        }
+        
+        loadTechs();
+    </script>
+</body>
+</html>
