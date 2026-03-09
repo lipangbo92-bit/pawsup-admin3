@@ -8,6 +8,8 @@
     { "src": "/dashboard", "dest": "/dashboard.html" },
     { "src": "/statistics", "dest": "/statistics.html" },
     { "src": "/schedule", "dest": "/schedule.html" },
+    { "src": "/admin-schedule", "dest": "/admin-schedule.html" },
+    { "src": "/admin-appointments", "dest": "/admin-appointments.html" },
     { "src": "/", "dest": "/index.html" }
   ]
 }
