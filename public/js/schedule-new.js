@@ -1,21 +1,16 @@
 // Schedule Management Module - 排班管理
-// 调用 Vercel API Routes 访问云数据库
-
 const API_BASE = '/api';
-
 let currentDate = '';
 let techniciansList = [];
 let schedulesData = {};
 let currentTechId = null;
 
-// 半小时时间段（从 08:00 到 22:00）
 const TIME_SLOTS = [];
 for (let h = 8; h <= 22; h++) {
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
     if (h < 22) TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
 }
 
-// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('scheduleDate');
@@ -23,41 +18,55 @@ document.addEventListener('DOMContentLoaded', function() {
         dateInput.value = today;
         currentDate = today;
     }
-    loadActiveTechnicians();
+    loadTechnicians();
 });
 
-// API 调用封装
 async function apiCall(endpoint, data) {
-    const response = await fetch(`${API_BASE}/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}`);
+    try {
+        const response = await fetch(`${API_BASE}/${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+    } catch (e) {
+        console.error('API Error:', e);
+        throw e;
     }
-    return await response.json();
 }
 
-// 加载在职技师列表
-async function loadActiveTechnicians() {
+async function loadTechnicians() {
     const container = document.getElementById('techList');
     if (container) container.innerHTML = '<div class="loading">加载技师列表...</div>';
     
     try {
-        const result = await apiCall('technicians', { action: 'listActive' });
-        if (!result.success) throw new Error(result.error);
+        // 先尝试获取在职技师
+        let result = await apiCall('technicians', { action: 'listActive' });
+        let techs = result.data || [];
         
-        techniciansList = (result.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
-        
-        if (techniciansList.length === 0) {
-            const allResult = await apiCall('technicians', { action: 'list' });
-            techniciansList = (allResult.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'})).filter(t => t.status !== 'inactive');
+        // 如果没有在职技师，获取所有技师
+        if (techs.length === 0) {
+            console.log('No active techs, fetching all...');
+            result = await apiCall('technicians', { action: 'list' });
+            techs = result.data || [];
         }
         
+        techniciansList = techs.map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
+        
         if (techniciansList.length === 0) {
-            if (container) container.innerHTML = '<div class="empty-state"><div>暂无在职技师</div></div>';
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size:32px; margin-bottom:8px;">👥</div>
+                        <div>暂无技师</div>
+                        <div style="font-size:12px; color:#999; margin-top:8px;">
+                            请先在<a href="technicians" style="color:var(--primary);">技师管理</a>中添加
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('scheduleGrid').innerHTML = '<div class="empty-state">请先添加技师</div>';
             return;
         }
         
@@ -65,19 +74,35 @@ async function loadActiveTechnicians() {
         renderTechList();
         loadSchedule();
     } catch (error) {
-        if (container) container.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
+        console.error('Load technicians error:', error);
+        if (container) {
+            container.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
+        }
     }
 }
 
 function renderTechList() {
     const container = document.getElementById('techList');
     if (!container) return;
-    container.innerHTML = techniciansList.map(tech => `
-        <div class="tech-item ${tech._id === currentTechId ? 'active' : ''}" onclick="selectTech('${tech._id}')">
-            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20;">${tech.avatarUrl ? `<img src="${tech.avatarUrl}">` : '👤'}</div>
-            <div class="tech-info"><div class="tech-name">${tech.name}</div><div class="tech-status">在职</div></div>
+    
+    const html = techniciansList.map(tech => {
+        const isActive = tech.status !== 'inactive';
+        return `
+        <div class="tech-item ${tech._id === currentTechId ? 'active' : ''}" 
+             onclick="selectTech('${tech._id}')"
+             style="${!isActive ? 'opacity:0.6;' : ''}">
+            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20;">
+                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}">` : '👤'}
+                ${!isActive ? '<span style="position:absolute;bottom:0;right:0;background:#999;color:white;font-size:10px;padding:1px 4px;border-radius:4px;">离</span>' : ''}
+            </div>
+            <div class="tech-info">
+                <div class="tech-name">${tech.name}</div>
+                <div class="tech-status">${isActive ? '在职' : '已离职'}</div>
+            </div>
         </div>
-    `).join('');
+    `}).join('');
+    
+    container.innerHTML = html;
 }
 
 function selectTech(techId) {
@@ -108,8 +133,6 @@ async function loadSchedule() {
     
     try {
         const result = await apiCall('schedules', { action: 'list', date: currentDate, technicianId: currentTechId });
-        if (!result.success) throw new Error(result.error);
-        
         schedulesData = {};
         (result.data || []).forEach(s => { schedulesData[s.technicianId] = s; });
         renderScheduleGrid();
@@ -121,11 +144,13 @@ async function loadSchedule() {
 function renderScheduleGrid() {
     const container = document.getElementById('scheduleGrid');
     if (!container) return;
+    
     const currentTech = techniciansList.find(t => t._id === currentTechId);
     if (!currentTech) {
         container.innerHTML = '<div class="empty-state">请先选择技师</div>';
         return;
     }
+    
     const schedule = schedulesData[currentTechId];
     const timeSlots = schedule ? (schedule.timeSlots || []) : [];
     const slotMap = {};
