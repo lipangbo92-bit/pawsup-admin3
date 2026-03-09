@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/dashboard", "dest": "/public/dashboard.html" },
-    { "src": "/orders", "dest": "/public/orders.html" },
-    { "src": "/services", "dest": "/public/services.html" },
-    { "src": "/technicians", "dest": "/public/technicians.html" },
-    { "src": "/statistics", "dest": "/public/statistics.html" },
-    { "src": "/admin-schedule", "dest": "/public/admin-schedule.html" },
-    { "src": "/admin-appointments", "dest": "/public/admin-appointments.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/orders", "destination": "/orders.html" },
+    { "source": "/services", "destination": "/services.html" },
+    { "source": "/technicians", "destination": "/technicians.html" },
+    { "source": "/statistics", "destination": "/statistics.html" },
+    { "source": "/schedule", "destination": "/schedule.html" },
+    { "source": "/admin-schedule", "destination": "/admin-schedule.html" },
+    { "source": "/admin-appointments", "destination": "/admin-appointments.html" }
   ]
 }
