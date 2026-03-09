@@ -98,12 +98,31 @@ function updateStats() {
     document.getElementById('statAvailable').textContent = availableSlots;
 }
 
+// 检查某个时间段是否被已有预约占用（考虑预约时长）
+function isTimeBooked(techId, time) {
+    const orderStartingHere = ordersData.find(o => 
+        o.technicianId === techId && o.appointmentTime === time
+    );
+    if (orderStartingHere) return true;
+    
+    const coveringOrder = ordersData.find(o => {
+        if (o.technicianId !== techId) return false;
+        const orderStart = o.appointmentTime;
+        const orderDuration = o.serviceDuration || 60;
+        const orderStartMinutes = parseInt(orderStart.split(':')[0]) * 60 + parseInt(orderStart.split(':')[1]);
+        const timeMinutes = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+        const orderEndMinutes = orderStartMinutes + orderDuration;
+        return timeMinutes > orderStartMinutes && timeMinutes < orderEndMinutes;
+    });
+    
+    return coveringOrder ? true : false;
+}
+
 function isTimeAvailable(techId, time) {
     const schedule = schedulesData[techId];
     if (schedule?.isRestDay) return false;
     
-    const isBooked = ordersData.some(o => o.technicianId === techId && o.appointmentTime === time);
-    if (isBooked) return false;
+    if (isTimeBooked(techId, time)) return false;
     
     if (schedule?.timeSlots?.length > 0) {
         const slot = schedule.timeSlots.find(s => s.time === time);
@@ -126,7 +145,13 @@ function renderTimeSlots() {
         
         if (selectedTechId === 'all') {
             const availableTechs = techniciansList.filter(tech => isTimeAvailable(tech._id, time));
-            const bookedOrders = ordersData.filter(o => o.appointmentTime === time);
+            const bookedOrders = ordersData.filter(o => {
+                const orderDuration = o.serviceDuration || 60;
+                const orderStartMinutes = parseInt(o.appointmentTime.split(':')[0]) * 60 + parseInt(o.appointmentTime.split(':')[1]);
+                const timeMinutes = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+                const orderEndMinutes = orderStartMinutes + orderDuration;
+                return timeMinutes >= orderStartMinutes && timeMinutes < orderEndMinutes;
+            });
             
             if (bookedOrders.length > 0) {
                 slotClass += ' booked';
@@ -149,18 +174,26 @@ function renderTimeSlots() {
                 statusText = '暂无可用技师';
             }
         } else {
-            const order = ordersData.find(o => o.technicianId === selectedTechId && o.appointmentTime === time);
+            const coveringOrder = ordersData.find(o => {
+                if (o.technicianId !== selectedTechId) return false;
+                const orderDuration = o.serviceDuration || 60;
+                const orderStartMinutes = parseInt(o.appointmentTime.split(':')[0]) * 60 + parseInt(o.appointmentTime.split(':')[1]);
+                const timeMinutes = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+                const orderEndMinutes = orderStartMinutes + orderDuration;
+                return timeMinutes >= orderStartMinutes && timeMinutes < orderEndMinutes;
+            });
+            
             const isAvailable = isTimeAvailable(selectedTechId, time);
             
-            if (order) {
+            if (coveringOrder) {
                 slotClass += ' booked';
                 statusClass = 'booked';
                 statusText = '已预约';
                 appointmentInfo = `
                     <div class="slot-appointment-info">
-                        <div class="customer">${order.customerName}</div>
-                        <div class="service">${order.serviceName}</div>
-                        <div class="tech">📞 ${order.customerPhone || ''}</div>
+                        <div class="customer">${coveringOrder.customerName}</div>
+                        <div class="service">${coveringOrder.serviceName}</div>
+                        <div class="tech">📞 ${coveringOrder.customerPhone || ''}</div>
                     </div>
                 `;
             } else if (isAvailable) {
@@ -186,7 +219,6 @@ function renderTimeSlots() {
     container.innerHTML = html || '<div class="empty-state">暂无数据</div>';
 }
 
-// ==================== 新增预约 ====================
 let selectedServiceDuration = 60;
 
 async function loadServicesForSelect() {
@@ -240,12 +272,24 @@ async function loadAvailableTimes() {
         const scheduleResult = await apiCall('schedules', { action: 'list', date, technicianId: techId });
         const schedule = scheduleResult.data?.[0];
         const orderResult = await apiCall('orders', { action: 'list', date });
-        const bookedTimes = (orderResult.data || [])
-            .filter(o => o.technicianId === techId)
-            .map(o => o.appointmentTime);
+        
+        const bookedSlots = new Set();
+        (orderResult.data || []).forEach(o => {
+            if (o.technicianId !== techId) return;
+            const orderStart = o.appointmentTime;
+            const orderDuration = o.serviceDuration || 60;
+            const orderStartMinutes = parseInt(orderStart.split(':')[0]) * 60 + parseInt(orderStart.split(':')[1]);
+            const orderEndMinutes = orderStartMinutes + orderDuration;
+            
+            TIME_SLOTS.forEach(slot => {
+                const slotMinutes = parseInt(slot.split(':')[0]) * 60 + parseInt(slot.split(':')[1]);
+                if (slotMinutes >= orderStartMinutes && slotMinutes < orderEndMinutes) {
+                    bookedSlots.add(slot);
+                }
+            });
+        });
         
         const slotsNeeded = Math.ceil(selectedServiceDuration / 30);
-        
         let availableSlots = [];
         
         if (schedule?.isRestDay) {
@@ -263,7 +307,7 @@ async function loadAvailableTimes() {
             let allAvailable = true;
             
             for (const time of neededSlots) {
-                if (bookedTimes.includes(time)) {
+                if (bookedSlots.has(time)) {
                     allAvailable = false;
                     break;
                 }
@@ -277,7 +321,6 @@ async function loadAvailableTimes() {
             }
             
             if (allAvailable) {
-                // 计算结束时间 - 修复格式化
                 const startHour = parseInt(startTime.split(':')[0]);
                 const startMin = parseInt(startTime.split(':')[1]);
                 const totalMinutes = startHour * 60 + startMin + selectedServiceDuration;
