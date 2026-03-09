@@ -223,8 +223,8 @@ async function loadTechniciansForSelect() {
         const select = document.getElementById('techId');
         if (!select) return;
         
-        // 只显示在职技师
-        const activeTechs = techniciansList.filter(t => t.status === 'active');
+        // 显示所有非离职技师（包括status为undefined的）
+        const activeTechs = techniciansList.filter(t => t.status !== 'inactive');
         select.innerHTML = '<option value="">请选择技师</option>' +
             activeTechs.map(t => `<option value="${t._id}">${t.name}</option>`).join('');
     } catch (e) {
