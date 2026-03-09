@@ -9,6 +9,25 @@ const app = cloudbase.init({
 
 const db = app.database();
 
+// 确保集合存在
+async function ensureCollection() {
+  try {
+    // 尝试获取集合信息，如果不存在会报错
+    await db.collection('schedules').where({}).limit(1).get();
+  } catch (e) {
+    if (e.message && e.message.includes('not exist')) {
+      console.log('[API] Collection schedules does not exist, creating...');
+      // 创建集合并添加一个空文档
+      try {
+        await db.createCollection('schedules');
+        console.log('[API] Collection schedules created');
+      } catch (createErr) {
+        console.error('[API] Failed to create collection:', createErr);
+      }
+    }
+  }
+}
+
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,6 +40,9 @@ module.exports = async (req, res) => {
   console.log(`[API Schedules] Action: ${action}`);
 
   try {
+    // 确保集合存在
+    await ensureCollection();
+    
     let result;
     switch (action) {
       case 'list':
