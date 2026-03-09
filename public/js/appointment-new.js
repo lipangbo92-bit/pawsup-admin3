@@ -156,11 +156,11 @@ function renderSummaryTable() {
                     <div class="tech-avatar-sm">${tech.avatarUrl ? `<img src="${tech.avatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : '👤'}</div>
                     <div>
                         <div class="tech-name">${tech.name}</div>
-                        <span class="tech-status-badge ${tech.status || 'active'}">${tech.status === 'active' ? '在职' : '离职'}</span>
+                        <span class="tech-status-badge ${tech.status === 'inactive' ? 'inactive' : 'active'}">${tech.status === 'inactive' ? '离职' : '在职'}</span>
                     </div>
                 </div>
             </td>
-            <td>${isRestDay ? '<span class="rest-badge">🌙 休息</span>' : '<span class="work-badge">💼 上班</span>'}</td>
+            <td class="status-cell">${isRestDay ? '<span class="rest-badge">🌙 休息</span>' : '<span class="work-badge">💼 上班</span>'}</td>
         `;
         
         if (isRestDay) {
@@ -284,20 +284,23 @@ function openNewAppointmentModal() {
     const modal = document.getElementById('newAppointmentModal');
     if (modal) {
         // 重置表单
-        document.getElementById('appointmentForm')?.reset();
+        const form = document.getElementById('appointmentForm');
+        if (form) form.reset();
         // 设置默认日期为今天
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('appointmentDate').value = today;
+        const apptDate = document.getElementById('appointmentDate');
+        if (apptDate) apptDate.value = today;
         // 清空时间选项
-        document.getElementById('appointmentTime').innerHTML = '<option value="">请先选择技师和日期</option>';
+        const timeSelect = document.getElementById('appointmentTime');
+        if (timeSelect) timeSelect.innerHTML = '<option value="">请先选择技师和日期</option>';
         
-        modal.classList.add('show');
+        modal.style.display = 'flex';
     }
 }
 
 function closeNewAppointmentModal() {
     const modal = document.getElementById('newAppointmentModal');
-    if (modal) modal.classList.remove('show');
+    if (modal) modal.style.display = 'none';
 }
 
 async function saveAppointment() {
