@@ -1,33 +1,33 @@
 // Appointment Summary Module - 预约汇总
-// 使用 cloudbase-js-sdk 直接访问云数据库
+// 调用 Vercel API Routes 访问云数据库
 
-const CLOUD_ENV_ID = 'cloud1-4gy1jyan842d73ab';
-let db = null;
+const API_BASE = '/api';
+
 let currentDate = '';
 let techniciansList = [];
 let ordersData = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    initCloudbase();
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('summaryDate');
+    if (dateInput) {
+        dateInput.value = today;
+        currentDate = today;
+    }
+    loadSummary();
 });
 
-async function initCloudbase() {
-    try {
-        if (typeof cloudbase === 'undefined') throw new Error('cloudbase SDK not loaded');
-        cloudbase.init({ env: CLOUD_ENV_ID, traceUser: true });
-        db = cloudbase.database();
-        await cloudbase.auth().anonymousAuthProvider().signIn();
-        
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById('summaryDate');
-        if (dateInput) {
-            dateInput.value = today;
-            currentDate = today;
-        }
-        loadSummary();
-    } catch (error) {
-        document.getElementById('summaryContainer').innerHTML = '<div class="empty-state">云服务初始化失败</div>';
+async function apiCall(endpoint, data) {
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
     }
+    return await response.json();
 }
 
 function onSummaryDateChange() {
@@ -44,14 +44,16 @@ async function loadSummary() {
     if (container) container.innerHTML = '<div class="loading">加载数据...</div>';
     
     try {
-        const techResult = await db.collection('technicians').get();
-        techniciansList = (techResult.data || []).map(t => ({...t, _id: t._id, name: t.name || '未命名'}));
+        const techResult = await apiCall('technicians', { action: 'list' });
+        if (!techResult.success) throw new Error(techResult.error);
+        techniciansList = (techResult.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
         
-        const orderResult = await db.collection('orders').where({ appointmentDate: currentDate }).get();
+        const orderResult = await apiCall('orders', { action: 'list', date: currentDate });
+        if (!orderResult.success) throw new Error(orderResult.error);
         ordersData = orderResult.data || [];
         
-        const scheduleResult = await db.collection('schedules').where({ date: currentDate }).get();
-        const schedules = scheduleResult.data || [];
+        const scheduleResult = await apiCall('schedules', { action: 'list', date: currentDate });
+        const schedules = scheduleResult.success ? (scheduleResult.data || []) : [];
         const scheduleMap = {};
         schedules.forEach(s => { scheduleMap[s.technicianId] = s; });
         
