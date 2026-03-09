@@ -41,13 +41,10 @@ async function loadTechnicians() {
     if (container) container.innerHTML = '<div class="loading">加载技师列表...</div>';
     
     try {
-        // 先尝试获取在职技师
         let result = await apiCall('technicians', { action: 'listActive' });
         let techs = result.data || [];
         
-        // 如果没有在职技师，获取所有技师
         if (techs.length === 0) {
-            console.log('No active techs, fetching all...');
             result = await apiCall('technicians', { action: 'list' });
             techs = result.data || [];
         }
@@ -74,10 +71,7 @@ async function loadTechnicians() {
         renderTechList();
         loadSchedule();
     } catch (error) {
-        console.error('Load technicians error:', error);
-        if (container) {
-            container.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
-        }
+        if (container) container.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
     }
 }
 
@@ -91,7 +85,7 @@ function renderTechList() {
         <div class="tech-item ${tech._id === currentTechId ? 'active' : ''}" 
              onclick="selectTech('${tech._id}')"
              style="${!isActive ? 'opacity:0.6;' : ''}">
-            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20;">
+            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20; position:relative;">
                 ${tech.avatarUrl ? `<img src="${tech.avatarUrl}">` : '👤'}
                 ${!isActive ? '<span style="position:absolute;bottom:0;right:0;background:#999;color:white;font-size:10px;padding:1px 4px;border-radius:4px;">离</span>' : ''}
             </div>
@@ -165,7 +159,7 @@ function renderScheduleGrid() {
             </div>
             <div class="quick-actions">
                 <button class="btn-sm ${isRestDay ? 'active' : ''}" onclick="toggleRestDay()">${isRestDay ? '✓ 休息日' : '设为休息日'}</button>
-                <button class="btn-sm" onclick="setWorkHours()">快速设置工时</button>
+                <button class="btn-sm" onclick="setWorkHours()">快速设置 10:00-21:00</button>
             </div>
         </div>`;
     
@@ -174,9 +168,10 @@ function renderScheduleGrid() {
     } else {
         html += `<div class="time-slots-container"><div class="slots-grid">` +
             TIME_SLOTS.map(time => {
-                const slot = slotMap[time] || {};
-                const isAvailable = slot.available !== false;
-                const isBooked = slot.orderId ? true : false;
+                const slot = slotMap[time];
+                // 修改：未设置的时间段默认为可预约（available: true）
+                const isAvailable = slot ? slot.available !== false : true;
+                const isBooked = slot && slot.orderId ? true : false;
                 let slotClass = 'time-slot';
                 if (isBooked) slotClass += ' booked';
                 else if (isAvailable) slotClass += ' available';
@@ -209,6 +204,7 @@ async function toggleSlot(time) {
         if (timeSlots[slotIndex].orderId) return;
         timeSlots[slotIndex].available = !timeSlots[slotIndex].available;
     } else {
+        // 新时间段，默认为关闭（因为当前显示的是可预约，点击后应该关闭）
         timeSlots.push({ time: time, available: false });
     }
     
@@ -236,21 +232,10 @@ async function toggleRestDay() {
     } catch (error) { alert('保存失败: ' + error.message); }
 }
 
-function setWorkHours() {
-    const modal = document.getElementById('workHoursModal');
-    if (modal) modal.classList.add('active');
-}
-
-function closeWorkHoursModal() {
-    const modal = document.getElementById('workHoursModal');
-    if (modal) modal.classList.remove('active');
-}
-
-async function saveWorkHours() {
-    const startTime = document.getElementById('workStart').value;
-    const endTime = document.getElementById('workEnd').value;
-    if (!startTime || !endTime) { alert('请选择上班时间'); return; }
-    if (startTime >= endTime) { alert('上班时间必须早于下班时间'); return; }
+// 快速设置工时为 10:00-21:00
+async function setWorkHours() {
+    const startTime = '10:00';
+    const endTime = '21:00';
     
     const currentTech = techniciansList.find(t => t._id === currentTechId);
     if (!currentTech) return;
@@ -268,8 +253,8 @@ async function saveWorkHours() {
             action: 'create',
             data: { technicianId: currentTechId, technicianName: currentTech.name, date: currentDate, timeSlots: timeSlots, isRestDay: false, workStart: startTime, workEnd: endTime }
         });
-        closeWorkHoursModal();
         loadSchedule();
+        alert('已设置 10:00-21:00 为工作时间');
     } catch (error) { alert('保存失败: ' + error.message); }
 }
 
