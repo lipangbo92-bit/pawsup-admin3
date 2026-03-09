@@ -1,120 +1,78 @@
 // Services Management Module
-// 使用 API 连接云开发数据库
-
 const API_BASE = '/api';
-const STORAGE_KEY = 'pawsup_services';
-
 let currentService = null;
 let servicesList = [];
 
-// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     loadServices();
 });
 
-// API 调用封装
 async function apiCall(endpoint, data) {
     const response = await fetch(`${API_BASE}/${endpoint}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP ${response.status}`);
     }
-
     return await response.json();
 }
 
-// Load services from API
 async function loadServices() {
     try {
         const result = await apiCall('services', { action: 'list' });
-        
-        console.log('API Response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.error || '加载失败');
-        }
+        if (!result.success) throw new Error(result.error || '加载失败');
 
         servicesList = (result.data || []).map(s => ({
             ...s,
             _id: s._id || s.id,
-            // 字段兼容处理
             name: s.name || s.title || '未命名服务',
-            description: s.description || s.desc || s.intro || '',
+            description: s.description || s.desc || '',
             category: s.category || 'bath',
-            price: s.price || 0
+            price: s.price || 0,
+            duration: s.duration || 60  // 默认60分钟
         }));
-        
-        console.log('Parsed services:', servicesList);
 
-        // 如果没有数据，初始化默认数据
         if (servicesList.length === 0) {
             const defaultServices = [
-                { name: '洗护套餐', category: 'bath', price: 99, description: '基础洗护服务' },
-                { name: '美容造型', category: 'grooming', price: 168, description: '专业美容修剪' },
-                { name: '驱虫保健', category: 'medical', price: 80, description: '体内外驱虫' }
+                { name: '洗护套餐', category: 'bath', price: 99, duration: 60, description: '基础洗护服务' },
+                { name: '美容造型', category: 'grooming', price: 168, duration: 90, description: '专业美容修剪' },
+                { name: '驱虫保健', category: 'medical', price: 80, duration: 30, description: '体内外驱虫' }
             ];
-            
             for (const service of defaultServices) {
                 await apiCall('services', { action: 'add', data: service });
             }
-            
-            // 重新加载
             const reloadResult = await apiCall('services', { action: 'list' });
             servicesList = (reloadResult.data || []).map(s => ({
-                ...s,
-                _id: s._id || s.id,
-                name: s.name || s.title || '未命名服务',
-                description: s.description || s.desc || '',
-                category: s.category || 'bath',
-                price: s.price || 0
+                ...s, _id: s._id || s.id, name: s.name || '未命名',
+                description: s.description || '', category: s.category || 'bath',
+                price: s.price || 0, duration: s.duration || 60
             }));
         }
-
         renderServicesGrid(servicesList);
     } catch (error) {
         console.error('Load services error:', error);
-        // 失败时显示空状态
         document.getElementById('servicesGrid').innerHTML = `
             <div class="empty-state" style="grid-column:1/-1; text-align:center; padding:40px;">
                 <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
                 <div>加载失败: ${error.message}</div>
-                <button onclick="location.reload()" style="margin-top:16px; padding:8px 16px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">刷新重试</button>
-            </div>
-        `;
+            </div>`;
     }
 }
 
-// Render services grid
 function renderServicesGrid(services) {
     const container = document.getElementById('servicesGrid');
-    
-    if (!container) {
-        console.error('servicesGrid not found');
-        return;
-    }
-    
+    if (!container) return;
     if (services.length === 0) {
         container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无服务，请添加</div>';
         return;
     }
     
     const categoryMap = {
-        'bath': '洗护美容',
-        'grooming': '美容造型',
-        'spa': 'SPA护理',
-        'medical': '医疗护理',
-        'boarding': '寄养服务',
-        'visiting': '上门服务',
-        'wash': '洗护美容',
-        'groom': '美容造型',
-        'other': '其他服务'
+        'bath': '洗护美容', 'grooming': '美容造型', 'spa': 'SPA护理',
+        'medical': '医疗护理', 'boarding': '寄养服务', 'other': '其他服务'
     };
     
     container.innerHTML = services.map(service => `
@@ -125,6 +83,7 @@ function renderServicesGrid(services) {
                 <p class="service-desc">${service.description || '暂无描述'}</p>
                 <div class="service-meta">
                     <span class="service-price">¥${(service.price || 0).toFixed(2)}</span>
+                    <span class="service-duration">⏱ ${service.duration || 60}分钟</span>
                 </div>
             </div>
             <div class="service-actions">
@@ -135,7 +94,6 @@ function renderServicesGrid(services) {
     `).join('');
 }
 
-// Open service modal for add
 function openServiceModal() {
     currentService = null;
     document.getElementById('serviceModalTitle').textContent = '添加服务';
@@ -144,13 +102,11 @@ function openServiceModal() {
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
-// Close service modal
 function closeServiceModal() {
     document.getElementById('serviceModal').style.display = 'none';
     currentService = null;
 }
 
-// Edit service
 function editService(serviceId) {
     currentService = servicesList.find(s => s._id === serviceId);
     if (!currentService) return;
@@ -159,98 +115,56 @@ function editService(serviceId) {
     document.getElementById('serviceId').value = currentService._id;
     document.getElementById('serviceName').value = currentService.name || '';
     document.getElementById('servicePrice').value = currentService.price || '';
+    document.getElementById('serviceDuration').value = currentService.duration || 60;
     document.getElementById('serviceCategory').value = currentService.category || '';
     document.getElementById('serviceDesc').value = currentService.description || '';
     
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
-// Save service
 async function saveService() {
     const name = document.getElementById('serviceName').value.trim();
     const price = parseFloat(document.getElementById('servicePrice').value);
+    const duration = parseInt(document.getElementById('serviceDuration').value);
     const category = document.getElementById('serviceCategory').value;
     const description = document.getElementById('serviceDesc').value.trim();
     
-    // Validation
-    if (!name) {
-        showMessage('请输入服务名称', 'error');
-        return;
-    }
-    if (!price || price <= 0) {
-        showMessage('请输入有效的价格', 'error');
-        return;
-    }
-    if (!category) {
-        showMessage('请选择服务分类', 'error');
-        return;
-    }
+    if (!name) { alert('请输入服务名称'); return; }
+    if (!price || price <= 0) { alert('请输入有效的价格'); return; }
+    if (!duration || duration < 30) { alert('请输入有效的服务时长（至少30分钟）'); return; }
+    if (!category) { alert('请选择服务分类'); return; }
     
     try {
-        const serviceData = {
-            name,
-            price,
-            category,
-            description
-        };
+        const serviceData = { name, price, duration, category, description };
         
         if (currentService) {
-            // Update existing
-            await apiCall('services', { 
-                action: 'update', 
-                id: currentService._id, 
-                data: serviceData 
-            });
-            showMessage('服务更新成功', 'success');
+            await apiCall('services', { action: 'update', id: currentService._id, data: serviceData });
+            alert('服务更新成功');
         } else {
-            // Add new
             await apiCall('services', { action: 'add', data: serviceData });
-            showMessage('服务添加成功', 'success');
+            alert('服务添加成功');
         }
         
         closeServiceModal();
         loadServices();
     } catch (err) {
         console.error('Save service error:', err);
-        showMessage('保存失败：' + (err.message || '请重试'), 'error');
+        alert('保存失败：' + (err.message || '请重试'));
     }
 }
 
-// 全局变量存储待删除的ID
 let pendingDeleteId = null;
 
-// 显示自定义确认对话框
 function showDeleteConfirm(serviceId) {
     pendingDeleteId = serviceId;
-    const confirmHtml = `
-        <div id="deleteConfirmModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center;">
-            <div style="background:white; padding:24px; border-radius:8px; max-width:360px; width:90%; text-align:center;">
-                <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
-                <h3 style="margin:0 0 12px 0; font-size:18px;">确认删除</h3>
-                <p style="margin:0 0 24px 0; color:#666;">确定要删除该服务吗？此操作不可恢复。</p>
-                <div style="display:flex; gap:12px; justify-content:center;">
-                    <button onclick="closeDeleteConfirm()" style="padding:10px 24px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">取消</button>
-                    <button onclick="confirmDelete()" style="padding:10px 24px; border:none; background:#f44336; color:white; border-radius:4px; cursor:pointer;">删除</button>
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', confirmHtml);
+    if (!confirm('确定要删除该服务吗？')) return;
+    confirmDelete();
 }
 
-// 关闭确认对话框
-function closeDeleteConfirm() {
-    pendingDeleteId = null;
-    const modal = document.getElementById('deleteConfirmModal');
-    if (modal) modal.remove();
-}
-
-// 确认删除
 async function confirmDelete() {
     if (!pendingDeleteId) return;
-    
     const serviceId = pendingDeleteId;
-    closeDeleteConfirm();
+    pendingDeleteId = null;
     
     try {
         await apiCall('services', { action: 'delete', id: serviceId });
@@ -262,29 +176,17 @@ async function confirmDelete() {
     }
 }
 
-// Delete service
 function deleteService(serviceId, event) {
-    // 阻止事件冒泡
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     showDeleteConfirm(serviceId);
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('serviceModal');
-    if (event.target === modal) {
-        closeServiceModal();
-    }
+    if (event.target === modal) closeServiceModal();
 };
 
-// Show message helper (兼容 app.js 中的函数)
-function showMessage(message, type = 'info') {
-    if (typeof window.showMessage === 'function' && window.showMessage !== showMessage) {
-        window.showMessage(message, type);
-    } else {
-        alert(message);
-    }
+function logout() {
+    localStorage.removeItem('adminLoggedIn');
+    window.location.href = 'index.html';
 }

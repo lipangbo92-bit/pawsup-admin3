@@ -1,10 +1,13 @@
-// Appointment Management Module - 预约管理
+// Appointment Management Module - 卡片式预约管理
 const API_BASE = '/api';
+
 let currentDate = '';
 let techniciansList = [];
 let servicesList = [];
 let ordersData = [];
 let schedulesData = {};
+let selectedTechId = 'all';
+
 const TIME_SLOTS = [];
 for (let h = 8; h <= 22; h++) {
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
@@ -13,14 +16,10 @@ for (let h = 8; h <= 22; h++) {
 
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('summaryDate');
-    if (dateInput) {
-        dateInput.value = today;
-        currentDate = today;
-    }
-    const apptDate = document.getElementById('appointmentDate');
-    if (apptDate) apptDate.value = today;
-    loadSummary();
+    document.getElementById('summaryDate').value = today;
+    document.getElementById('appointmentDate').value = today;
+    currentDate = today;
+    loadData();
     loadServicesForSelect();
     loadTechniciansForSelect();
 });
@@ -40,87 +39,157 @@ async function apiCall(endpoint, data) {
     }
 }
 
-function onSummaryDateChange() {
-    const dateInput = document.getElementById('summaryDate');
-    if (dateInput) {
-        currentDate = dateInput.value;
-        loadSummary();
+async function loadData() {
+    if (!currentDate) return;
+    
+    try {
+        const [techResult, orderResult, scheduleResult] = await Promise.all([
+            apiCall('technicians', { action: 'list' }),
+            apiCall('orders', { action: 'list', date: currentDate }),
+            apiCall('schedules', { action: 'list', date: currentDate })
+        ]);
+        
+        techniciansList = (techResult.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
+        ordersData = orderResult.data || [];
+        schedulesData = {};
+        (scheduleResult.data || []).forEach(s => { schedulesData[s.technicianId] = s; });
+        
+        renderTechFilter();
+        renderTimeSlots();
+        updateStats();
+    } catch (error) {
+        console.error('Load data error:', error);
+        document.getElementById('timeSlotsContainer').innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
     }
 }
 
-async function loadSummary() {
-    if (!currentDate) return;
-    const tableBody = document.getElementById('tableBody');
-    if (tableBody) tableBody.innerHTML = '<tr><td colspan="30" class="loading">加载数据...</td></tr>';
-    try {
-        const techResult = await apiCall('technicians', { action: 'list' });
-        if (!techResult.success) throw new Error(techResult.error);
-        techniciansList = (techResult.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
-        const orderResult = await apiCall('orders', { action: 'list', date: currentDate });
-        if (!orderResult.success) throw new Error(orderResult.error);
-        ordersData = orderResult.data || [];
-        const scheduleResult = await apiCall('schedules', { action: 'list', date: currentDate });
-        schedulesData = {};
-        (scheduleResult.data || []).forEach(s => { schedulesData[s.technicianId] = s; });
-        updateStats();
-        renderSummaryTable();
-    } catch (error) {
-        console.error('Load summary error:', error);
-        if (tableBody) tableBody.innerHTML = `<tr><td colspan="30" class="empty-state">加载失败: ${error.message}</td></tr>`;
-    }
+function onSummaryDateChange() {
+    currentDate = document.getElementById('summaryDate').value;
+    loadData();
+}
+
+function renderTechFilter() {
+    const container = document.getElementById('techFilter');
+    if (!container) return;
+    
+    let html = `<button class="tech-filter-btn ${selectedTechId === 'all' ? 'active' : ''}" onclick="selectTechFilter('all')">全部技师</button>`;
+    html += techniciansList.map(tech => 
+        `<button class="tech-filter-btn ${selectedTechId === tech._id ? 'active' : ''}" onclick="selectTechFilter('${tech._id}')">${tech.name}</button>`
+    ).join('');
+    container.innerHTML = html;
+}
+
+function selectTechFilter(techId) {
+    selectedTechId = techId;
+    renderTechFilter();
+    renderTimeSlots();
 }
 
 function updateStats() {
-    document.getElementById('statTotalTechs').textContent = techniciansList.length;
-    document.getElementById('statTotalOrders').textContent = ordersData.length;
-    document.getElementById('statCompleted').textContent = ordersData.filter(o => o.status === 'completed').length;
+    const totalOrders = ordersData.length;
+    const availableSlots = TIME_SLOTS.filter(time => {
+        if (selectedTechId === 'all') {
+            return techniciansList.some(tech => isTimeAvailable(tech._id, time));
+        }
+        return isTimeAvailable(selectedTechId, time);
+    }).length;
+    
+    document.getElementById('statTotalOrders').textContent = totalOrders;
+    document.getElementById('statAvailable').textContent = availableSlots;
 }
 
-function renderSummaryTable() {
-    const tableHead = document.getElementById('tableHead');
-    const tableBody = document.getElementById('tableBody');
-    if (!tableHead || !tableBody) return;
-    let headHtml = `<tr><th class="tech-col">技师</th><th class="status-cell">状态</th>${TIME_SLOTS.map(t => `<th class="time-col">${t}</th>`).join('')}<th>订单数</th></tr>`;
-    tableHead.innerHTML = headHtml;
-    const ordersByTech = {};
-    techniciansList.forEach(tech => { ordersByTech[tech._id] = []; });
-    ordersData.forEach(order => {
-        if (order.technicianId && ordersByTech[order.technicianId]) ordersByTech[order.technicianId].push(order);
-    });
-    let bodyHtml = techniciansList.map(tech => {
-        const schedule = schedulesData[tech._id];
-        const isRestDay = schedule ? schedule.isRestDay : false;
-        const techOrders = ordersByTech[tech._id] || [];
-        const slotStatus = {};
-        TIME_SLOTS.forEach(t => slotStatus[t] = { type: 'empty' });
-        if (schedule && !isRestDay && schedule.timeSlots) {
-            schedule.timeSlots.forEach(slot => {
-                if (slotStatus[slot.time]) slotStatus[slot.time] = { type: slot.available !== false ? 'available' : 'closed' };
-            });
-        }
-        techOrders.forEach(order => {
-            if (order.appointmentTime && slotStatus[order.appointmentTime]) slotStatus[order.appointmentTime] = { type: 'booked', order: order };
-        });
-        let rowHtml = `<tr class="${tech.status === 'inactive' ? 'inactive' : ''}"><td class="tech-cell"><div class="tech-info-row"><div class="tech-avatar-sm">${tech.avatarUrl ? `<img src="${tech.avatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : '👤'}</div><div><div class="tech-name">${tech.name}</div><span class="tech-status-badge ${tech.status === 'inactive' ? 'inactive' : 'active'}">${tech.status === 'inactive' ? '离职' : '在职'}</span></div></div></td><td class="status-cell">${isRestDay ? '<span class="rest-badge">🌙 休息</span>' : '<span class="work-badge">💼 上班</span>'}</td>`;
-        if (isRestDay) {
-            rowHtml += `<td colspan="${TIME_SLOTS.length}" class="rest-row">今日休息</td>`;
-        } else {
-            TIME_SLOTS.forEach(time => {
-                const slot = slotStatus[time];
-                let cellClass = 'slot-cell';
-                let content = '';
-                let title = '';
-                if (slot.type === 'booked') { cellClass += ' booked'; content = '●'; title = `${slot.order.customerName || '客户'} - ${slot.order.serviceName || '服务'}`; }
-                else if (slot.type === 'available') { cellClass += ' available'; content = '○'; title = '可预约'; }
-                else if (slot.type === 'closed') { cellClass += ' closed'; title = '未开放'; }
-                rowHtml += `<td class="${cellClass}" title="${title}">${content}</td>`;
-            });
-        }
-        rowHtml += `<td><span class="order-count">${techOrders.length}</span></td></tr>`;
-        return rowHtml;
-    }).join('');
-    tableBody.innerHTML = bodyHtml;
+function isTimeAvailable(techId, time) {
+    const schedule = schedulesData[techId];
+    if (schedule?.isRestDay) return false;
+    
+    const isBooked = ordersData.some(o => o.technicianId === techId && o.appointmentTime === time);
+    if (isBooked) return false;
+    
+    if (schedule?.timeSlots?.length > 0) {
+        const slot = schedule.timeSlots.find(s => s.time === time);
+        return slot ? slot.available !== false : true;
+    }
+    return true;
 }
+
+function renderTimeSlots() {
+    const container = document.getElementById('timeSlotsContainer');
+    if (!container) return;
+    
+    let html = '';
+    
+    for (const time of TIME_SLOTS) {
+        let slotClass = 'time-slot-card';
+        let statusClass = '';
+        let statusText = '';
+        let appointmentInfo = '';
+        
+        if (selectedTechId === 'all') {
+            // 显示所有技师的汇总
+            const availableTechs = techniciansList.filter(tech => isTimeAvailable(tech._id, time));
+            const bookedOrders = ordersData.filter(o => o.appointmentTime === time);
+            
+            if (bookedOrders.length > 0) {
+                slotClass += ' booked';
+                statusClass = 'booked';
+                statusText = `已预约 ${bookedOrders.length} 人`;
+                appointmentInfo = bookedOrders.map(o => `
+                    <div class="slot-appointment-info">
+                        <div class="customer">${o.customerName}</div>
+                        <div class="service">${o.serviceName}</div>
+                        <div class="tech">👤 ${o.technicianName || '未分配'}</div>
+                    </div>
+                `).join('');
+            } else if (availableTechs.length > 0) {
+                slotClass += ' available';
+                statusClass = 'available';
+                statusText = `可预约 (${availableTechs.length}位技师)`;
+            } else {
+                slotClass += ' rest';
+                statusClass = 'booked';
+                statusText = '暂无可用技师';
+            }
+        } else {
+            // 显示单个技师
+            const order = ordersData.find(o => o.technicianId === selectedTechId && o.appointmentTime === time);
+            const isAvailable = isTimeAvailable(selectedTechId, time);
+            
+            if (order) {
+                slotClass += ' booked';
+                statusClass = 'booked';
+                statusText = '已预约';
+                appointmentInfo = `
+                    <div class="slot-appointment-info">
+                        <div class="customer">${order.customerName}</div>
+                        <div class="service">${order.serviceName}</div>
+                        <div class="tech">📞 ${order.customerPhone || ''}</div>
+                    </div>
+                `;
+            } else if (isAvailable) {
+                slotClass += ' available';
+                statusClass = 'available';
+                statusText = '可预约';
+            } else {
+                slotClass += ' rest';
+                statusClass = 'booked';
+                statusText = '未开放';
+            }
+        }
+        
+        html += `
+            <div class="${slotClass}">
+                <div class="slot-time">${time}</div>
+                <span class="slot-status ${statusClass}">${statusText}</span>
+                ${appointmentInfo}
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html || '<div class="empty-state">暂无数据</div>';
+}
+
+// ==================== 新增预约 ====================
+let selectedServiceDuration = 60;
 
 async function loadServicesForSelect() {
     try {
@@ -129,7 +198,8 @@ async function loadServicesForSelect() {
         servicesList = result.data || [];
         const select = document.getElementById('serviceId');
         if (!select) return;
-        select.innerHTML = '<option value="">请选择服务</option>' + servicesList.map(s => `<option value="${s._id || s.id}" data-price="${s.price}">${s.name} - ¥${s.price}</option>`).join('');
+        select.innerHTML = '<option value="">请选择服务</option>' +
+            servicesList.map(s => `<option value="${s._id || s.id}" data-duration="${s.duration || 60}">${s.name} - ¥${s.price} (${s.duration || 60}分钟)</option>`).join('');
     } catch (e) { console.error('Load services error:', e); }
 }
 
@@ -141,8 +211,19 @@ async function loadTechniciansForSelect() {
         const select = document.getElementById('techId');
         if (!select) return;
         const activeTechs = techniciansList.filter(t => t.status !== 'inactive');
-        select.innerHTML = '<option value="">请选择技师</option>' + activeTechs.map(t => `<option value="${t._id}">${t.name}</option>`).join('');
+        select.innerHTML = '<option value="">请选择技师</option>' +
+            activeTechs.map(t => `<option value="${t._id}">${t.name}</option>`).join('');
     } catch (e) { console.error('Load technicians error:', e); }
+}
+
+function onServiceChange() {
+    const serviceId = document.getElementById('serviceId')?.value;
+    const service = servicesList.find(s => (s._id || s.id) === serviceId);
+    if (service) {
+        selectedServiceDuration = service.duration || 60;
+        document.getElementById('serviceDurationHint').textContent = `服务时长: ${selectedServiceDuration}分钟`;
+    }
+    onTechChange();
 }
 
 function onTechChange() { loadAvailableTimes(); }
@@ -152,31 +233,67 @@ async function loadAvailableTimes() {
     const techId = document.getElementById('techId')?.value;
     const date = document.getElementById('appointmentDate')?.value;
     const timeSelect = document.getElementById('appointmentTime');
+    
     if (!techId || !date || !timeSelect) return;
+    
     timeSelect.innerHTML = '<option value="">加载中...</option>';
+    
     try {
         const scheduleResult = await apiCall('schedules', { action: 'list', date, technicianId: techId });
         const schedule = scheduleResult.data?.[0];
-        console.log('[DEBUG] Schedule:', schedule);
         const orderResult = await apiCall('orders', { action: 'list', date });
-        const bookedTimes = (orderResult.data || []).filter(o => o.technicianId === techId).map(o => o.appointmentTime);
-        console.log('[DEBUG] Booked times:', bookedTimes);
+        const bookedTimes = (orderResult.data || [])
+            .filter(o => o.technicianId === techId)
+            .map(o => o.appointmentTime);
+        
+        // 计算需要连续的时间段数
+        const slotsNeeded = Math.ceil(selectedServiceDuration / 30);
+        
         let availableSlots = [];
-        if (schedule && schedule.isRestDay) {
+        
+        if (schedule?.isRestDay) {
             timeSelect.innerHTML = '<option value="">该技师今日休息</option>';
             return;
         }
-        if (schedule && schedule.timeSlots && schedule.timeSlots.length > 0) {
-            availableSlots = schedule.timeSlots.filter(slot => slot.available !== false && !bookedTimes.includes(slot.time)).map(slot => slot.time);
-            console.log('[DEBUG] Available from schedule:', availableSlots);
-        } else {
-            availableSlots = TIME_SLOTS.filter(t => !bookedTimes.includes(t));
-            console.log('[DEBUG] Available default:', availableSlots);
+        
+        for (let i = 0; i < TIME_SLOTS.length; i++) {
+            const startTime = TIME_SLOTS[i];
+            const endIndex = i + slotsNeeded;
+            
+            if (endIndex > TIME_SLOTS.length) break;
+            
+            const neededSlots = TIME_SLOTS.slice(i, endIndex);
+            let allAvailable = true;
+            
+            for (const time of neededSlots) {
+                if (bookedTimes.includes(time)) {
+                    allAvailable = false;
+                    break;
+                }
+                if (schedule?.timeSlots?.length > 0) {
+                    const slot = schedule.timeSlots.find(s => s.time === time);
+                    if (slot && slot.available === false) {
+                        allAvailable = false;
+                        break;
+                    }
+                }
+            }
+            
+            if (allAvailable) {
+                const endTime = TIME_SLOTS[endIndex - 1];
+                const endHour = parseInt(endTime.split(':')[0]);
+                const endMin = parseInt(endTime.split(':')[1]) + 30;
+                const finalEndTime = endMin >= 60 ? `${String(endHour + 1).padStart(2,'0')}:00` : `${String(endHour).padStart(2,'0')}:${endMin}`;
+                availableSlots.push({ value: startTime, label: `${startTime} - ${finalEndTime}` });
+            }
         }
+        
         if (availableSlots.length === 0) {
             timeSelect.innerHTML = '<option value="">该技师今日无可用时间</option>';
         } else {
-            timeSelect.innerHTML = '<option value="">请选择时间</option>' + availableSlots.map(t => `<option value="${t}">${t}</option>`).join('');
+            timeSelect.innerHTML = '<option value="">请选择时间</option>' +
+                availableSlots.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+            document.getElementById('durationHint').textContent = `将占用 ${selectedServiceDuration} 分钟`;
         }
     } catch (e) {
         console.error('Load available times error:', e);
@@ -187,13 +304,11 @@ async function loadAvailableTimes() {
 function openNewAppointmentModal() {
     const modal = document.getElementById('newAppointmentModal');
     if (modal) {
-        const form = document.getElementById('appointmentForm');
-        if (form) form.reset();
-        const today = new Date().toISOString().split('T')[0];
-        const apptDate = document.getElementById('appointmentDate');
-        if (apptDate) apptDate.value = today;
-        const timeSelect = document.getElementById('appointmentTime');
-        if (timeSelect) timeSelect.innerHTML = '<option value="">请先选择技师和日期</option>';
+        document.getElementById('appointmentForm')?.reset();
+        document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('appointmentTime').innerHTML = '<option value="">请先选择技师和日期</option>';
+        document.getElementById('serviceDurationHint').textContent = '';
+        document.getElementById('durationHint').textContent = '';
         modal.style.display = 'flex';
     }
 }
@@ -213,6 +328,7 @@ async function saveAppointment() {
     const appointmentDate = document.getElementById('appointmentDate')?.value;
     const appointmentTime = document.getElementById('appointmentTime')?.value;
     const remark = document.getElementById('remark')?.value?.trim();
+    
     if (!customerName) { alert('请输入客户姓名'); return; }
     if (!customerPhone) { alert('请输入联系电话'); return; }
     if (!petType) { alert('请选择宠物类型'); return; }
@@ -220,21 +336,34 @@ async function saveAppointment() {
     if (!technicianId) { alert('请选择技师'); return; }
     if (!appointmentDate) { alert('请选择预约日期'); return; }
     if (!appointmentTime) { alert('请选择预约时间'); return; }
+    
     const service = servicesList.find(s => (s._id || s.id) === serviceId);
     const technician = techniciansList.find(t => t._id === technicianId);
+    
     try {
         const orderData = {
-            customerName, customerPhone, petInfo: { type: petType, name: petName },
-            serviceId, serviceName: service?.name || '', technicianId, technicianName: technician?.name || '',
-            appointmentDate, appointmentTime, status: 'confirmed', remark, source: 'manual', price: service?.price || 0
+            customerName, customerPhone,
+            petInfo: { type: petType, name: petName },
+            serviceId, serviceName: service?.name || '',
+            serviceDuration: service?.duration || 60,
+            technicianId, technicianName: technician?.name || '',
+            appointmentDate, appointmentTime,
+            status: 'confirmed', remark, source: 'manual',
+            price: service?.price || 0
         };
+        
         const result = await apiCall('orders', { action: 'create', data: orderData });
+        
         if (result.success) {
             alert('预约成功！');
             closeNewAppointmentModal();
-            loadSummary();
-        } else { alert('预约失败：' + result.error); }
-    } catch (error) { alert('预约失败：' + error.message); }
+            loadData();
+        } else {
+            alert('预约失败：' + result.error);
+        }
+    } catch (error) {
+        alert('预约失败：' + error.message);
+    }
 }
 
 function logout() {
