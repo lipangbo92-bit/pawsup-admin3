@@ -2,710 +2,329 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>排班管理 - 管理端</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>PawsUp 爪哇宠屋 - 排班管理</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        :root {
-            --primary: #F97316;
-            --primary-light: #FED7AA;
-            --secondary: #FED7AA;
-            --cta: #8B5CF6;
-            --bg: #FFF7ED;
-            --text: #7C2D12;
-            --text-light: #C2410C;
-            --white: #FFFFFF;
-            --gray-100: #FFEDD5;
-            --gray-200: #FED7AA;
-            --gray-300: #FB923C;
-            --gray-500: #EA580C;
-            --green: #10B981;
-            --green-light: #D1FAE5;
-            --orange: #F59E0B;
-            --red: #EF4444;
-            --red-light: #FEE2E2;
-            --purple: #8B5CF6;
-            --purple-light: #EDE9FE;
-            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Nunito Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* 侧边栏 */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 220px;
-            background: var(--white);
-            padding: 24px 0;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
-            z-index: 100;
-        }
-
-        .logo-section {
-            padding: 0 20px 24px;
-            border-bottom: 1px solid var(--gray-100);
-            margin-bottom: 16px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Varela Round', sans-serif;
-            font-size: 20px;
-            color: var(--primary);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            color: #6B7280;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-            text-decoration: none;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: var(--gray-100);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-
-        .nav-item .icon { font-size: 18px; }
-
-        /* 主内容区 */
-        .main-content {
-            margin-left: 220px;
-            padding: 24px;
-            min-height: 100vh;
-        }
-
-        .header {
-            margin-bottom: 24px;
-        }
-
-        .page-title {
-            font-family: 'Varela Round', sans-serif;
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .page-desc {
-            color: #6B7280;
-            font-size: 14px;
-        }
-
-        /* 顶部操作栏 */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .date-selector {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .date-selector label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .date-input {
-            padding: 10px 14px;
-            border: 2px solid var(--gray-200);
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--white);
-            cursor: pointer;
-        }
-
-        .date-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* 布局 */
-        .content-layout {
-            display: flex;
+        .schedule-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
             gap: 24px;
-            min-height: calc(100vh - 200px);
+            height: calc(100vh - 200px);
         }
-
-        /* 左侧技师列表 */
-        .tech-list-panel {
-            width: 260px;
-            flex-shrink: 0;
-        }
-
-        .panel-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #6B7280;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tech-list {
+        
+        .tech-panel {
             background: var(--white);
-            border-radius: 16px;
-            padding: 12px;
-            box-shadow: var(--shadow);
-            max-height: calc(100vh - 280px);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
             overflow-y: auto;
         }
-
+        
+        .tech-panel h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--gray-800);
+        }
+        
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
         .tech-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px;
-            border-radius: 12px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
-            margin-bottom: 8px;
         }
-
-        .tech-item:last-child {
-            margin-bottom: 0;
-        }
-
+        
         .tech-item:hover {
             background: var(--gray-100);
         }
-
+        
         .tech-item.active {
-            background: var(--gray-100);
-            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-color: var(--primary-color);
         }
-
+        
         .tech-avatar {
             width: 44px;
             height: 44px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            position: relative;
-            flex-shrink: 0;
+            color: white;
         }
-
-        .tech-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .tech-status-dot {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 2px solid var(--white);
-        }
-
-        .tech-status-dot.online { background: var(--green); }
-        .tech-status-dot.offline { background: #9CA3AF; }
-
+        
         .tech-info {
             flex: 1;
-            min-width: 0;
         }
-
+        
         .tech-name {
             font-weight: 600;
             font-size: 14px;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: var(--gray-800);
         }
-
+        
         .tech-status {
-            font-size: 11px;
-            color: #6B7280;
+            font-size: 12px;
+            color: var(--gray-400);
         }
-
-        /* 右侧排班区域 */
+        
         .schedule-panel {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .schedule-card {
             background: var(--white);
-            border-radius: 16px;
+            border-radius: var(--radius-lg);
             padding: 24px;
-            box-shadow: var(--shadow);
-            min-height: 500px;
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
         }
-
-        .loading, .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9CA3AF;
-        }
-
-        .empty-state button {
-            margin-top: 12px;
-        }
-
-        /* 排班头部 */
-        .schedule-header-bar {
+        
+        .schedule-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--gray-100);
-            flex-wrap: wrap;
-            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
         }
-
-        .tech-info-header {
+        
+        .schedule-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
-
-        .tech-name-large {
-            font-size: 18px;
+        
+        .current-tech {
+            font-size: 20px;
             font-weight: 700;
+            color: var(--gray-800);
         }
-
-        .schedule-date {
+        
+        .current-date {
             background: var(--gray-100);
-            padding: 4px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-light);
+            font-size: 14px;
+            color: var(--gray-600);
         }
-
-        .quick-actions {
+        
+        .schedule-actions {
             display: flex;
-            gap: 8px;
-        }
-
-        .btn-sm {
-            padding: 8px 14px;
-            border: 1px solid var(--gray-200);
-            background: var(--white);
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text);
-        }
-
-        .btn-sm:hover {
-            background: var(--gray-100);
-        }
-
-        .btn-sm.active {
-            background: var(--red-light);
-            color: var(--red);
-            border-color: var(--red);
-        }
-
-        /* 休息日提示 */
-        .rest-day-banner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 40px;
-            background: var(--gray-100);
-            border-radius: 12px;
-            color: #6B7280;
-            font-size: 16px;
-        }
-
-        .rest-day-banner span:first-child {
-            font-size: 32px;
-        }
-
-        /* 时间段网格 */
-        .time-slots-container {
-            margin-bottom: 20px;
-        }
-
-        .slots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 10px;
         }
-
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
         .time-slot {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px 8px;
+            padding: 14px 8px;
             border: 2px solid var(--gray-200);
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             transition: all 0.2s;
             background: var(--white);
-            position: relative;
-            min-height: 60px;
+            min-height: 70px;
         }
-
+        
         .time-slot:hover {
-            border-color: var(--primary);
+            border-color: var(--primary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+            box-shadow: var(--shadow-md);
         }
-
+        
         .time-slot.available {
-            background: var(--green-light);
-            border-color: var(--green);
+            background: #ecfdf5;
+            border-color: #10b981;
         }
-
+        
         .time-slot.booked {
-            background: var(--purple-light);
-            border-color: var(--purple);
+            background: #ede9fe;
+            border-color: var(--secondary-color);
             cursor: not-allowed;
         }
-
-        .time-slot .slot-time {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
+        
+        .time-slot.rest {
+            background: var(--gray-100);
+            border-color: var(--gray-200);
+            opacity: 0.6;
         }
-
-        .time-slot .slot-status {
+        
+        .slot-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .slot-status {
             font-size: 11px;
-            color: #6B7280;
+            margin-top: 4px;
+            color: var(--gray-400);
         }
-
+        
         .time-slot.available .slot-status {
-            color: var(--green);
+            color: #10b981;
         }
-
+        
         .time-slot.booked .slot-status {
-            color: var(--purple);
+            color: var(--secondary-color);
         }
-
-        .order-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: var(--purple);
-            color: white;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        /* 图例 */
+        
         .schedule-legend {
             display: flex;
-            gap: 20px;
-            padding-top: 16px;
-            border-top: 1px solid var(--gray-100);
-            flex-wrap: wrap;
+            gap: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
         }
-
+        
         .legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            color: #6B7280;
+            color: var(--gray-600);
         }
-
+        
         .legend-dot {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border-radius: 4px;
             border: 2px solid;
         }
-
+        
         .legend-dot.available {
-            background: var(--green-light);
-            border-color: var(--green);
+            background: #ecfdf5;
+            border-color: #10b981;
         }
-
+        
         .legend-dot.closed {
             background: var(--white);
             border-color: var(--gray-200);
         }
-
+        
         .legend-dot.booked {
-            background: var(--purple-light);
-            border-color: var(--purple);
+            background: #ede9fe;
+            border-color: var(--secondary-color);
         }
-
-        /* 弹窗 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+        
+        .rest-banner {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 28px;
-            width: 400px;
-            max-width: 90%;
-            transform: scale(0.9);
-            transition: all 0.3s;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .form-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid var(--gray-200);
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .form-separator {
-            color: #6B7280;
-            font-weight: 500;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            font-family: inherit;
-        }
-
-        .btn-secondary {
+            padding: 60px;
             background: var(--gray-100);
-            color: var(--text);
+            border-radius: var(--radius-lg);
+            color: var(--gray-600);
         }
-
-        .btn-secondary:hover {
-            background: var(--gray-200);
+        
+        .rest-banner .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--gray-500);
-        }
-
-        /* 响应式 */
+        
         @media (max-width: 1024px) {
-            .sidebar { display: none; }
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
+            .schedule-layout {
+                grid-template-columns: 1fr;
+                height: auto;
             }
-            .content-layout {
-                flex-direction: column;
+            
+            .tech-panel {
+                max-height: 200px;
             }
-            .tech-list-panel {
-                width: 100%;
-            }
+            
             .tech-list {
-                display: flex;
-                gap: 8px;
+                flex-direction: row;
                 overflow-x: auto;
-                max-height: none;
-                padding: 8px;
             }
+            
             .tech-item {
-                flex-shrink: 0;
-                margin-bottom: 0;
-                min-width: 140px;
-            }
-            .slots-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .slots-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .schedule-header-bar {
-                flex-direction: column;
-                align-items: flex-start;
+                min-width: 160px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-section">
-            <div class="logo">
-                <span>🐾</span>
-                <span>爪哇后台管理</span>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
             </div>
-        </div>
-        <nav>
-            <a href="admin-dashboard" class="nav-item">
-                <span class="icon">📊</span>
-                <span>仪表盘</span>
-            </a>
-            <a href="admin-appointments" class="nav-item">
-                <span class="icon">📋</span>
-                <span>预约管理</span>
-            </a>
-            <a href="admin-technicians" class="nav-item">
-                <span class="icon">👥</span>
-                <span>技师管理</span>
-            </a>
-            <a href="admin-schedule" class="nav-item active">
-                <span class="icon">📅</span>
-                <span>排班管理</span>
-            </a>
-            <a href="admin-services" class="nav-item">
-                <span class="icon">✂️</span>
-                <span>服务管理</span>
-            </a>
-            <a href="admin-statistics" class="nav-item">
-                <span class="icon">📈</span>
-                <span>数据统计</span>
-            </a>
-        </nav>
-    </div>
-
-    <div class="main-content">
-        <div class="header">
-            <h1 class="page-title">📅 排班管理</h1>
-            <p class="page-desc">为在职技师设置每天的工作时间段，以半小时为单位</p>
-        </div>
-
-        <div class="top-bar">
-            <div class="date-selector">
-                <label>选择日期：</label>
-                <input type="date" class="date-input" id="scheduleDate" onchange="onDateChange()">
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
             </div>
-        </div>
-
-        <div class="content-layout">
-            <!-- 左侧技师列表 -->
-            <div class="tech-list-panel">
-                <div class="panel-title">在职技师</div>
-                <div class="tech-list" id="techList">
-                    <div class="loading">加载中...</div>
-                </div>
-            </div>
-
-            <!-- 右侧排班设置 -->
-            <div class="schedule-panel">
-                <div class="schedule-card" id="scheduleGrid">
-                    <div class="empty-state">
-                        <div style="font-size:48px; margin-bottom:16px;">👈</div>
-                        <div>请从左侧选择技师</div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="technicians">👨‍🔧 技师管理</a></li>
+                    <li class="active"><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>排班管理</h2>
+                    <div class="date-selector">
+                        <input type="date" id="scheduleDate" class="form-control" onchange="onDateChange()">
                     </div>
                 </div>
-            </div>
+                
+                <div class="schedule-layout">
+                    <div class="tech-panel">
+                        <h3>选择技师</h3>
+                        <div class="tech-list" id="techList">
+                            <div class="loading">加载中...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-panel" id="schedulePanel">
+                        <div class="empty-state">
+                            <div style="font-size:48px; margin-bottom:16px;">👈</div>
+                            <div>请从左侧选择技师</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
-
+    
     <!-- 快速设置工作时间弹窗 -->
-    <div class="modal-overlay" id="workHoursModal">
-        <div class="modal">
-            <h3 class="modal-title">快速设置工作时间</h3>
-            <p style="text-align:center; color:#6B7280; font-size:13px; margin-bottom:20px;">一键设置当天的可预约时间段</p>
-
-            <div class="form-group">
-                <label class="form-label">工作时间</label>
-                <div class="form-row">
-                    <select class="form-input" id="workStart">
-                        <option value="">上班时间</option>
+    <div class="modal" id="workHoursModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>快速设置工作时间</h3>
+                <button class="close-btn" onclick="closeWorkHoursModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>上班时间</label>
+                    <select id="workStart" class="form-control">
                         <option value="08:00">08:00</option>
                         <option value="08:30">08:30</option>
                         <option value="09:00" selected>09:00</option>
@@ -713,17 +332,11 @@
                         <option value="10:00">10:00</option>
                         <option value="10:30">10:30</option>
                         <option value="11:00">11:00</option>
-                        <option value="11:30">11:30</option>
-                        <option value="12:00">12:00</option>
-                        <option value="13:00">13:00</option>
-                        <option value="13:30">13:30</option>
-                        <option value="14:00">14:00</option>
                     </select>
-                    <span class="form-separator">至</span>
-                    <select class="form-input" id="workEnd">
-                        <option value="">下班时间</option>
-                        <option value="16:00">16:00</option>
-                        <option value="16:30">16:30</option>
+                </div>
+                <div class="form-group">
+                    <label>下班时间</label>
+                    <select id="workEnd" class="form-control">
                         <option value="17:00">17:00</option>
                         <option value="17:30">17:30</option>
                         <option value="18:00">18:00</option>
@@ -731,17 +344,12 @@
                         <option value="19:00">19:00</option>
                         <option value="19:30">19:30</option>
                         <option value="20:00" selected>20:00</option>
-                        <option value="20:30">20:30</option>
-                        <option value="21:00">21:00</option>
-                        <option value="21:30">21:30</option>
-                        <option value="22:00">22:00</option>
                     </select>
                 </div>
             </div>
-
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeWorkHoursModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveWorkHours()">保存</button>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeWorkHoursModal()">取消</button>
+                <button class="btn-primary" onclick="saveWorkHours()">保存</button>
             </div>
         </div>
     </div>

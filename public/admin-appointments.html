@@ -2,424 +2,224 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>预约管理 - 管理端</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>PawsUp 爪哇宠屋 - 预约管理</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        :root {
-            --primary: #F97316;
-            --primary-light: #FED7AA;
-            --secondary: #FED7AA;
-            --cta: #8B5CF6;
-            --bg: #FFF7ED;
-            --text: #7C2D12;
-            --text-light: #C2410C;
-            --white: #FFFFFF;
-            --gray-100: #FFEDD5;
-            --gray-200: #FED7AA;
-            --gray-300: #FB923C;
-            --gray-500: #EA580C;
-            --green: #10B981;
-            --green-light: #D1FAE5;
-            --orange: #F59E0B;
-            --red: #EF4444;
-            --red-light: #FEE2E2;
-            --purple: #8B5CF6;
-            --purple-light: #EDE9FE;
-            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Nunito Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* 侧边栏 */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 220px;
-            background: var(--white);
-            padding: 24px 0;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
-            z-index: 100;
-        }
-
-        .logo-section {
-            padding: 0 20px 24px;
-            border-bottom: 1px solid var(--gray-100);
-            margin-bottom: 16px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Varela Round', sans-serif;
-            font-size: 20px;
-            color: var(--primary);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            color: #6B7280;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-            text-decoration: none;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: var(--gray-100);
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-
-        .nav-item .icon { font-size: 18px; }
-
-        /* 主内容区 */
-        .main-content {
-            margin-left: 220px;
-            padding: 24px;
-            min-height: 100vh;
-        }
-
-        .header {
-            margin-bottom: 24px;
-        }
-
-        .page-title {
-            font-family: 'Varela Round', sans-serif;
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .page-desc {
-            color: #6B7280;
-            font-size: 14px;
-        }
-
-        /* 顶部操作栏 */
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .date-selector {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .date-selector label {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .date-input {
-            padding: 10px 14px;
-            border: 2px solid var(--gray-200);
-            border-radius: 10px;
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--white);
-            cursor: pointer;
-        }
-
-        .date-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn-primary {
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary:hover {
-            background: var(--gray-500);
-        }
-
-        /* 汇总卡片 */
-        .summary-card {
-            background: var(--white);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            min-height: 500px;
-        }
-
-        .loading, .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9CA3AF;
-        }
-
-        .empty-state button {
-            margin-top: 12px;
-        }
-
-        /* 汇总头部 */
         .summary-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--gray-100);
             flex-wrap: wrap;
             gap: 16px;
         }
-
-        .summary-date {
-            font-size: 20px;
-            font-weight: 700;
+        
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-
+        
+        .date-selector label {
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+        
         .summary-stats {
             display: flex;
             gap: 24px;
         }
-
+        
         .stat-item {
             text-align: center;
+            padding: 12px 20px;
+            background: var(--white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
         }
-
+        
         .stat-value {
             display: block;
             font-size: 24px;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-color);
         }
-
+        
         .stat-label {
             font-size: 12px;
-            color: #6B7280;
+            color: var(--gray-400);
         }
-
-        /* 表格 */
+        
         .summary-table-wrapper {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             overflow-x: auto;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--gray-100);
+            margin-bottom: 24px;
         }
-
+        
         .summary-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-
+        
         .summary-table th {
             background: var(--gray-100);
-            padding: 12px 8px;
+            padding: 14px 8px;
             font-weight: 600;
             text-align: center;
             white-space: nowrap;
             position: sticky;
             top: 0;
-            z-index: 10;
+            color: var(--gray-600);
         }
-
+        
         .summary-table td {
             padding: 12px 8px;
             text-align: center;
-            border-bottom: 1px solid var(--gray-100);
+            border-bottom: 1px solid var(--gray-200);
         }
-
+        
         .summary-table tbody tr:hover {
             background: var(--gray-100);
         }
-
+        
         .summary-table tbody tr.inactive {
             opacity: 0.6;
-            background: #F9FAFB;
+            background: #f9fafb;
         }
-
-        /* 列宽 */
+        
         .tech-col {
             min-width: 140px;
             text-align: left !important;
             padding-left: 16px !important;
         }
-
-        .status-col {
-            min-width: 80px;
-        }
-
+        
         .time-col {
-            min-width: 40px;
+            min-width: 44px;
             font-size: 11px;
-            color: #6B7280;
+            color: var(--gray-400);
         }
-
-        .count-col {
-            min-width: 60px;
-            font-weight: 600;
-        }
-
-        /* 单元格样式 */
+        
         .tech-cell {
             text-align: left !important;
         }
-
+        
         .tech-info-row {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
+        
         .tech-avatar-sm {
             width: 36px;
             height: 36px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            flex-shrink: 0;
+            color: white;
         }
-
-        .tech-avatar-sm img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .tech-info-text {
-            min-width: 0;
-        }
-
+        
         .tech-name {
             font-weight: 600;
             font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
-
+        
         .tech-status-badge {
             font-size: 10px;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 10px;
             display: inline-block;
             margin-top: 2px;
         }
-
+        
         .tech-status-badge.active {
-            background: var(--green-light);
-            color: var(--green);
+            background: #d1fae5;
+            color: #059669;
         }
-
+        
         .tech-status-badge.inactive {
             background: var(--gray-200);
-            color: #6B7280;
+            color: var(--gray-400);
         }
-
-        /* 状态徽章 */
+        
         .rest-badge {
             background: var(--gray-100);
-            color: #6B7280;
+            color: var(--gray-500);
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
         }
-
+        
         .work-badge {
-            background: var(--green-light);
-            color: var(--green);
+            background: #d1fae5;
+            color: #059669;
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
         }
-
-        /* 时间段单元格 */
+        
         .slot-cell {
             font-size: 11px;
             cursor: default;
         }
-
+        
         .slot-cell.available {
-            color: var(--green);
+            color: #10b981;
         }
-
+        
         .slot-cell.booked {
-            color: var(--purple);
+            color: var(--secondary-color);
             font-weight: 700;
         }
-
+        
         .slot-cell.closed {
-            background: #F3F4F6;
+            background: #f3f4f6;
         }
-
-        .slot-cell.empty {
-            color: #E5E7EB;
-        }
-
+        
         .rest-row {
-            background: #F9FAFB;
-            color: #9CA3AF;
+            background: #f9fafb;
+            color: var(--gray-400);
             font-size: 13px;
         }
-
+        
         .order-count {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-width: 28px;
             height: 28px;
-            background: var(--primary);
+            background: var(--primary-color);
             color: white;
             border-radius: 14px;
             font-size: 13px;
             font-weight: 600;
         }
-
-        /* 图例 */
+        
         .summary-legend {
             display: flex;
             gap: 24px;
             flex-wrap: wrap;
-            padding-top: 16px;
-            border-top: 1px solid var(--gray-100);
+            padding: 16px;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
         }
-
+        
         .legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            color: #6B7280;
+            color: var(--gray-600);
         }
-
+        
         .legend-dot {
             width: 16px;
             height: 16px;
@@ -429,44 +229,42 @@
             justify-content: center;
             font-size: 10px;
         }
-
+        
         .legend-dot.available {
-            background: var(--green-light);
-            color: var(--green);
+            background: #d1fae5;
+            color: #10b981;
         }
-
+        
         .legend-dot.booked {
-            background: var(--purple-light);
-            color: var(--purple);
+            background: #ede9fe;
+            color: var(--secondary-color);
         }
-
+        
         .legend-dot.closed {
-            background: #F3F4F6;
-            border: 1px solid #E5E7EB;
+            background: #f3f4f6;
+            border: 1px solid var(--gray-200);
         }
-
-        .legend-dot.empty {
-            background: var(--white);
-            border: 1px dashed #E5E7EB;
+        
+        /* 新增预约表单样式 */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
-
-        /* 响应式 */
-        @media (max-width: 1024px) {
-            .sidebar { display: none; }
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
+        
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
             }
-            .summary-table-wrapper {
-                font-size: 11px;
-            }
-            .time-col {
-                min-width: 32px;
-                padding: 8px 4px !important;
-            }
+            
             .summary-stats {
-                gap: 16px;
+                gap: 12px;
             }
+            
+            .stat-item {
+                padding: 8px 12px;
+            }
+            
             .stat-value {
                 font-size: 18px;
             }
@@ -474,64 +272,172 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="logo-section">
-            <div class="logo">
-                <span>🐾</span>
-                <span>爪哇后台管理</span>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li class="active"><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="technicians">👨‍🔧 技师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>预约管理</h2>
+                    <button class="btn-primary" onclick="openNewAppointmentModal()">+ 新增预约</button>
+                </div>
+                
+                <div class="summary-header">
+                    <div class="date-selector">
+                        <label>选择日期：</label>
+                        <input type="date" id="summaryDate" class="form-control" onchange="onSummaryDateChange()">
+                    </div>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="statTotalTechs">0</span>
+                            <span class="stat-label">技师总数</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="statTotalOrders">0</span>
+                            <span class="stat-label">订单总数</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="statCompleted">0</span>
+                            <span class="stat-label">已完成</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-table-wrapper">
+                    <table class="summary-table">
+                        <thead id="tableHead">
+                            <tr>
+                                <th class="tech-col">技师</th>
+                                <th>状态</th>
+                                <!-- 时间段动态生成 -->
+                                <th>订单数</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="summary-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot available">○</span>
+                        <span>可预约</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot booked">●</span>
+                        <span>已预约</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot closed"></span>
+                        <span>未开放</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 新增预约弹窗 -->
+    <div class="modal" id="newAppointmentModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>新增预约</h3>
+                <button class="close-btn" onclick="closeNewAppointmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>客户姓名 *</label>
+                            <input type="text" id="customerName" class="form-control" required placeholder="请输入客户姓名">
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话 *</label>
+                            <input type="tel" id="customerPhone" class="form-control" required placeholder="请输入联系电话">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>宠物类型 *</label>
+                            <select id="petType" class="form-control" required>
+                                <option value="">请选择</option>
+                                <option value="dog">狗狗</option>
+                                <option value="cat">猫咪</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>宠物名称</label>
+                            <input type="text" id="petName" class="form-control" placeholder="请输入宠物名称">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>选择服务 *</label>
+                            <select id="serviceId" class="form-control" required>
+                                <option value="">请选择服务</option>
+                                <!-- 动态加载 -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>选择技师 *</label>
+                            <select id="techId" class="form-control" required onchange="onTechChange()">
+                                <option value="">请选择技师</option>
+                                <!-- 动态加载 -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>预约日期 *</label>
+                            <input type="date" id="appointmentDate" class="form-control" required onchange="onDateChange()">
+                        </div>
+                        <div class="form-group">
+                            <label>预约时间 *</label>
+                            <select id="appointmentTime" class="form-control" required>
+                                <option value="">请选择时间</option>
+                                <!-- 动态加载可用时间 -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="remark" class="form-control" rows="2" placeholder="可选：特殊要求或备注"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeNewAppointmentModal()">取消</button>
+                <button class="btn-primary" onclick="saveAppointment()">确认预约</button>
             </div>
         </div>
-        <nav>
-            <a href="dashboard.html" class="nav-item">
-                <span class="icon">📊</span>
-                <span>仪表盘</span>
-            </a>
-            <a href="admin-appointments" class="nav-item active">
-                <span class="icon">📋</span>
-                <span>预约管理</span>
-            </a>
-            <a href="orders.html" class="nav-item">
-                <span class="icon">📦</span>
-                <span>订单管理</span>
-            </a>
-            <a href="services.html" class="nav-item">
-                <span class="icon">✂️</span>
-                <span>服务管理</span>
-            </a>
-            <a href="technicians.html" class="nav-item">
-                <span class="icon">👥</span>
-                <span>技师管理</span>
-            </a>
-            <a href="admin-schedule" class="nav-item ">
-                <span class="icon">📅</span>
-                <span>排班管理</span>
-            </a>
-            <a href="statistics.html" class="nav-item">
-                <span class="icon">📈</span>
-                <span>数据统计</span>
-            </a>
-        </nav>
     </div>
 
-    <div class="main-content">
-        <div class="header">
-            <h1 class="page-title">📋 预约管理</h1>
-            <p class="page-desc">按技师查看每天的预约情况汇总</p>
-        </div>
-
-        <div class="top-bar">
-            <div class="date-selector">
-                <label>选择日期：</label>
-                <input type="date" class="date-input" id="summaryDate" onchange="onSummaryDateChange()">
-            </div>
-            <a href="orders.html" class="btn-primary">📋 查看订单列表</a>
-        </div>
-
-        <div class="summary-card" id="summaryContainer">
-            <div class="loading">加载数据...</div>
-        </div>
-    </div>
-
-    <script src="js/appointment-summary.js"></script>
+    <script src="js/appointment-new.js"></script>
 </body>
 </html>
