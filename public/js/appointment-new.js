@@ -264,7 +264,7 @@ async function loadAvailableTimes() {
         
         if (schedule && !schedule.isRestDay && schedule.timeSlots) {
             availableSlots = schedule.timeSlots
-                .filter(slot => slot.available && !bookedTimes.includes(slot.time))
+                .filter(slot => slot.available !== false && !bookedTimes.includes(slot.time))
                 .map(slot => slot.time);
         }
         
