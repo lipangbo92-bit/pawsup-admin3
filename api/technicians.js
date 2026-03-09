@@ -1,34 +1,20 @@
 // Vercel API Route: /api/technicians
 const cloudbase = require('@cloudbase/node-sdk');
 
-// 检查环境变量
-if (!process.env.TENCENT_SECRET_ID || !process.env.TENCENT_SECRET_KEY) {
-  console.error('[API] Missing environment variables: TENCENT_SECRET_ID or TENCENT_SECRET_KEY');
-}
+const app = cloudbase.init({
+  env: 'cloud1-4gy1jyan842d73ab',
+  secretId: process.env.TENCENT_SECRET_ID,
+  secretKey: process.env.TENCENT_SECRET_KEY
+});
 
-let db;
-try {
-  const app = cloudbase.init({
-    env: 'cloud1-4gy1jyan842d73ab',
-    secretId: process.env.TENCENT_SECRET_ID,
-    secretKey: process.env.TENCENT_SECRET_KEY
-  });
-  db = app.database();
-} catch (e) {
-  console.error('[API] Cloudbase init error:', e);
-}
+const db = app.database();
 
 module.exports = async (req, res) => {
-  // CORS
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
-  }
-
-  if (!db) {
-    return res.status(500).json({ success: false, error: 'Database not initialized' });
   }
 
   const { action = 'list', data, id, status } = req.body || {};

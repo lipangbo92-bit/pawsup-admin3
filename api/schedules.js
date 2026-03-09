@@ -1,17 +1,13 @@
 // Vercel API Route: /api/schedules
 const cloudbase = require('@cloudbase/node-sdk');
 
-let db;
-try {
-  const app = cloudbase.init({
-    env: 'cloud1-4gy1jyan842d73ab',
-    secretId: process.env.TENCENT_SECRET_ID,
-    secretKey: process.env.TENCENT_SECRET_KEY
-  });
-  db = app.database();
-} catch (e) {
-  console.error('[API] Cloudbase init error:', e);
-}
+const app = cloudbase.init({
+  env: 'cloud1-4gy1jyan842d73ab',
+  secretId: process.env.TENCENT_SECRET_ID,
+  secretKey: process.env.TENCENT_SECRET_KEY
+});
+
+const db = app.database();
 
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
@@ -19,10 +15,6 @@ module.exports = async (req, res) => {
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
-  }
-
-  if (!db) {
-    return res.status(500).json({ success: false, error: 'Database not initialized' });
   }
 
   const { action = 'list', data, date, technicianId } = req.body || {};
@@ -36,12 +28,6 @@ module.exports = async (req, res) => {
         break;
       case 'create':
         result = await createSchedule(data);
-        break;
-      case 'update':
-        result = await updateSchedule(data.id, data);
-        break;
-      case 'delete':
-        result = await deleteSchedule(data.id);
         break;
       default:
         result = { success: false, error: 'Unknown action: ' + action };
@@ -62,9 +48,9 @@ async function getSchedules(date, technicianId) {
 }
 
 async function createSchedule(data) {
-  const { technicianId, technicianName, date, timeSlots, isRestDay, workStart, workEnd } = data;
+  const { technicianId, technicianName, date, timeSlots, isRestDay } = data;
   if (!technicianId || !date) {
-    return { success: false, error: 'Missing required fields' };
+    return { success: false, error: 'Missing fields' };
   }
   
   const existing = await db.collection('schedules').where({ technicianId, date }).get();
@@ -74,27 +60,12 @@ async function createSchedule(data) {
     isRestDay: isRestDay || false,
     updatedAt: new Date()
   };
-  if (workStart) scheduleData.workStart = workStart;
-  if (workEnd) scheduleData.workEnd = workEnd;
 
   if (existing.data.length > 0) {
     await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
     return { success: true, message: 'Schedule updated' };
   }
   
-  const result = await db.collection('schedules').add({
-    ...scheduleData,
-    createdAt: new Date()
-  });
+  const result = await db.collection('schedules').add({ ...scheduleData, createdAt: new Date() });
   return { success: true, id: result.id };
-}
-
-async function updateSchedule(id, data) {
-  await db.collection('schedules').doc(id).update({ ...data, updatedAt: new Date() });
-  return { success: true };
-}
-
-async function deleteSchedule(id) {
-  await db.collection('schedules').doc(id).remove();
-  return { success: true };
 }
