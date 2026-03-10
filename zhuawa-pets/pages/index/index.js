@@ -1,4 +1,4 @@
-// 首页 - 正确版本
+// 首页 - 修复头像显示
 Page({
   data: {
     technicians: [],
@@ -16,6 +16,8 @@ Page({
         this.loadServices()
       ]);
       
+      console.log('技师数据:', techsRes);
+      
       const technicians = techsRes.length > 0 ? techsRes : this.getLocalTechnicians();
       
       this.setData({
@@ -23,6 +25,7 @@ Page({
         services: servicesRes
       });
     } catch (err) {
+      console.error('加载失败:', err);
       this.setData({
         technicians: this.getLocalTechnicians(),
         services: []
@@ -37,18 +40,27 @@ Page({
         data: { action: 'list' }
       });
       
+      console.log('API原始数据:', res.result.data);
+      
       if (res.result && res.result.success && res.result.data) {
-        return res.result.data.map(item => ({
-          name: item.name,
-          level: item.level || '中级',
-          position: item.position || '美容师',
-          rating: item.rating || 5,
-          orders: item.orders || 0,
-          avatar: item.avatarUrl || item.avatar || ''
-        }));
+        return res.result.data.map(item => {
+          // 检查头像字段
+          const avatarUrl = item.avatarUrl || item.avatar || '';
+          console.log('技师:', item.name, '头像:', avatarUrl ? '有' : '无', '长度:', avatarUrl.length);
+          
+          return {
+            name: item.name,
+            level: item.level || '中级',
+            position: item.position || '美容师',
+            rating: item.rating || 5,
+            orders: item.orders || 0,
+            avatar: avatarUrl
+          };
+        });
       }
       return [];
     } catch (err) {
+      console.error('加载技师失败:', err);
       return [];
     }
   },
@@ -73,11 +85,8 @@ Page({
     }
   },
 
-  // 快速预约 - 点击服务项目
   goToService(e) {
     const serviceName = e.currentTarget.dataset.service;
-    console.log('快速预约:', serviceName);
-    // 找到对应的服务ID
     const service = this.data.services.find(s => s.name.includes(serviceName));
     if (service) {
       wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${service.id}` });
@@ -86,7 +95,6 @@ Page({
     }
   },
 
-  // 热门服务 - 点击具体服务
   goToBooking(e) {
     const serviceId = e.currentTarget.dataset.id;
     wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}` });
