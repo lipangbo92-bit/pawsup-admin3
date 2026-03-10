@@ -35,7 +35,7 @@
             
             <main class="main-content">
                 <div class="page-header">
-                    <h2>服务管理 <span style="color:#F97316;font-size:14px;">(支持图片上传)</span></h2>
+                    <h2>服务管理</h2>
                     <button class="btn-primary" onclick="openServiceModal()">+ 添加服务</button>
                 </div>
                 
@@ -58,25 +58,14 @@
                     <!-- 服务图片上传 -->
                     <div class="form-group">
                         <label>服务图片</label>
-<<<<<<< HEAD
-                        <div class="service-image-upload" id="serviceImageUpload">
-                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)">
-                            <div class="service-image-preview" id="serviceImagePreview">
-                                <span>🖼️</span>
-                                <span class="upload-hint">点击上传服务图片</span>
-                            </div>
-                        </div>
-                        <p class="form-hint">建议尺寸：400x300px，支持 JPG、PNG 格式</p>
-=======
-                        <div class="service-image-upload" id="serviceImageUpload" style="position:relative;width:100%;height:200px;max-width:200px;margin:0 auto;border:2px dashed #ddd;border-radius:12px;overflow:hidden;cursor:pointer;background:#f9f9f9;">
+                        <div class="service-image-upload" id="serviceImageUpload" style="position:relative;width:200px;height:200px;border:2px dashed #ddd;border-radius:12px;overflow:hidden;cursor:pointer;background:#f9f9f9;margin:0 auto;">
                             <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;">
                             <div class="service-image-preview" id="serviceImagePreview" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;">
                                 <span style="font-size:48px;margin-bottom:8px;">🖼️</span>
                                 <span style="font-size:14px;">点击上传服务图片</span>
                             </div>
                         </div>
-                        <p style="font-size:12px;color:#999;margin-top:8px;">建议尺寸：200x200px（正方形），支持 JPG、PNG 格式</p>
->>>>>>> 8561e98 (design: 服务图片改为正方形 200x200)
+                        <p style="font-size:12px;color:#999;margin-top:8px;text-align:center;">建议尺寸：200x200px（正方形）</p>
                     </div>
                     
                     <div class="form-group">
