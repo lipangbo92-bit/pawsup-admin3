@@ -1,22 +1,68 @@
-<view style="padding:20rpx;">
-  <!-- 调试信息 -->
-  <view style="background:#ffeb3b;padding:20rpx;margin-bottom:20rpx;border-radius:12rpx;">
-    <text style="font-size:28rpx;color:#333;font-weight:bold;display:block;">状态: {{debugInfo}}</text>
-    <text wx:if="{{errorDetail}}" style="font-size:22rpx;color:#666;display:block;margin-top:10rpx;word-break:break-all;">{{errorDetail}}</text>
+<view class="container">
+  <view style="background:#ffeb3b;padding:10rpx 20rpx;margin:10rpx;border-radius:8rpx;">
+    <text style="font-size:22rpx;color:#333;">{{debugInfo}}</text>
   </view>
 
-  <!-- 服务列表 -->
-  <view wx:for="{{services}}" wx:key="_id" style="background:#fff;padding:20rpx;margin-bottom:20rpx;border-radius:12rpx;">
-    <text style="font-size:32rpx;font-weight:bold;">{{item.name}}</text>
-    <text style="font-size:24rpx;color:#666;display:block;margin-top:10rpx;">分类: {{item.category}}</text>
-    <text style="font-size:28rpx;color:#F97316;display:block;margin-top:10rpx;">¥{{item.price}}</text>
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <text class="nav-title">服务项目</text>
+    </view>
   </view>
 
-  <view wx:if="{{services.length===0}}" style="text-align:center;padding:60rpx;color:#999;">
-    <text style="font-size:60rpx;">🛁</text>
-    <text style="font-size:28rpx;display:block;margin-top:20rpx;">暂无服务数据</text>
-  </view>
+  <!-- 左右分栏布局 -->
+  <view class="main-content">
+    <!-- 左侧分类导航 -->
+    <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="index"
+        class="category-item {{currentCategory === index ? 'active' : ''}}"
+        bindtap="switchCategory"
+        data-index="{{index}}"
+      >
+        <text class="category-text">{{item}}</text>
+      </view>
+    </scroll-view>
 
-  <!-- 刷新按钮 -->
-  <button bindtap="loadServices" style="margin-top:40rpx;background:#F97316;color:#fff;">重新加载</button>
+    <!-- 右侧服务列表 -->
+    <scroll-view class="service-list" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="service-content">
+        <view 
+          wx:for="{{services}}" 
+          wx:key="id"
+          class="service-card"
+        >
+          <view class="service-image-wrapper">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
+            <view wx:else class="service-icon {{item.iconClass}}">
+              <text>{{item.iconText}}</text>
+            </view>
+          </view>
+          
+          <view class="service-info">
+            <view>
+              <text class="service-name">{{item.name}}</text>
+              <text class="service-desc">{{item.desc}}</text>
+            </view>
+            <view class="service-bottom">
+              <view class="price-wrapper">
+                <text class="price-symbol">¥</text>
+                <text class="price-value">{{item.price}}</text>
+                <text class="price-unit">{{item.unit}}</text>
+              </view>
+              <view class="book-btn" bindtap="bookService" data-service="{{item.id}}">
+                <text class="book-icon">+</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
+          暂无该分类服务
+        </view>
+      </view>
+    </scroll-view>
+  </view>
 </view>
