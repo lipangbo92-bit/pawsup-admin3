@@ -95,6 +95,8 @@ page {
 
 .service-content {
   padding: 20rpx;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ========== 服务卡片 - 强制统一尺寸 ========== */
@@ -106,10 +108,11 @@ page {
   padding: 20rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  /* 强制固定高度 */
+  /* 强制固定高度和宽度 */
   height: 160rpx !important;
   min-height: 160rpx !important;
   max-height: 160rpx !important;
+  width: 100% !important;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -156,6 +159,7 @@ page {
   justify-content: space-between;
   height: 120rpx;
   min-width: 0;
+  width: calc(100% - 140rpx);
 }
 
 /* 服务名称 - 固定两行 */
