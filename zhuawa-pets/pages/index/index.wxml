@@ -1,4 +1,4 @@
-<!--首页 - 修复版-->
+<!--首页-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -45,43 +45,39 @@
     </view>
   </view>
 
-  <!-- 金牌技师推荐 -->
+  <!-- 金牌美容师推荐 -->
   <view class="technician-section">
     <view class="section-header">
-      <text class="section-title">金牌技师推荐 ({{technicians.length}}人)</text>
+      <text class="section-title">金牌美容师推荐</text>
       <text class="section-more">更多 ›</text>
     </view>
     
-    <!-- 技师列表 -->
-    <block wx:if="{{technicians.length > 0}}">
-      <view class="technician-list">
-        <view wx:for="{{technicians}}" wx:key="id" class="technician-card">
-          <view class="technician-avatar">
-            <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
-            <text wx:else style="font-size:48rpx;">👤</text>
-          </view>
-          <view class="technician-info">
-            <view class="technician-name-row">
-              <text class="technician-name">{{item.name}}</text>
-              <text class="technician-badge">{{item.level}}</text>
-            </view>
-            <text class="technician-skill">{{item.position}}</text>
-            <view class="technician-stats">
-              <text class="technician-rating">⭐ {{item.rating}}分</text>
-              <text class="technician-orders">{{item.orders}}单</text>
-            </view>
-          </view>
-          <view class="technician-book-btn">预约</view>
+    <!-- 美容师列表 -->
+    <view class="technician-list" wx:if="{{technicians && technicians.length > 0}}">
+      <view wx:for="{{technicians}}" wx:key="index" class="technician-card">
+        <view class="technician-avatar">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+          <text wx:else style="font-size:48rpx;">👤</text>
         </view>
+        <view class="technician-info">
+          <view class="technician-name-row">
+            <text class="technician-name">{{item.name}}</text>
+            <text class="technician-badge">{{item.level}}</text>
+          </view>
+          <text class="technician-skill">{{item.position}}</text>
+          <view class="technician-stats">
+            <text class="technician-rating">⭐ {{item.rating}}分</text>
+            <text class="technician-orders">{{item.orders}}单</text>
+          </view>
+        </view>
+        <view class="technician-book-btn">预约</view>
       </view>
-    </block>
+    </view>
     
     <!-- 无数据提示 -->
-    <block wx:else>
-      <view style="text-align:center;padding:40rpx;color:#999;">
-        暂无技师数据
-      </view>
-    </block>
+    <view wx:else style="text-align:center;padding:40rpx;color:#999;">
+      暂无美容师数据
+    </view>
   </view>
 
   <!-- 热门服务 -->
@@ -91,7 +87,7 @@
       <text class="section-more" bindtap="goToServices">更多 ›</text>
     </view>
     <view class="service-grid">
-      <view wx:for="{{services}}" wx:key="id" class="service-card" bindtap="goToBooking" data-id="{{item.id}}">
+      <view wx:for="{{services}}" wx:key="index" class="service-card" bindtap="goToBooking" data-id="{{item.id}}">
         <view class="service-icon-wrapper">
           <text class="service-icon">🐾</text>
         </view>
