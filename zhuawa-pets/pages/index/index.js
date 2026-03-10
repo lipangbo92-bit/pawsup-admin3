@@ -1,4 +1,4 @@
-// 首页 - 详细调试
+// 首页 - 强制处理
 Page({
   data: {
     technicians: [],
@@ -10,7 +10,7 @@ Page({
   },
 
   async loadData() {
-    this.setData({ debugMsg: '调用中...' });
+    this.setData({ debugMsg: '加载中...' });
     
     try {
       const res = await wx.cloud.callFunction({
@@ -18,44 +18,37 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('=== 完整返回 ===');
-      console.log('res:', res);
-      console.log('res.result:', res.result);
-      console.log('typeof res.result:', typeof res.result);
-      console.log('Array.isArray:', Array.isArray(res.result));
+      console.log('返回:', res);
       
-      if (res.result) {
-        console.log('res.result keys:', Object.keys(res.result));
-        console.log('res.result.success:', res.result.success);
-        console.log('res.result.data:', res.result.data);
+      let data = [];
+      
+      // 无论如何，尝试从 res.result 提取数据
+      if (res && res.result) {
+        const result = res.result;
+        
+        // 如果 result 是数组
+        if (Array.isArray(result)) {
+          data = result;
+        }
+        // 如果 result 包含 data 数组
+        else if (result.data && Array.isArray(result.data)) {
+          data = result.data;
+        }
+        // 如果 result 是单条记录（有 _id）
+        else if (result._id) {
+          data = [result];
+        }
       }
       
-      let data = null;
+      console.log('提取的数据:', data);
+      console.log('数据条数:', data.length);
       
-      // 情况1: {success: true, data: [...]}
-      if (res.result && res.result.data && Array.isArray(res.result.data)) {
-        data = res.result.data;
-        console.log('命中: 标准格式');
-      }
-      // 情况2: 直接是数组
-      else if (Array.isArray(res.result)) {
-        data = res.result;
-        console.log('命中: 直接数组');
-      }
-      // 情况3: 直接是对象（单条记录）
-      else if (res.result && typeof res.result === 'object' && res.result._id) {
-        data = [res.result];
-        console.log('命中: 单条记录');
-      }
-      
-      if (!data) {
-        console.error('无法识别格式');
-        this.setData({ debugMsg: '格式错误' });
+      if (data.length === 0) {
+        this.setData({ debugMsg: '无数据' });
         return;
       }
       
-      console.log('数据条数:', data.length);
-      
+      // 转换
       const techs = data.map(item => ({
         name: item.name || '未命名',
         level: item.level || '中级',
@@ -64,6 +57,8 @@ Page({
         orders: item.orders || 0,
         avatar: item.avatarUrl || item.avatar || ''
       }));
+      
+      console.log('转换后:', techs);
       
       this.setData({
         technicians: techs,
