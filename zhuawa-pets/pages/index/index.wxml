@@ -1,4 +1,4 @@
-<!--首页 - 修复头像渲染-->
+<!--首页 - 添加美容师详情弹窗-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -45,9 +45,9 @@
     </view>
     
     <view class="technician-list">
-      <view wx:for="{{technicians}}" wx:key="index" class="technician-card">
-        <!-- 头像 - 修复渲染 -->
-        <view class="technician-avatar">
+      <view wx:for="{{technicians}}" wx:key="index" class="technician-card" bindtap="showTechnicianDetail" data-index="{{index}}">
+        <!-- 头像 -->
+        <view class="technician-avatar" catchtap="preventBubble">
           <block wx:if="{{item.avatar && item.avatar.length > 10}}">
             <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
           </block>
@@ -56,7 +56,7 @@
           </block>
         </view>
         
-        <view class="technician-info">
+        <view class="technician-info" catchtap="preventBubble">
           <!-- 第一排：名字 + 岗位 + 等级 -->
           <view class="technician-name-row">
             <text class="technician-name">{{item.name}}</text>
@@ -69,7 +69,8 @@
             <text class="technician-orders">{{item.orders}}单</text>
           </view>
         </view>
-        <view class="technician-book-btn">预约</view>
+        <!-- 预约按钮 - 阻止冒泡 -->
+        <view class="technician-book-btn" catchtap="bookTechnician" data-index="{{index}}">预约</view>
       </view>
     </view>
   </view>
@@ -86,6 +87,45 @@
         <text class="hot-service-name">{{item.name}}</text>
         <text class="hot-service-price">¥{{item.price}}起</text>
       </view>
+    </view>
+  </view>
+
+  <!-- 美容师详情弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="modal-content" wx:if="{{showModal}}">
+    <view class="modal-header">
+      <text class="modal-title">美容师介绍</text>
+      <text class="modal-close" bindtap="closeModal">×</text>
+    </view>
+    <view class="modal-body" wx:if="{{selectedTechnician}}">
+      <!-- 头像 -->
+      <view class="modal-avatar">
+        <block wx:if="{{selectedTechnician.avatar && selectedTechnician.avatar.length > 10}}">
+          <image src="{{selectedTechnician.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+        </block>
+        <block wx:else>
+          <text style="font-size:80rpx;">👤</text>
+        </block>
+      </view>
+      <!-- 基本信息 -->
+      <view class="modal-info">
+        <text class="modal-name">{{selectedTechnician.name}}</text>
+        <view class="modal-tags">
+          <text class="modal-tag">{{selectedTechnician.position}}</text>
+          <text class="modal-tag tag-level">{{selectedTechnician.level}}</text>
+        </view>
+        <view class="modal-stats">
+          <text class="modal-stat">⭐ {{selectedTechnician.rating}}分</text>
+          <text class="modal-stat">📋 {{selectedTechnician.orders}}单</text>
+        </view>
+      </view>
+      <!-- 详细介绍 -->
+      <view class="modal-desc">
+        <text class="desc-title">个人简介</text>
+        <text class="desc-content">{{selectedTechnician.intro || '专业宠物美容师，拥有多年美容经验，擅长各类犬猫造型修剪，服务细致周到，深受客户好评。'}}</text>
+      </view>
+      <!-- 预约按钮 -->
+      <view class="modal-book-btn" bindtap="bookFromModal">立即预约</view>
     </view>
   </view>
 </view>

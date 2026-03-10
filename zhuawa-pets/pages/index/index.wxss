@@ -292,3 +292,146 @@
   color: #F97316;
   font-weight: 600;
 }
+/* pages/index/index.wxss - 添加弹窗样式 */
+
+/* ========== 弹窗遮罩 ========== */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+/* ========== 弹窗内容 ========== */
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  z-index: 101;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+  padding: 0 10rpx;
+}
+
+.modal-body {
+  padding: 40rpx 30rpx;
+}
+
+/* 弹窗头像 */
+.modal-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  margin: 0 auto 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 弹窗基本信息 */
+.modal-info {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.modal-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.modal-tags {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.modal-tag {
+  font-size: 24rpx;
+  color: #6B7280;
+  background: #F3F4F6;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+.modal-tag.tag-level {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
+.modal-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40rpx;
+}
+
+.modal-stat {
+  font-size: 26rpx;
+  color: #4B5563;
+}
+
+/* 弹窗简介 */
+.modal-desc {
+  background: #F9FAFB;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 30rpx;
+}
+
+.desc-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.desc-content {
+  font-size: 26rpx;
+  color: #6B7280;
+  line-height: 1.6;
+  display: block;
+}
+
+/* 弹窗预约按钮 */
+.modal-book-btn {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  padding: 28rpx 0;
+  border-radius: 16rpx;
+}
