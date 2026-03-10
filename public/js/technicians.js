@@ -1,24 +1,34 @@
-// Technicians Management Module
-// 使用 API 连接云开发数据库
-
+// Technicians Management Module - 修复头像上传到云存储
 const API_BASE = '/api';
 
 let currentTechnician = null;
 let techniciansList = [];
-let worksImages = []; // 当前编辑的作品图片列表
+let worksImages = [];
+
+// 云存储配置
+const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     loadTechnicians();
+    initCloudStorage();
 });
+
+// 初始化云存储
+function initCloudStorage() {
+    // 使用云开发 Web SDK
+    if (typeof cloudbase !== 'undefined') {
+        cloudbase.init({
+            env: CLOUD_ENV
+        });
+    }
+}
 
 // API 调用封装
 async function apiCall(endpoint, data) {
     const response = await fetch(`${API_BASE}/${endpoint}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
 
@@ -26,125 +36,150 @@ async function apiCall(endpoint, data) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP ${response.status}`);
     }
-
     return await response.json();
 }
 
-// Load technicians from API
+// 压缩图片
+function compressImage(base64, maxWidth = 400, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // 按比例缩放
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 转为 base64，压缩质量
+            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedBase64);
+        };
+        img.onerror = reject;
+        img.src = base64;
+    });
+}
+
+// 上传图片到云存储
+async function uploadToCloudStorage(base64Data, fileName) {
+    try {
+        // 方法1: 尝试使用云开发 Web SDK
+        if (typeof cloudbase !== 'undefined' && cloudbase.uploadFile) {
+            // 将 base64 转为 Blob
+            const response = await fetch(base64Data);
+            const blob = await response.blob();
+            
+            const result = await cloudbase.uploadFile({
+                cloudPath: `avatars/${Date.now()}_${fileName}`,
+                filePath: blob
+            });
+            
+            return result.fileID;
+        }
+        
+        // 方法2: 使用 API 上传到云存储
+        const res = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'uploadImage',
+                data: base64Data,
+                path: `avatars/${Date.now()}_${fileName}`
+            })
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+            return result.fileID;
+        }
+        throw new Error(result.error || '上传失败');
+    } catch (err) {
+        console.error('上传失败:', err);
+        // 如果上传失败，返回压缩后的 base64（降级方案）
+        return base64Data;
+    }
+}
+
+// Load technicians
 async function loadTechnicians() {
     try {
         const result = await apiCall('technicians', { action: 'list' });
-        
-        console.log('API Response:', result);
-        
-        if (!result.success) {
-            throw new Error(result.error || '加载失败');
-        }
+        if (!result.success) throw new Error(result.error || '加载失败');
 
         techniciansList = (result.data || []).map(t => ({
             ...t,
             _id: t._id || t.id,
-            // 字段兼容处理
             name: t.name || '未命名',
             specialty: t.specialty || t.skills || t.tags?.join(', ') || '暂无',
             position: t.position || '美容师',
             level: t.level || '中级',
             rating: t.rating || 5,
             orderCount: t.orderCount || t.orders || 0,
-            works: t.works || [], // 作品图片数组
+            works: t.works || [],
             avatarUrl: t.avatarUrl || t.avatar || ''
         }));
         
-        console.log('Parsed technicians:', techniciansList);
-
         renderTechniciansGrid(techniciansList);
     } catch (error) {
-        console.error('Load technicians error:', error);
+        console.error('Load error:', error);
         document.getElementById('techniciansGrid').innerHTML = `
-            <div class="empty-state" style="grid-column:1/-1; text-align:center; padding:40px;">
-                <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+            <div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;">
+                <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
                 <div>加载失败: ${error.message}</div>
-                <button onclick="location.reload()" style="margin-top:16px; padding:8px 16px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">刷新重试</button>
-            </div>
-        `;
+            </div>`;
     }
 }
 
-// 获取等级徽章HTML
-function getLevelBadge(level) {
-    const levelMap = {
-        '初级': { text: '初级', class: 'badge-junior' },
-        '中级': { text: '中级', class: 'badge-intermediate' },
-        '高级': { text: '高级', class: 'badge-senior' },
-        '资深': { text: '资深', class: 'badge-expert' },
-        '首席': { text: '首席', class: 'badge-master' }
-    };
-    const config = levelMap[level] || levelMap['中级'];
-    return `<span class="level-badge ${config.class}">${config.text}</span>`;
-}
-
-// 渲染作品图片预览
-function renderWorksPreview(works) {
-    if (!works || works.length === 0) return '';
-    return `
-        <div class="works-preview">
-            ${works.slice(0, 3).map((img, idx) => `
-                <div class="work-thumb">
-                    <img src="${img}" alt="作品${idx + 1}">
-                </div>
-            `).join('')}
-            ${works.length > 3 ? `<div class="work-more">+${works.length - 3}</div>` : ''}
-        </div>
-    `;
-}
-
-// Render technicians grid
+// Render grid
 function renderTechniciansGrid(technicians) {
     const container = document.getElementById('techniciansGrid');
-    
-    if (!container) {
-        console.error('techniciansGrid not found');
-        return;
-    }
+    if (!container) return;
     
     if (technicians.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无美容师，请添加</div>';
+        container.innerHTML = '<div class="empty-state">暂无美容师，请添加</div>';
         return;
-    }
-    
-    // Generate star rating HTML
-    function getStarsHtml(rating) {
-        const stars = '⭐'.repeat(rating || 0);
-        return `<span class="star-rating">${stars}</span>`;
     }
     
     container.innerHTML = technicians.map(tech => `
         <div class="technician-card">
             <div class="tech-avatar">
-                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
+                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span>👤</span>'}
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
                 <div class="tech-meta-row">
-                    <span class="tech-position">${tech.position || '美容师'}</span>
-                    ${getLevelBadge(tech.level)}
+                    <span class="tech-position">${tech.position}</span>
+                    <span class="level-badge badge-${getLevelClass(tech.level)}">${tech.level}</span>
                 </div>
-                <div class="tech-rating">${getStarsHtml(tech.rating)}</div>
-                <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
-                ${renderWorksPreview(tech.works)}
+                <div class="tech-rating">${'⭐'.repeat(tech.rating || 0)}</div>
+                <p class="tech-specialty">专业：${tech.specialty}</p>
                 <div class="tech-meta">
                     <span class="tech-orders">订单数：${tech.orderCount || 0}</span>
                 </div>
             </div>
             <div class="tech-actions">
-                <button class="btn-icon" onclick="editTechnician('${tech._id}')" title="编辑">✏️</button>
-                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)" title="删除">🗑️</button>
+                <button class="btn-icon" onclick="editTechnician('${tech._id}')">✏️</button>
+                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)">🗑️</button>
             </div>
         </div>
     `).join('');
 }
 
-// Open technician modal for add
+function getLevelClass(level) {
+    const map = { '初级': 'junior', '中级': 'intermediate', '高级': 'senior', '资深': 'expert', '首席': 'master' };
+    return map[level] || 'intermediate';
+}
+
+// Open modal
 function openTechnicianModal() {
     currentTechnician = null;
     worksImages = [];
@@ -154,23 +189,18 @@ function openTechnicianModal() {
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     document.getElementById('techPosition').value = '美容师';
     document.getElementById('techLevel').value = '中级';
-    
-    // 关键修复：清空头像input的value，确保可以重复选择
-    const avatarInput = document.getElementById('avatarInput');
-    if (avatarInput) avatarInput.value = '';
-    
+    document.getElementById('avatarInput').value = '';
     renderWorksGrid();
     document.getElementById('technicianModal').style.display = 'flex';
 }
 
-// Close technician modal
 function closeTechnicianModal() {
     document.getElementById('technicianModal').style.display = 'none';
     currentTechnician = null;
     worksImages = [];
 }
 
-// Edit technician
+// Edit
 function editTechnician(techId) {
     currentTechnician = techniciansList.find(t => t._id === techId);
     if (!currentTechnician) return;
@@ -184,15 +214,11 @@ function editTechnician(techId) {
     document.getElementById('techRating').value = currentTechnician.rating || '';
     document.getElementById('techOrderCount').value = currentTechnician.orderCount || '';
     
-    // 加载作品图片
     worksImages = currentTechnician.works || [];
     renderWorksGrid();
     
-    // 关键修复：清空头像input的value
-    const avatarInput = document.getElementById('avatarInput');
-    if (avatarInput) avatarInput.value = '';
+    document.getElementById('avatarInput').value = '';
     
-    // Set avatar preview
     if (currentTechnician.avatarUrl) {
         document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatarUrl}" alt="头像">`;
     } else {
@@ -202,34 +228,26 @@ function editTechnician(techId) {
     document.getElementById('technicianModal').style.display = 'flex';
 }
 
-// 渲染作品图片网格
 function renderWorksGrid() {
     const grid = document.getElementById('worksGrid');
     const addBtn = document.getElementById('worksAddBtn');
-    
     if (!grid) return;
     
-    // 清空现有内容
     grid.innerHTML = '';
-    
-    // 渲染已上传的图片
     worksImages.forEach((img, index) => {
         const imgDiv = document.createElement('div');
         imgDiv.className = 'work-item';
         imgDiv.innerHTML = `
             <img src="${img}" alt="作品${index + 1}">
-            <button type="button" class="work-delete" onclick="deleteWork(${index})" title="删除">×</button>
+            <button type="button" class="work-delete" onclick="deleteWork(${index})">×</button>
         `;
         grid.appendChild(imgDiv);
     });
     
-    // 控制添加按钮显示（最多6张）
-    if (addBtn) {
-        addBtn.style.display = worksImages.length >= 6 ? 'none' : 'flex';
-    }
+    if (addBtn) addBtn.style.display = worksImages.length >= 6 ? 'none' : 'flex';
 }
 
-// 处理作品图片上传
+// Handle works upload
 function handleWorksUpload(input) {
     if (!input.files || input.files.length === 0) return;
     
@@ -241,39 +259,24 @@ function handleWorksUpload(input) {
     }
     
     const files = Array.from(input.files).slice(0, remainingSlots);
-    let loadedCount = 0;
     
     files.forEach(file => {
-        // 检查文件大小（5MB限制）
         if (file.size > 5 * 1024 * 1024) {
             alert(`图片 ${file.name} 超过5MB限制，已跳过`);
-            loadedCount++;
             return;
         }
         
         const reader = new FileReader();
         reader.onload = function(e) {
             worksImages.push(e.target.result);
-            loadedCount++;
-            if (loadedCount >= files.length) {
-                renderWorksGrid();
-            }
-        };
-        reader.onerror = function() {
-            console.error('读取图片失败:', file.name);
-            loadedCount++;
-            if (loadedCount >= files.length) {
-                renderWorksGrid();
-            }
+            renderWorksGrid();
         };
         reader.readAsDataURL(file);
     });
     
-    // 关键修复：清空input以便重复选择相同文件
     input.value = '';
 }
 
-// 删除作品图片
 function deleteWork(index) {
     if (confirm('确定删除这张作品图片吗？')) {
         worksImages.splice(index, 1);
@@ -281,7 +284,7 @@ function deleteWork(index) {
     }
 }
 
-// 预览头像 - 增强版，带错误处理
+// Preview avatar - 关键修改：先压缩再保存
 function previewAvatar(input) {
     console.log('previewAvatar called, files:', input.files);
     
@@ -293,14 +296,12 @@ function previewAvatar(input) {
     const file = input.files[0];
     console.log('Selected file:', file.name, file.size, file.type);
     
-    // 检查文件大小（5MB限制）
     if (file.size > 5 * 1024 * 1024) {
-        alert('图片大小超过5MB限制，请选择较小的图片');
+        alert('图片大小超过5MB限制');
         input.value = '';
         return;
     }
     
-    // 检查文件类型
     if (!file.type.startsWith('image/')) {
         alert('请选择图片文件（JPG/PNG）');
         input.value = '';
@@ -309,40 +310,41 @@ function previewAvatar(input) {
     
     const reader = new FileReader();
     
-    reader.onload = function(e) {
-        console.log('FileReader onload success');
+    reader.onload = async function(e) {
+        console.log('File loaded, compressing...');
         const preview = document.getElementById('avatarPreview');
-        if (preview) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="头像预览">`;
-            // 保存到currentTechnician用于提交
+        
+        try {
+            // 压缩图片
+            const compressedBase64 = await compressImage(e.target.result, 400, 0.8);
+            console.log('Compressed size:', compressedBase64.length);
+            
+            if (preview) {
+                preview.innerHTML = `<img src="${compressedBase64}" alt="头像预览">`;
+            }
+            
             if (!currentTechnician) {
                 currentTechnician = {};
             }
-            currentTechnician._tempAvatar = e.target.result;
+            currentTechnician._tempAvatar = compressedBase64;
+            
+            alert('头像已选择，点击保存后上传');
+        } catch (err) {
+            console.error('压缩失败:', err);
+            alert('图片处理失败，请重试');
         }
     };
     
     reader.onerror = function(e) {
         console.error('FileReader error:', e);
-        alert('读取图片失败，请重试');
+        alert('读取图片失败');
     };
     
-    reader.onabort = function() {
-        console.log('FileReader aborted');
-    };
-    
-    try {
-        reader.readAsDataURL(file);
-    } catch (err) {
-        console.error('readAsDataURL error:', err);
-        alert('读取图片出错：' + err.message);
-    }
-    
-    // 关键修复：清空input以便可以再次选择相同或不同的文件
+    reader.readAsDataURL(file);
     input.value = '';
 }
 
-// Save technician
+// Save technician - 关键修改：上传头像到云存储
 async function saveTechnician() {
     const name = document.getElementById('techName').value.trim();
     const specialty = document.getElementById('techSpecialty').value.trim();
@@ -351,21 +353,24 @@ async function saveTechnician() {
     const rating = parseInt(document.getElementById('techRating').value);
     const orderCount = parseInt(document.getElementById('techOrderCount').value) || 0;
     
-    // Validation
-    if (!name) {
-        alert('请输入姓名');
-        return;
-    }
-    if (!specialty) {
-        alert('请输入专业');
-        return;
-    }
-    if (!rating || rating < 1 || rating > 5) {
-        alert('请选择评分');
-        return;
-    }
+    if (!name) { alert('请输入姓名'); return; }
+    if (!specialty) { alert('请输入专业'); return; }
+    if (!rating || rating < 1 || rating > 5) { alert('请选择评分'); return; }
     
     try {
+        // 显示上传中
+        const saveBtn = document.querySelector('.btn-primary[onclick="saveTechnician()"]');
+        if (saveBtn) saveBtn.textContent = '上传中...';
+        
+        let avatarUrl = currentTechnician && currentTechnician.avatarUrl ? currentTechnician.avatarUrl : '';
+        
+        // 如果有新头像，上传到云存储
+        if (currentTechnician && currentTechnician._tempAvatar) {
+            console.log('Uploading avatar to cloud storage...');
+            avatarUrl = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
+            console.log('Avatar uploaded:', avatarUrl);
+        }
+        
         const techData = {
             name,
             specialty,
@@ -373,16 +378,11 @@ async function saveTechnician() {
             level,
             rating,
             orders: orderCount,
-            works: worksImages
+            works: worksImages,
+            avatarUrl: avatarUrl
         };
         
-        // 如果有新上传的头像，添加到数据中
-        if (currentTechnician && currentTechnician._tempAvatar) {
-            techData.avatarUrl = currentTechnician._tempAvatar;
-        }
-        
         if (currentTechnician && currentTechnician._id) {
-            // Update existing
             await apiCall('technicians', { 
                 action: 'update', 
                 id: currentTechnician._id, 
@@ -390,7 +390,6 @@ async function saveTechnician() {
             });
             alert('信息更新成功');
         } else {
-            // Add new
             await apiCall('technicians', { action: 'add', data: techData });
             alert('添加成功');
         }
@@ -398,44 +397,42 @@ async function saveTechnician() {
         closeTechnicianModal();
         loadTechnicians();
     } catch (err) {
-        console.error('Save technician error:', err);
+        console.error('Save error:', err);
         alert('保存失败：' + (err.message || '请重试'));
+    } finally {
+        const saveBtn = document.querySelector('.btn-primary[onclick="saveTechnician()"]');
+        if (saveBtn) saveBtn.textContent = '保存';
     }
 }
 
-// 全局变量存储待删除的ID
+// Delete
 let pendingDeleteTechId = null;
 
-// 显示自定义确认对话框
 function showDeleteTechConfirm(techId) {
     pendingDeleteTechId = techId;
     const confirmHtml = `
-        <div id="deleteConfirmModal" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:center; justify-content:center;">
-            <div style="background:white; padding:24px; border-radius:8px; max-width:360px; width:90%; text-align:center;">
-                <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
-                <h3 style="margin:0 0 12px 0; font-size:18px;">确认删除</h3>
-                <p style="margin:0 0 24px 0; color:#666;">确定要删除该美容师吗？此操作不可恢复。</p>
-                <div style="display:flex; gap:12px; justify-content:center;">
-                    <button onclick="closeDeleteTechConfirm()" style="padding:10px 24px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">取消</button>
-                    <button onclick="confirmTechDelete()" style="padding:10px 24px; border:none; background:#f44336; color:white; border-radius:4px; cursor:pointer;">删除</button>
+        <div id="deleteConfirmModal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+            <div style="background:white;padding:24px;border-radius:8px;max-width:360px;width:90%;text-align:center;">
+                <div style="font-size:48px;margin-bottom:16px;">🗑️</div>
+                <h3 style="margin:0 0 12px 0;font-size:18px;">确认删除</h3>
+                <p style="margin:0 0 24px 0;color:#666;">确定要删除该美容师吗？此操作不可恢复。</p>
+                <div style="display:flex;gap:12px;justify-content:center;">
+                    <button onclick="closeDeleteTechConfirm()" style="padding:10px 24px;border:1px solid #ddd;background:white;border-radius:4px;cursor:pointer;">取消</button>
+                    <button onclick="confirmTechDelete()" style="padding:10px 24px;border:none;background:#f44336;color:white;border-radius:4px;cursor:pointer;">删除</button>
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
     document.body.insertAdjacentHTML('beforeend', confirmHtml);
 }
 
-// 关闭确认对话框
 function closeDeleteTechConfirm() {
     pendingDeleteTechId = null;
     const modal = document.getElementById('deleteConfirmModal');
     if (modal) modal.remove();
 }
 
-// 确认删除
 async function confirmTechDelete() {
     if (!pendingDeleteTechId) return;
-    
     const techId = pendingDeleteTechId;
     closeDeleteTechConfirm();
     
@@ -444,12 +441,10 @@ async function confirmTechDelete() {
         alert('已删除');
         loadTechnicians();
     } catch (err) {
-        console.error('Delete technician error:', err);
         alert('删除失败：' + (err.message || '请重试'));
     }
 }
 
-// Delete technician
 function deleteTechnician(techId, event) {
     if (event) {
         event.preventDefault();
@@ -458,10 +453,7 @@ function deleteTechnician(techId, event) {
     showDeleteTechConfirm(techId);
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('technicianModal');
-    if (event.target === modal) {
-        closeTechnicianModal();
-    }
+    if (event.target === modal) closeTechnicianModal();
 };
