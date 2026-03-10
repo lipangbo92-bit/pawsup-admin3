@@ -44,7 +44,7 @@
           <view class="service-info">
             <view>
               <text class="service-name">{{item.name}}</text>
-              <text class="service-desc">{{item.desc}}</text>
+              <text class="service-desc">{{item.desc || " "}}</text>
             </view>
             <view class="service-bottom">
               <view class="price-wrapper">
