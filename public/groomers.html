@@ -49,7 +49,7 @@
     
     <!-- 添加/编辑美容师模态框 -->
     <div class="modal" id="technicianModal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
                 <h3 id="technicianModalTitle">添加美容师</h3>
                 <button class="close-btn" onclick="closeTechnicianModal()">&times;</button>
@@ -57,8 +57,10 @@
             <div class="modal-body">
                 <form id="technicianForm">
                     <input type="hidden" id="technicianId">
+                    
+                    <!-- 头像上传 -->
                     <div class="form-group avatar-group">
-                        <label>头像 (可选)</label>
+                        <label>头像</label>
                         <div class="avatar-upload" id="avatarUpload">
                             <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)">
                             <div class="avatar-preview" id="avatarPreview">
@@ -67,6 +69,8 @@
                             <span class="upload-hint">点击上传头像</span>
                         </div>
                     </div>
+                    
+                    <!-- 基本信息 -->
                     <div class="form-group">
                         <label>姓名 *</label>
                         <input type="text" id="techName" required placeholder="美容师姓名">
@@ -75,6 +79,8 @@
                         <label>专业 *</label>
                         <input type="text" id="techSpecialty" required placeholder="如：洗护美容、SPA护理">
                     </div>
+                    
+                    <!-- 岗位和等级 -->
                     <div class="form-row">
                         <div class="form-group">
                             <label>岗位 *</label>
@@ -95,11 +101,13 @@
                             </select>
                         </div>
                     </div>
+                    
+                    <!-- 评分和订单数 -->
                     <div class="form-row">
                         <div class="form-group">
                             <label>评分 (1-5星) *</label>
                             <select id="techRating" required>
-                                <option value="">请选择评级</option>
+                                <option value="">请选择</option>
                                 <option value="5">⭐⭐⭐⭐⭐ (5星)</option>
                                 <option value="4">⭐⭐⭐⭐ (4星)</option>
                                 <option value="3">⭐⭐⭐ (3星)</option>
@@ -111,6 +119,22 @@
                             <label>订单数 *</label>
                             <input type="number" id="techOrderCount" required min="0" placeholder="0">
                         </div>
+                    </div>
+                    
+                    <!-- 作品图片上传 -->
+                    <div class="form-group">
+                        <label>作品图片（最多6张）</label>
+                        <div class="works-upload-container">
+                            <div class="works-grid" id="worksGrid">
+                                <!-- 已上传图片显示在这里 -->
+                            </div>
+                            <div class="works-add-btn" id="worksAddBtn" onclick="document.getElementById('worksInput').click()">
+                                <span>+</span>
+                                <span>添加图片</span>
+                            </div>
+                            <input type="file" id="worksInput" accept="image/*" multiple style="display:none" onchange="handleWorksUpload(this)">
+                        </div>
+                        <p class="form-hint">支持 JPG、PNG 格式，单张不超过 5MB</p>
                     </div>
                 </form>
             </div>

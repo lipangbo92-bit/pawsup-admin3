@@ -5,6 +5,7 @@ const API_BASE = '/api';
 
 let currentTechnician = null;
 let techniciansList = [];
+let worksImages = []; // 当前编辑的作品图片列表
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -46,10 +47,11 @@ async function loadTechnicians() {
             // 字段兼容处理
             name: t.name || '未命名',
             specialty: t.specialty || t.skills || t.tags?.join(', ') || '暂无',
-            position: t.position || '美容师',  // 岗位（美容师/洗护师/助理）
-            level: t.level || '中级',          // 等级（初级/中级/高级/资深/首席）
+            position: t.position || '美容师',
+            level: t.level || '中级',
             rating: t.rating || 5,
-            orderCount: t.orderCount || t.orders || 0
+            orderCount: t.orderCount || t.orders || 0,
+            works: t.works || [] // 作品图片数组
         }));
         
         console.log('Parsed technicians:', techniciansList);
@@ -57,9 +59,9 @@ async function loadTechnicians() {
         // 如果没有数据，初始化默认数据
         if (techniciansList.length === 0) {
             const defaultTechnicians = [
-                { name: '张美容', specialty: '洗护美容、美容造型', position: '美容师', level: '高级', rating: 5, orders: 128 },
-                { name: '李洗护', specialty: 'SPA护理、染毛', position: '洗护师', level: '中级', rating: 4, orders: 86 },
-                { name: '王助理', specialty: '洗护美容', position: '助理', level: '初级', rating: 3, orders: 45 }
+                { name: '张美容', specialty: '洗护美容、美容造型', position: '美容师', level: '高级', rating: 5, orders: 128, works: [] },
+                { name: '李洗护', specialty: 'SPA护理、染毛', position: '洗护师', level: '中级', rating: 4, orders: 86, works: [] },
+                { name: '王助理', specialty: '洗护美容', position: '助理', level: '初级', rating: 3, orders: 45, works: [] }
             ];
             
             for (const tech of defaultTechnicians) {
@@ -76,7 +78,8 @@ async function loadTechnicians() {
                 position: t.position || '美容师',
                 level: t.level || '中级',
                 rating: t.rating || 5,
-                orderCount: t.orderCount || t.orders || 0
+                orderCount: t.orderCount || t.orders || 0,
+                works: t.works || []
             }));
         }
 
@@ -104,6 +107,21 @@ function getLevelBadge(level) {
     };
     const config = levelMap[level] || levelMap['中级'];
     return `<span class="level-badge ${config.class}">${config.text}</span>`;
+}
+
+// 渲染作品图片预览
+function renderWorksPreview(works) {
+    if (!works || works.length === 0) return '';
+    return `
+        <div class="works-preview">
+            ${works.slice(0, 3).map((img, idx) => `
+                <div class="work-thumb">
+                    <img src="${img}" alt="作品${idx + 1}">
+                </div>
+            `).join('')}
+            ${works.length > 3 ? `<div class="work-more">+${works.length - 3}</div>` : ''}
+        </div>
+    `;
 }
 
 // Render technicians grid
@@ -139,6 +157,7 @@ function renderTechniciansGrid(technicians) {
                 </div>
                 <div class="tech-rating">${getStarsHtml(tech.rating)}</div>
                 <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
+                ${renderWorksPreview(tech.works)}
                 <div class="tech-meta">
                     <span class="tech-orders">订单数：${tech.orderCount || 0}</span>
                 </div>
@@ -154,13 +173,14 @@ function renderTechniciansGrid(technicians) {
 // Open technician modal for add
 function openTechnicianModal() {
     currentTechnician = null;
+    worksImages = [];
     document.getElementById('technicianModalTitle').textContent = '添加美容师';
     document.getElementById('technicianForm').reset();
     document.getElementById('technicianId').value = '';
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
-    // 设置默认值
     document.getElementById('techPosition').value = '美容师';
     document.getElementById('techLevel').value = '中级';
+    renderWorksGrid();
     document.getElementById('technicianModal').style.display = 'flex';
 }
 
@@ -168,6 +188,7 @@ function openTechnicianModal() {
 function closeTechnicianModal() {
     document.getElementById('technicianModal').style.display = 'none';
     currentTechnician = null;
+    worksImages = [];
 }
 
 // Edit technician
@@ -184,6 +205,10 @@ function editTechnician(techId) {
     document.getElementById('techRating').value = currentTechnician.rating || '';
     document.getElementById('techOrderCount').value = currentTechnician.orderCount || '';
     
+    // 加载作品图片
+    worksImages = currentTechnician.works || [];
+    renderWorksGrid();
+    
     // Set avatar preview
     if (currentTechnician.avatarUrl) {
         document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatarUrl}" alt="头像">`;
@@ -192,6 +217,72 @@ function editTechnician(techId) {
     }
     
     document.getElementById('technicianModal').style.display = 'flex';
+}
+
+// 渲染作品图片网格
+function renderWorksGrid() {
+    const grid = document.getElementById('worksGrid');
+    const addBtn = document.getElementById('worksAddBtn');
+    
+    if (!grid) return;
+    
+    // 清空现有内容
+    grid.innerHTML = '';
+    
+    // 渲染已上传的图片
+    worksImages.forEach((img, index) => {
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'work-item';
+        imgDiv.innerHTML = `
+            <img src="${img}" alt="作品${index + 1}">
+            <button type="button" class="work-delete" onclick="deleteWork(${index})" title="删除">×</button>
+        `;
+        grid.appendChild(imgDiv);
+    });
+    
+    // 控制添加按钮显示（最多6张）
+    if (addBtn) {
+        addBtn.style.display = worksImages.length >= 6 ? 'none' : 'flex';
+    }
+}
+
+// 处理作品图片上传
+function handleWorksUpload(input) {
+    if (!input.files || input.files.length === 0) return;
+    
+    const remainingSlots = 6 - worksImages.length;
+    if (remainingSlots <= 0) {
+        alert('最多只能上传6张作品图片');
+        return;
+    }
+    
+    const files = Array.from(input.files).slice(0, remainingSlots);
+    
+    files.forEach(file => {
+        // 检查文件大小（5MB限制）
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`图片 ${file.name} 超过5MB限制，已跳过`);
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            worksImages.push(e.target.result);
+            renderWorksGrid();
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    // 清空input以便重复选择相同文件
+    input.value = '';
+}
+
+// 删除作品图片
+function deleteWork(index) {
+    if (confirm('确定删除这张作品图片吗？')) {
+        worksImages.splice(index, 1);
+        renderWorksGrid();
+    }
 }
 
 // Save technician
@@ -205,15 +296,15 @@ async function saveTechnician() {
     
     // Validation
     if (!name) {
-        showMessage('请输入姓名', 'error');
+        alert('请输入姓名');
         return;
     }
     if (!specialty) {
-        showMessage('请输入专业', 'error');
+        alert('请输入专业');
         return;
     }
     if (!rating || rating < 1 || rating > 5) {
-        showMessage('请选择评分', 'error');
+        alert('请选择评分');
         return;
     }
     
@@ -221,10 +312,11 @@ async function saveTechnician() {
         const techData = {
             name,
             specialty,
-            position,   // 岗位（美容师/洗护师/助理）
-            level,      // 等级（初级/中级/高级/资深/首席）
+            position,
+            level,
             rating,
-            orders: orderCount
+            orders: orderCount,
+            works: worksImages // 作品图片数组
         };
         
         if (currentTechnician) {
@@ -234,18 +326,18 @@ async function saveTechnician() {
                 id: currentTechnician._id, 
                 data: techData 
             });
-            showMessage('信息更新成功', 'success');
+            alert('信息更新成功');
         } else {
             // Add new
             await apiCall('technicians', { action: 'add', data: techData });
-            showMessage('添加成功', 'success');
+            alert('添加成功');
         }
         
         closeTechnicianModal();
         loadTechnicians();
     } catch (err) {
         console.error('Save technician error:', err);
-        showMessage('保存失败：' + (err.message || '请重试'), 'error');
+        alert('保存失败：' + (err.message || '请重试'));
     }
 }
 
@@ -297,7 +389,6 @@ async function confirmTechDelete() {
 
 // Delete technician
 function deleteTechnician(techId, event) {
-    // 阻止事件冒泡
     if (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -323,9 +414,3 @@ window.onclick = function(event) {
         closeTechnicianModal();
     }
 };
-
-// Show message helper
-function showMessage(message, type) {
-    // 简单的alert提示，实际项目中可以使用更优雅的提示组件
-    alert(message);
-}
