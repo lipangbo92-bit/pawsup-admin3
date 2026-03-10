@@ -1,0 +1,692 @@
+/* pages/boarding/boarding.wxss */
+
+page {
+  background-color: #F8FAFC;
+  height: 100%;
+}
+
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+}
+
+/* ========== 顶部导航栏 ========== */
+.custom-nav {
+  position: relative;
+  height: 176rpx;
+  padding-top: 88rpx;
+  box-sizing: border-box;
+}
+
+.nav-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  z-index: 0;
+}
+
+.nav-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 20rpx;
+}
+
+.nav-back {
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-placeholder {
+  width: 88rpx;
+}
+
+/* ========== 步骤指示器 ========== */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 30rpx;
+  background-color: #FFFFFF;
+  margin-bottom: 20rpx;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.step-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background-color: #E5E7EB;
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+.step-dot.current {
+  width: 28rpx;
+  height: 28rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  box-shadow: 0 0 0 8rpx rgba(249, 115, 22, 0.15);
+}
+
+.step-text {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+
+.step-text.active {
+  color: #F97316;
+  font-weight: 500;
+}
+
+.step-line {
+  flex: 1;
+  height: 4rpx;
+  background-color: #E5E7EB;
+  margin: 0 12rpx;
+  margin-bottom: 40rpx;
+  border-radius: 2rpx;
+  overflow: hidden;
+}
+
+.step-line-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F97316 0%, #EA580C 100%);
+  transition: width 0.3s ease;
+}
+
+/* ========== 内容区域 ========== */
+.content-wrapper {
+  flex: 1;
+  padding: 0 30rpx 420rpx;
+}
+
+.confirm-wrapper {
+  padding-bottom: 480rpx;
+}
+
+/* ========== 区块卡片 ========== */
+.section-card {
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  padding: 28rpx 32rpx;
+  display: flex;
+  align-items: center;
+}
+
+.section-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* ========== 房型卡片 ========== */
+.room-list {
+  padding: 24rpx;
+}
+
+.room-card {
+  background-color: #FFFFFF;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+}
+
+.room-card:last-child {
+  margin-bottom: 0;
+}
+
+.room-card.selected {
+  border: 4rpx solid #F97316;
+  box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.2);
+  background-color: #FFF7ED;
+}
+
+.room-card:active {
+  transform: scale(0.98);
+}
+
+.room-main {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.room-icon-wrap {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.room-icon-wrap.cage {
+  background-color: #F3F4F6;
+}
+
+.room-icon-wrap.standard {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%);
+}
+
+.room-icon-wrap.luxury {
+  background: linear-gradient(135deg, #FEF9C3 0%, #FDE68A 100%);
+}
+
+.room-emoji {
+  font-size: 48rpx;
+}
+
+.room-info {
+  flex: 1;
+}
+
+.room-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.room-desc {
+  font-size: 26rpx;
+  color: #6B7280;
+}
+
+.room-price-wrap {
+  text-align: right;
+}
+
+.room-price {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+.room-unit {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+.room-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #6B7280;
+  background-color: #F3F4F6;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.tag.orange {
+  color: #F97316;
+  background-color: rgba(249, 115, 22, 0.1);
+}
+
+.tag.gold {
+  color: #B45309;
+  background-color: rgba(251, 191, 36, 0.2);
+}
+
+/* ========== 提示条 ========== */
+.selected-room-notice,
+.selected-info-notice {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 2rpx solid #FDBA74;
+}
+
+.notice-text {
+  font-size: 28rpx;
+  color: #92400E;
+}
+
+/* ========== 日期选择 ========== */
+.date-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40rpx 32rpx;
+}
+
+.date-item {
+  flex: 1;
+}
+
+.date-label {
+  font-size: 26rpx;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.date-value {
+  height: 80rpx;
+  background-color: #F9FAFB;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #1F2937;
+  font-weight: 500;
+}
+
+.date-value.active {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  border-color: #F97316;
+  color: #F97316;
+}
+
+.date-value .placeholder {
+  color: #9CA3AF;
+}
+
+.date-arrow {
+  padding: 0 24rpx;
+  margin-top: 20rpx;
+}
+
+.arrow-icon {
+  font-size: 36rpx;
+  color: #F97316;
+}
+
+.nights-summary {
+  padding: 24rpx 32rpx 40rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.summary-text {
+  font-size: 30rpx;
+  color: #6B7280;
+}
+
+.night-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #F97316;
+  margin: 0 8rpx;
+}
+
+/* ========== 宠物数量选择 ========== */
+.pet-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 32rpx;
+  gap: 60rpx;
+}
+
+.count-btn {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(249, 115, 22, 0.3);
+}
+
+.count-btn.disabled {
+  background: #E5E7EB;
+  box-shadow: none;
+}
+
+.count-btn:active {
+  transform: scale(0.92);
+}
+
+.count-icon {
+  font-size: 44rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.count-num {
+  font-size: 72rpx;
+  font-weight: 700;
+  color: #F97316;
+  min-width: 120rpx;
+  text-align: center;
+}
+
+.pet-hint {
+  display: block;
+  text-align: center;
+  font-size: 26rpx;
+  color: #9CA3AF;
+  padding-bottom: 40rpx;
+}
+
+/* ========== 确认页面信息列表 ========== */
+.info-list {
+  padding: 32rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F3F4F6;
+}
+
+.info-item.last {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-label {
+  font-size: 30rpx;
+  color: #6B7280;
+}
+
+.info-value {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+/* ========== 价格明细 ========== */
+.price-list {
+  padding: 32rpx;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.price-label {
+  font-size: 28rpx;
+  color: #6B7280;
+}
+
+.price-value {
+  font-size: 28rpx;
+  color: #1F2937;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx;
+  border-top: 2rpx solid #F3F4F6;
+  margin-top: 16rpx;
+}
+
+.total-label {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.total-price {
+  display: flex;
+  align-items: baseline;
+}
+
+.total-price .currency {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #F97316;
+  margin-right: 4rpx;
+}
+
+.total-price .amount {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+/* ========== 取消政策 ========== */
+.policy-card {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  border-radius: 16rpx;
+  padding: 28rpx;
+  display: flex;
+  align-items: flex-start;
+  border: 2rpx solid #FDBA74;
+}
+
+.policy-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+}
+
+.policy-text {
+  font-size: 28rpx;
+  color: #92400E;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.policy-bold {
+  font-weight: 600;
+  color: #F97316;
+}
+
+/* ========== 底部按钮栏 ========== */
+.bottom-bar {
+  position: fixed;
+  bottom: calc(100rpx + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  background-color: #FFFFFF;
+  padding: 24rpx 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+.bottom-info {
+  flex: 1;
+}
+
+.bottom-label {
+  font-size: 28rpx;
+  color: #9CA3AF;
+}
+
+.bottom-selected {
+  display: flex;
+  flex-direction: column;
+}
+
+.selected-name {
+  font-size: 28rpx;
+  color: #6B7280;
+  margin-bottom: 4rpx;
+}
+
+.selected-price {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #FDBA74 0%, #FB923C 100%);
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 24rpx 56rpx;
+  border-radius: 44rpx;
+  border: none;
+  line-height: 1;
+  margin-left: 24rpx;
+}
+
+.next-btn.active {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.35);
+}
+
+.next-btn::after {
+  border: none;
+}
+
+.next-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* 支付按钮 */
+.total-price-wrap {
+  display: flex;
+  align-items: baseline;
+}
+
+.total-price-wrap .currency {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #F97316;
+  margin-right: 4rpx;
+}
+
+.total-price-wrap .amount {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  padding: 28rpx 72rpx;
+  border-radius: 48rpx;
+  border: none;
+  line-height: 1;
+  margin-left: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.35);
+}
+
+.pay-btn::after {
+  border: none;
+}
+
+.pay-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* ========== 底部导航栏 ========== */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(100rpx + env(safe-area-inset-bottom));
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 10rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  z-index: 101;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100rpx;
+  padding-top: 10rpx;
+  gap: 6rpx;
+}
+
+.tab-item:active {
+  opacity: 0.7;
+}
+
+.tab-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.tab-text {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  line-height: 1;
+}
+
+.tab-item.active .tab-text {
+  color: #F97316;
+  font-weight: 500;
+}

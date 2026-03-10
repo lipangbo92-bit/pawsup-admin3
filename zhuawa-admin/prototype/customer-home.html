@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>栖游记 - 宠物服务</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #FFF5F0;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #F97316 0%, #EC4899 100%);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header .brand {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .header .location {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        /* Banner */
+        .banner {
+            background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+            margin: 12px 16px;
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .banner h2 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .banner p {
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        
+        .banner .btn {
+            background: white;
+            color: #EC4899;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        /* Quick Actions - 3 columns */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 16px;
+            margin-top: 16px;
+        }
+        
+        .action-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        
+        .action-item .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .action-item:nth-child(1) .icon { background: #FED7AA; }
+        .action-item:nth-child(2) .icon { background: #DDD6FE; }
+        .action-item:nth-child(3) .icon { background: #BFDBFE; }
+        
+        .action-item .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .action-item .subtitle {
+            font-size: 11px;
+            color: #999;
+        }
+        
+        /* Section Title */
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 16px 12px;
+        }
+        
+        .section-title h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .section-title .more {
+            font-size: 13px;
+            color: #F97316;
+        }
+        
+        /* Tech List - Vertical */
+        .tech-list {
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .tech-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        
+        .tech-item .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FED7AA 0%, #F97316 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .tech-item .info {
+            flex: 1;
+        }
+        
+        .tech-item .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .tech-item .badge {
+            display: inline-block;
+            background: #FFF7ED;
+            color: #F97316;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 4px;
+        }
+        
+        .tech-item .rating {
+            font-size: 13px;
+            color: #F59E0B;
+        }
+        
+        .tech-item .book-btn {
+            background: linear-gradient(135deg, #F97316 0%, #EC4899 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Tab Bar */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #999;
+            font-size: 11px;
+        }
+        
+        .tab-item.active {
+            color: #F97316;
+        }
+        
+        .tab-item .icon {
+            width: 24px;
+            height: 24px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="brand">栖游记</div>
+        <div class="location">
+            <span>📍</span>
+            <span>距您0.5km</span>
+        </div>
+    </div>
+    
+    <!-- Banner -->
+    <div class="banner">
+        <h2>🐾 加入会员</h2>
+        <p>享1元洗护特权，全年省心</p>
+        <div class="btn">立即入会 →</div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <div class="action-item">
+            <div class="icon">🛁</div>
+            <div class="title">洗护美容</div>
+            <div class="subtitle">洗澡护理</div>
+        </div>
+        <div class="action-item">
+            <div class="icon">🏠</div>
+            <div class="title">寄养日托</div>
+            <div class="subtitle">安心托管</div>
+        </div>
+        <div class="action-item">
+            <div class="icon">🚪</div>
+            <div class="title">上门服务</div>
+            <div class="subtitle">足不出户</div>
+        </div>
+    </div>
+    
+    <!-- Tech Section -->
+    <div class="section-title">
+        <h3>✨ 星光美容师</h3>
+        <span class="more">更多 ></span>
+    </div>
+    
+    <!-- Tech List -->
+    <div class="tech-list">
+        <div class="tech-item">
+            <div class="avatar">👩‍🦱</div>
+            <div class="info">
+                <div class="name">小美</div>
+                <div class="badge">高级美容师</div>
+                <div class="rating">⭐ 4.9 (328)</div>
+            </div>
+            <button class="book-btn">预约</button>
+        </div>
+        
+        <div class="tech-item">
+            <div class="avatar">👨‍🦲</div>
+            <div class="info">
+                <div class="name">Tony</div>
+                <div class="badge">中级美容师</div>
+                <div class="rating">⭐ 4.8 (215)</div>
+            </div>
+            <button class="book-btn">预约</button>
+        </div>
+        
+        <div class="tech-item">
+            <div class="avatar">👩</div>
+            <div class="info">
+                <div class="name">Lily</div>
+                <div class="badge">护理美容师</div>
+                <div class="rating">⭐ 4.8 (156)</div>
+            </div>
+            <button class="book-btn">预约</button>
+        </div>
+    </div>
+    
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <div class="tab-item active">
+            <div class="icon">🏠</div>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <div class="icon">🛒</div>
+            <span>商城</span>
+        </div>
+        <div class="tab-item">
+            <div class="icon">📋</div>
+            <span>服务</span>
+        </div>
+        <div class="tab-item">
+            <div class="icon">📝</div>
+            <span>订单</span>
+        </div>
+        <div class="tab-item">
+            <div class="icon">👤</div>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

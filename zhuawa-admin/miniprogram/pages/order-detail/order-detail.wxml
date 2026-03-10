@@ -1,0 +1,83 @@
+<!--pages/order-detail/order-detail.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="back" bindtap="goBack">←</view>
+    <view class="title">预约详情</view>
+    <view class="placeholder"></view>
+  </view>
+  
+  <!-- 状态卡片 -->
+  <view class="status-card {{order.status}}">
+    <view class="status-icon">
+      <text wx:if="{{order.status === 'pending'}}">💳</text>
+      <text wx:elif="{{order.status === 'paid'}}">✅</text>
+      <text wx:elif="{{order.status === 'completed'}}">🎉</text>
+      <text wx:elif="{{order.status === 'canceled'}}">❌</text>
+    </view>
+    <view class="status-text">{{order.statusText}}</view>
+  </view>
+  
+  <!-- 订单信息 -->
+  <view class="card">
+    <view class="card-title">订单信息</view>
+    
+    <view class="info-row">
+      <text class="label">订单编号</text>
+      <text class="value">{{order.orderNo}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">服务项目</text>
+      <text class="value">{{service.name}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">服务技师</text>
+      <text class="value">{{technician.name}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">预约宠物</text>
+      <text class="value">{{pet.name}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">预约时间</text>
+      <text class="value">{{order.date}} {{order.time}}</text>
+    </view>
+    
+    <view class="info-row" wx:if="{{order.remark}}">
+      <text class="label">备注</text>
+      <text class="value">{{order.remark}}</text>
+    </view>
+  </view>
+  
+  <!-- 费用信息 -->
+  <view class="card">
+    <view class="card-title">费用信息</view>
+    
+    <view class="info-row">
+      <text class="label">服务费用</text>
+      <text class="value">¥{{order.price}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">支付方式</text>
+      <text class="value">微信支付</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">下单时间</text>
+      <text class="value">{{order.createdAt}}</text>
+    </view>
+  </view>
+  
+  <!-- 底部按钮 -->
+  <view class="bottom-bar" wx:if="{{order.status === 'pending' || order.status === 'paid'}}">
+    <view class="contact-btn" bindtap="contactService">联系客服</view>
+    <view class="cancel-btn" bindtap="onCancel">取消预约</view>
+    <view class="pay-btn" wx:if="{{order.status === 'pending'}}" bindtap="goToPay">
+      立即支付
+    </view>
+  </view>
+</view>

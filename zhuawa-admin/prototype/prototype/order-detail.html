@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约详情 - 栖游记</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --green: #10B981;
+            --orange: #F59E0B;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back { color: var(--white); font-size: 20px; cursor: pointer; }
+        .title { font-family: 'Varela Round', sans-serif; font-size: 18px; color: var(--white); }
+        
+        .status-card {
+            background: var(--white);
+            margin: 16px;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+        }
+        
+        .status-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green) 0%, #059669 100%);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        
+        .status-text { font-family: 'Varela Round', sans-serif; font-size: 20px; margin-bottom: 8px; }
+        .status-desc { font-size: 13px; color: #6B7280; }
+        
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px;
+            position: relative;
+        }
+        .progress::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 60px;
+            right: 60px;
+            height: 3px;
+            background: var(--gray-100);
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .progress-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .progress-step.active .progress-dot {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .progress-step.done .progress-dot {
+            background: var(--green);
+            color: var(--white);
+        }
+        
+        .progress-label { font-size: 11px; color: #9CA3AF; }
+        .progress-step.active .progress-label { color: var(--primary); font-weight: 600; }
+        
+        .card {
+            background: var(--white);
+            margin: 0 16px 16px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+        }
+        
+        .card-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #6B7280; }
+        .info-value { font-weight: 600; }
+        
+        .btns {
+            padding: 20px 16px;
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: var(--white);
+            color: #EF4444;
+            border: 2px solid #FEE2E2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back">←</div>
+        <div class="title">预约详情</div>
+    </div>
+    
+    <div class="status-card">
+        <div class="status-icon">✓</div>
+        <div class="status-text">待消费</div>
+        <div class="status-desc">请按时到店消费</div>
+    </div>
+    
+    <div class="progress">
+        <div class="progress-step done">
+            <div class="progress-dot">✓</div>
+            <span class="progress-label">已预约</span>
+        </div>
+        <div class="progress-step active">
+            <div class="progress-dot">2</div>
+            <span class="progress-label">待消费</span>
+        </div>
+        <div class="progress-step">
+            <div class="progress-dot">3</div>
+            <span class="progress-label">已完成</span>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-title">📋 预约信息</div>
+        <div class="info-row">
+            <span class="info-label">订单编号</span>
+            <span class="info-value">202402271530</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务项目</span>
+            <span class="info-value">狗狗洗护套餐</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务技师</span>
+            <span class="info-value">小美</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务宠物</span>
+            <span class="info-value">豆豆</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">预约时间</span>
+            <span class="info-value">2024年2月27日 15:30</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务时长</span>
+            <span class="info-value">约60分钟</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">支付金额</span>
+            <span class="info-value" style="color: var(--primary);">¥99</span>
+        </div>
+    </div>
+    
+    <div class="btns">
+        <button class="btn btn-secondary">取消预约</button>
+        <button class="btn btn-primary">联系技师</button>
+    </div>
+</body>
+</html>

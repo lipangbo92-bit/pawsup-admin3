@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>预约管理 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-500: #EA580C;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 24px;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-item .icon { font-size: 18px; }
+        
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 20px;
+            font-size: 13px;
+            color: #6B7280;
+            cursor: pointer;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--gray-200);
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 120px 1fr 100px 100px 120px 100px;
+            gap: 16px;
+            padding: 12px 16px;
+            background: var(--gray-100);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+            margin-bottom: 12px;
+        }
+        
+        .appointment-row {
+            display: grid;
+            grid-template-columns: 120px 1fr 100px 100px 120px 100px;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 1px solid #F3F4F6;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .appointment-row:last-child { border-bottom: none; }
+        
+        .time-cell {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .service-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .service-name { font-weight: 500; }
+        .service-detail {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        
+        .customer-cell, .tech-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .avatar-sm {
+            width: 28px;
+            height: 28px;
+            background: var(--gray-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .price-cell {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.pending { background: #FEF3C7; color: #D97706; }
+        .status-badge.confirmed { background: #DBEAFE; color: #2563EB; }
+        .status-badge.in-progress { background: #F3E8FF; color: #7C3AED; }
+        .status-badge.completed { background: #D1FAE5; color: #059669; }
+        .status-badge.cancelled { background: #FEE2E2; color: #DC2626; }
+        
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-outline {
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            background: var(--white);
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .page-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .table-header, .appointment-row { grid-template-columns: 100px 1fr 80px; }
+            .table-header > *:nth-child(4),
+            .table-header > *:nth-child(5),
+            .appointment-row > *:nth-child(4),
+            .appointment-row > *:nth-child(5) { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>爪哇后台管理</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item" onclick="window.location.href='admin-dashboard.html'">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </div>
+            <div class="nav-item active">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='admin-technicians.html'">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='admin-schedule.html'">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='admin-services.html'">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='admin-statistics.html'">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">📋 预约管理</h1>
+        </div>
+        
+        <div class="filter-bar">
+            <button class="filter-btn active">全部</button>
+            <button class="filter-btn">待确认</button>
+            <button class="filter-btn">已确认</button>
+            <button class="filter-btn">服务中</button>
+            <button class="filter-btn">已完成</button>
+            <button class="filter-btn">已取消</button>
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" placeholder="搜索客户、宠物或技师">
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="table-header">
+                <span>时间</span>
+                <span>服务/宠物</span>
+                <span>客户</span>
+                <span>技师</span>
+                <span>金额</span>
+                <span>状态</span>
+            </div>
+            
+            <div class="appointment-row">
+                <span class="time-cell">10:00</span>
+                <div class="service-cell">
+                    <span class="service-name">狗狗洗护套餐</span>
+                    <span class="service-detail">🐶 豆豆 · 金毛</span>
+                </div>
+                <div class="customer-cell">
+                    <span class="avatar-sm">王</span>
+                    <span>王先生</span>
+                </div>
+                <div class="tech-cell">
+                    <span class="avatar-sm">👩</span>
+                    <span>小美</span>
+                </div>
+                <span class="price-cell">¥99</span>
+                <span class="status-badge confirmed">已确认</span>
+            </div>
+            
+            <div class="appointment-row">
+                <span class="time-cell">11:30</span>
+                <div class="service-cell">
+                    <span class="service-name">猫咪洗护套餐</span>
+                    <span class="service-detail">🐱 咪咪 · 英短</span>
+                </div>
+                <div class="customer-cell">
+                    <span class="avatar-sm">李</span>
+                    <span>李女士</span>
+                </div>
+                <div class="tech-cell">
+                    <span class="avatar-sm">👨</span>
+                    <span>Tony</span>
+                </div>
+                <span class="price-cell">¥129</span>
+                <span class="status-badge pending">待确认</span>
+            </div>
+            
+            <div class="appointment-row">
+                <span class="time-cell">14:00</span>
+                <div class="service-cell">
+                    <span class="service-name">宠物美容造型</span>
+                    <span class="service-detail">🐩 小白 · 比熊</span>
+                </div>
+                <div class="customer-cell">
+                    <span class="avatar-sm">张</span>
+                    <span>张女士</span>
+                </div>
+                <div class="tech-cell">
+                    <span class="avatar-sm">👩</span>
+                    <span>小美</span>
+                </div>
+                <span class="price-cell">¥199</span>
+                <div>
+                    <span class="status-badge in-progress">服务中</span>
+                </div>
+            </div>
+            
+            <div class="appointment-row">
+                <span class="time-cell">15:30</span>
+                <div class="service-cell">
+                    <span class="service-name">狗狗洗护套餐</span>
+                    <span class="service-detail">🐕 旺财 · 柴犬</span>
+                </div>
+                <div class="customer-cell">
+                    <span class="avatar-sm">陈</span>
+                    <span>陈先生</span>
+                </div>
+                <div class="tech-cell">
+                    <span class="avatar-sm">👩</span>
+                    <span>Lily</span>
+                </div>
+                <span class="price-cell">¥99</span>
+                <span class="status-badge completed">已完成</span>
+            </div>
+            
+            <div class="appointment-row">
+                <span class="time-cell">16:30</span>
+                <div class="service-cell">
+                    <span class="service-name">宠物寄养</span>
+                    <span class="service-detail">🐱 橘子 · 橘猫</span>
+                </div>
+                <div class="customer-cell">
+                    <span class="avatar-sm">赵</span>
+                    <span>赵女士</span>
+                </div>
+                <div class="tech-cell">
+                    <span class="avatar-sm">👨</span>
+                    <span>阿强</span>
+                </div>
+                <span class="price-cell">¥80</span>
+                <span class="status-badge cancelled">已取消</span>
+            </div>
+        </div>
+        
+        <div class="pagination">
+            <button class="page-btn">‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">›</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+/* pages/orders/orders.wxss */
+page {
+  background: #FDF2F8;
+}
+
+.container {
+  min-height: 100vh;
+}
+
+/* Tabs */
+.tabs {
+  background: #fff;
+  display: flex;
+  padding: 0 16rpx;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #6B7280;
+  position: relative;
+}
+
+.tab.active {
+  color: #EC4899;
+  font-weight: 600;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 4rpx;
+  background: #EC4899;
+  border-radius: 2rpx;
+}
+
+/* Order List */
+.order-list {
+  padding: 24rpx 32rpx;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(236, 72, 153, 0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.order-no {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+.order-status {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.order-status.pending {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.order-status.paid {
+  background: #D1FAE5;
+  color: #059669;
+}
+
+.order-status.completed {
+  background: #E5E7EB;
+  color: #6B7280;
+}
+
+.order-status.canceled {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.order-body {
+  margin-bottom: 16rpx;
+}
+
+.order-service {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+}
+
+.order-meta {
+  font-size: 26rpx;
+  color: #6B7280;
+  margin-bottom: 8rpx;
+}
+
+.order-pet {
+  font-size: 26rpx;
+  color: #6B7280;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F3F4F6;
+}
+
+.order-price {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #EC4899;
+}
+
+.order-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn {
+  padding: 12rpx 24rpx;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+}
+
+.btn.cancel {
+  background: #fff;
+  color: #6B7280;
+  border: 1rpx solid #D1D5DB;
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 96rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  color: #9CA3AF;
+  font-size: 28rpx;
+}

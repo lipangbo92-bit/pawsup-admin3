@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>寄养预约 - 爪哇宠屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        'primary-light': '#FFF7ED',
+                        'primary-dark': '#EA580C',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+        
+        /* 房型卡片样式 - 带边框阴影 */
+        .room-card {
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .room-card:active {
+            transform: scale(0.98);
+        }
+        .room-card.selected {
+            border: 2px solid #F97316;
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.25), 0 0 0 4px rgba(249, 115, 22, 0.1);
+            background-color: #FFF7ED;
+        }
+        
+        /* 步骤指示器连线 */
+        .step-line {
+            height: 2px;
+            background: #E5E7EB;
+            position: relative;
+            overflow: hidden;
+        }
+        .step-line-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F97316, #FB923C);
+            transition: width 0.3s ease;
+        }
+        
+        /* 步骤圆点 */
+        .step-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .step-dot.active {
+            background: linear-gradient(135deg, #F97316, #EA580C);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+        .step-dot.current {
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(135deg, #F97316, #EA580C);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+        }
+        
+        /* 按钮渐变橙色背景 */
+        .btn-gradient {
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+            box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+        }
+        .btn-gradient:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+        }
+        .btn-gradient:disabled {
+            background: linear-gradient(135deg, #D1D5DB 0%, #9CA3AF 100%);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        /* 计数按钮样式 */
+        .btn-count {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.15s ease;
+        }
+        .btn-count:active {
+            transform: scale(0.92);
+        }
+        
+        input[type="date"] {
+            appearance: none;
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 shadow-2xl overflow-hidden pb-44">
+        
+        <!-- 顶部导航栏 -->
+        <div class="bg-gradient-to-r from-orange-500 to-orange-600">
+            <div class="px-4 pt-12 pb-4 flex items-center justify-center relative">
+                <button onclick="goBack()" class="absolute left-4 text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="text-lg font-semibold text-white" id="pageTitle">寄养预约</h1>
+            </div>
+        </div>
+        
+        <!-- 步骤指示器 - 圆点+连线样式 -->
+        <div class="px-6 py-5 bg-white">
+            <div class="flex items-center justify-between">
+                <!-- 步骤1 -->
+                <div class="flex flex-col items-center gap-2" id="stepIndicator1">
+                    <div class="step-dot current" id="dot1"></div>
+                    <span class="text-xs text-primary font-medium">日期/数量</span>
+                </div>
+                <!-- 连线1 -->
+                <div class="flex-1 mx-3 mt-[-14px]">
+                    <div class="step-line rounded-full">
+                        <div class="step-line-fill" id="progress1" style="width: 0%"></div>
+                    </div>
+                </div>
+                <!-- 步骤2 -->
+                <div class="flex flex-col items-center gap-2" id="stepIndicator2">
+                    <div class="step-dot" id="dot2"></div>
+                    <span class="text-xs text-gray-400" id="text2">选择房型</span>
+                </div>
+                <!-- 连线2 -->
+                <div class="flex-1 mx-3 mt-[-14px]">
+                    <div class="step-line rounded-full">
+                        <div class="step-line-fill" id="progress2" style="width: 0%"></div>
+                    </div>
+                </div>
+                <!-- 步骤3 -->
+                <div class="flex flex-col items-center gap-2" id="stepIndicator3">
+                    <div class="step-dot" id="dot3"></div>
+                    <span class="text-xs text-gray-400" id="text3">确认</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 步骤1：选择日期 + 宠物数量 -->
+        <div class="step-content active" id="step1">
+            <div class="p-4 space-y-4">
+                <!-- 日期选择 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <h3 class="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>📅</span> 选择日期
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-gray-600 text-sm">入住日期</label>
+                            <input type="date" id="checkinDate" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary" onchange="calculateNights()">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-gray-600 text-sm">退房日期</label>
+                            <input type="date" id="checkoutDate" class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary" onchange="calculateNights()">
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-orange-50 rounded-xl p-3 flex items-center justify-center">
+                        <span class="text-sm text-gray-600">共 <span class="text-primary font-bold text-lg" id="nightCount">0</span> 晚</span>
+                    </div>
+                </div>
+                
+                <!-- 宠物数量 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm">
+                    <h3 class="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>🐾</span> 宠物数量
+                    </h3>
+                    <div class="flex items-center justify-center gap-8">
+                        <button onclick="changePetCount(-1)" class="btn-count w-12 h-12 rounded-full bg-gray-100 text-xl font-medium text-gray-600 flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                            </svg>
+                        </button>
+                        <span class="text-3xl font-bold text-primary w-16 text-center" id="petCount">1</span>
+                        <button onclick="changePetCount(1)" class="btn-count w-12 h-12 rounded-full bg-primary text-white text-xl font-medium flex items-center justify-center">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-center text-xs text-gray-400 mt-3">可选1-3只宠物</p>
+                </div>
+            </div>
+            
+            <!-- 底部按钮栏 -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 p-4 z-40">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-500 text-sm">共 <span id="summaryNights" class="font-medium text-gray-800">0</span> 晚 · <span id="summaryPets" class="font-medium text-gray-800">1</span> 只宠物</span>
+                    <span class="text-xl font-bold text-primary" id="step1Price">¥0</span>
+                </div>
+                <button onclick="goToStep2()" class="btn-gradient w-full text-white py-4 rounded-full text-base font-semibold">
+                    下一步
+                </button>
+            </div>
+        </div>
+        
+        <!-- 步骤2：选择房型 -->
+        <div class="step-content" id="step2">
+            <div class="p-4">
+                <!-- 已选信息提示 -->
+                <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-4 mb-4 border border-orange-100">
+                    <p class="text-sm text-gray-700" id="selectedInfo">03月03日 - 03月05日 共2晚 1只宠物</p>
+                </div>
+                
+                <h3 class="text-base font-semibold text-gray-800 mb-4">选择房型</h3>
+                
+                <!-- 房型卡片 -->
+                <div class="space-y-3" id="roomList">
+                    <div class="room-card bg-white rounded-2xl p-4 cursor-pointer" onclick="selectRoom('cage', 88, '围栏/笼养')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center text-3xl">🏠</div>
+                                <div>
+                                    <div class="font-medium text-gray-800">围栏/笼养</div>
+                                    <div class="text-sm text-gray-500">适合小型犬猫咪</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-primary">¥88</div>
+                                <div class="text-xs text-gray-400">/晚</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">基础配置</span>
+                            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">24h监控</span>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card bg-white rounded-2xl p-4 cursor-pointer" onclick="selectRoom('standard', 168, '标准间')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-16 h-16 bg-orange-50 rounded-xl flex items-center justify-center text-3xl">🏨</div>
+                                <div>
+                                    <div class="font-medium text-gray-800">标准间</div>
+                                    <div class="text-sm text-gray-500">1宠1间，有窗</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-primary">¥168</div>
+                                <div class="text-xs text-gray-400">/晚</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">独立空间</span>
+                            <span class="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">每日遛弯</span>
+                        </div>
+                    </div>
+                    
+                    <div class="room-card bg-white rounded-2xl p-4 cursor-pointer" onclick="selectRoom('luxury', 268, '豪华间')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-16 h-16 bg-yellow-50 rounded-xl flex items-center justify-center text-3xl">🏰</div>
+                                <div>
+                                    <div class="font-medium text-gray-800">豪华间</div>
+                                    <div class="text-sm text-gray-500">1宠1间，豪华配置</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-primary">¥268</div>
+                                <div class="text-xs text-gray-400">/晚</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                            <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">VIP服务</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">专属管家</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">SPA服务</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部按钮栏 -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 p-4 z-40">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <span class="text-gray-500 text-sm" id="selectedRoomName">未选择房型</span>
+                        <div class="text-xs text-gray-400 mt-0.5" id="selectedRoomDetail"></div>
+                    </div>
+                    <span class="text-xl font-bold text-primary" id="step2Price">¥0</span>
+                </div>
+                <button onclick="goToStep3()" id="confirmRoomBtn" class="btn-gradient w-full text-white py-4 rounded-full text-base font-semibold" disabled>
+                    确认选择
+                </button>
+            </div>
+        </div>
+        
+        <!-- 步骤3：确认页面 -->
+        <div class="step-content" id="step3">
+            <div class="p-4 space-y-4">
+                <!-- 预约信息卡片 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                    <h3 class="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>📋</span> 预约信息
+                    </h3>
+                    <div class="flex justify-between py-3 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">房型</span>
+                        <span class="text-sm font-medium text-gray-800" id="confirmRoomType">标准间</span>
+                    </div>
+                    <div class="flex justify-between py-3 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">入住日期</span>
+                        <span class="text-sm font-medium text-gray-800" id="confirmCheckin">2024年3月3日</span>
+                    </div>
+                    <div class="flex justify-between py-3 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">退房日期</span>
+                        <span class="text-sm font-medium text-gray-800" id="confirmCheckout">2024年3月5日</span>
+                    </div>
+                    <div class="flex justify-between py-3 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">入住天数</span>
+                        <span class="text-sm font-medium text-gray-800"><span id="confirmNights">2</span> 晚</span>
+                    </div>
+                    <div class="flex justify-between py-3">
+                        <span class="text-sm text-gray-500">宠物数量</span>
+                        <span class="text-sm font-medium text-gray-800"><span id="confirmPets">1</span> 只</span>
+                    </div>
+                </div>
+                
+                <!-- 价格明细 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                    <h3 class="text-base font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>💰</span> 价格明细
+                    </h3>
+                    <div class="flex justify-between py-2">
+                        <span class="text-sm text-gray-500" id="priceDetail">标准间 ¥168 × 2晚 × 1只</span>
+                        <span class="text-sm text-gray-800" id="subtotalPrice">¥336</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">服务费</span>
+                        <span class="text-sm text-gray-800">¥0</span>
+                    </div>
+                    <div class="flex justify-between py-3 mt-2">
+                        <span class="text-base font-semibold text-gray-800">应付金额</span>
+                        <span class="text-2xl font-bold text-primary" id="totalPrice">¥336</span>
+                    </div>
+                </div>
+                
+                <!-- 取消政策 -->
+                <div class="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl p-4 border border-orange-100">
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        <span class="text-primary font-medium">⚠️ 取消政策：</span>入住前24小时可取消，全额退款；24小时内取消，收取首晚房费。请合理安排您的时间。
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 底部按钮栏 -->
+            <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 p-4 z-40">
+                <button onclick="confirmBooking()" class="btn-gradient w-full text-white py-4 rounded-full text-base font-semibold">
+                    确认支付 <span id="payButtonPrice">¥336</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 状态管理
+        let currentStep = 1;
+        let petCount = 1;
+        let nightCount = 0;
+        let selectedRoom = null;
+        let selectedRoomPrice = 0;
+        let selectedRoomName = '';
+        let checkinDate = '';
+        let checkoutDate = '';
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认日期
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 2);
+            
+            document.getElementById('checkinDate').valueAsDate = today;
+            document.getElementById('checkoutDate').valueAsDate = tomorrow;
+            
+            calculateNights();
+        });
+        
+        // 返回按钮
+        function goBack() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            } else {
+                window.history.back();
+            }
+        }
+        
+        // 切换步骤
+        function goToStep(step) {
+            // 隐藏当前步骤
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            
+            // 更新步骤指示器
+            updateStepIndicator(step);
+            
+            // 更新页面标题
+            const titles = ['寄养预约', '选择房型', '确认预约'];
+            document.getElementById('pageTitle').textContent = titles[step - 1];
+            
+            currentStep = step;
+        }
+        
+        // 更新步骤指示器样式 - 圆点+连线
+        function updateStepIndicator(step) {
+            const dots = ['dot1', 'dot2', 'dot3'];
+            const texts = ['text1', 'text2', 'text3'];
+            const progresses = ['progress1', 'progress2'];
+            
+            // 更新圆点和文字
+            for (let i = 0; i < 3; i++) {
+                const dot = document.getElementById(dots[i]);
+                const text = document.getElementById('text' + (i + 1));
+                
+                if (i + 1 < step) {
+                    // 已完成步骤
+                    dot.classList.remove('current');
+                    dot.classList.add('active');
+                    text.classList.remove('text-gray-400');
+                    text.classList.add('text-primary', 'font-medium');
+                } else if (i + 1 === step) {
+                    // 当前步骤
+                    dot.classList.remove('active');
+                    dot.classList.add('current');
+                    text.classList.remove('text-gray-400');
+                    text.classList.add('text-primary', 'font-medium');
+                } else {
+                    // 未完成步骤
+                    dot.classList.remove('active', 'current');
+                    text.classList.remove('text-primary', 'font-medium');
+                    text.classList.add('text-gray-400');
+                }
+            }
+            
+            // 更新连线进度
+            document.getElementById('progress1').style.width = step >= 2 ? '100%' : '0%';
+            document.getElementById('progress2').style.width = step >= 3 ? '100%' : '0%';
+        }
+        
+        // 宠物数量
+        function changePetCount(delta) {
+            const newCount = petCount + delta;
+            if (newCount >= 1 && newCount <= 3) {
+                petCount = newCount;
+                document.getElementById('petCount').textContent = petCount;
+                document.getElementById('summaryPets').textContent = petCount;
+                updateStep1Price();
+            }
+        }
+        
+        // 计算晚数
+        function calculateNights() {
+            const checkin = new Date(document.getElementById('checkinDate').value);
+            const checkout = new Date(document.getElementById('checkoutDate').value);
+            
+            if (checkin && checkout && checkout > checkin) {
+                const diffTime = Math.abs(checkout - checkin);
+                nightCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            } else {
+                nightCount = 0;
+            }
+            
+            document.getElementById('nightCount').textContent = nightCount;
+            document.getElementById('summaryNights').textContent = nightCount;
+            updateStep1Price();
+        }
+        
+        // 更新步骤1价格（预估）
+        function updateStep1Price() {
+            // 使用最低价计算预估
+            const minPrice = 88;
+            const total = nightCount * petCount * minPrice;
+            document.getElementById('step1Price').textContent = '¥' + total + '起';
+        }
+        
+        // 前往步骤2
+        function goToStep2() {
+            if (nightCount === 0) {
+                alert('请选择有效的入住和退房日期');
+                return;
+            }
+            
+            // 格式化日期显示
+            checkinDate = document.getElementById('checkinDate').value;
+            checkoutDate = document.getElementById('checkoutDate').value;
+            
+            const checkinFormatted = formatDate(checkinDate);
+            const checkoutFormatted = formatDate(checkoutDate);
+            
+            document.getElementById('selectedInfo').textContent = 
+                `${checkinFormatted} - ${checkoutFormatted} 共${nightCount}晚 ${petCount}只宠物`;
+            
+            goToStep(2);
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return `${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+        
+        function formatDateFull(dateString) {
+            const date = new Date(dateString);
+            return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+        
+        // 选择房型
+        function selectRoom(type, price, name) {
+            selectedRoom = type;
+            selectedRoomPrice = price;
+            selectedRoomName = name;
+            
+            // 更新卡片样式
+            document.querySelectorAll('.room-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // 更新底部信息
+            const total = price * nightCount * petCount;
+            document.getElementById('selectedRoomName').textContent = name;
+            document.getElementById('selectedRoomDetail').textContent = `¥${price}/晚 × ${nightCount}晚 × ${petCount}只`;
+            document.getElementById('step2Price').textContent = '¥' + total;
+            
+            // 启用确认按钮
+            const btn = document.getElementById('confirmRoomBtn');
+            btn.disabled = false;
+        }
+        
+        // 前往步骤3
+        function goToStep3() {
+            if (!selectedRoom) {
+                alert('请先选择房型');
+                return;
+            }
+            
+            // 填充确认页面数据
+            document.getElementById('confirmRoomType').textContent = selectedRoomName;
+            document.getElementById('confirmCheckin').textContent = formatDateFull(checkinDate);
+            document.getElementById('confirmCheckout').textContent = formatDateFull(checkoutDate);
+            document.getElementById('confirmNights').textContent = nightCount;
+            document.getElementById('confirmPets').textContent = petCount;
+            
+            // 价格明细
+            const total = selectedRoomPrice * nightCount * petCount;
+            document.getElementById('priceDetail').textContent = 
+                `${selectedRoomName} ¥${selectedRoomPrice} × ${nightCount}晚 × ${petCount}只`;
+            document.getElementById('subtotalPrice').textContent = '¥' + total;
+            document.getElementById('totalPrice').textContent = '¥' + total;
+            document.getElementById('payButtonPrice').textContent = '¥' + total;
+            
+            goToStep(3);
+        }
+        
+        // 确认预约
+        function confirmBooking() {
+            // 跳转到成功页面
+            window.location.href = 'booking-success.html';
+        }
+    </script>
+</body>
+</html>
