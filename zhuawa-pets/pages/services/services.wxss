@@ -1,4 +1,4 @@
-/* pages/services/services.wxss - 严格统一卡片尺寸 */
+/* pages/services/services.wxss - 完全固定卡片尺寸 */
 page {
   background-color: #F8FAFC;
   height: 100vh;
@@ -27,28 +27,21 @@ page {
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
   background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  z-index: 0;
 }
 
 .nav-content {
   position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 88rpx;
-  padding: 0 20rpx;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .nav-title {
   font-size: 36rpx;
   font-weight: 600;
   color: #FFFFFF;
-  text-align: center;
 }
 
 /* ========== 主内容区 ========== */
@@ -63,13 +56,13 @@ page {
   width: 200rpx;
   background-color: #FFFFFF;
   border-right: 1rpx solid #E5E7EB;
+  flex-shrink: 0;
 }
 
 .category-item {
   padding: 32rpx 20rpx;
   text-align: center;
   border-left: 4rpx solid transparent;
-  transition: all 0.2s;
 }
 
 .category-item.active {
@@ -91,15 +84,14 @@ page {
 .service-list {
   flex: 1;
   background-color: #F8FAFC;
+  overflow: hidden;
 }
 
 .service-content {
   padding: 20rpx;
-  width: 100%;
-  box-sizing: border-box;
 }
 
-/* ========== 服务卡片 - 强制统一尺寸 ========== */
+/* ========== 服务卡片 - 完全固定尺寸 ========== */
 .service-card {
   display: flex;
   align-items: center;
@@ -108,16 +100,13 @@ page {
   padding: 20rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  /* 强制固定高度和宽度 */
+  /* 完全固定的宽高 */
+  width: 490rpx !important;
   height: 160rpx !important;
-  min-height: 160rpx !important;
-  max-height: 160rpx !important;
-  width: 100% !important;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
-/* 图片/图标区域 - 固定尺寸 */
+/* 图片/图标区域 - 固定120x120 */
 .service-image-wrapper {
   width: 120rpx;
   height: 120rpx;
@@ -129,14 +118,14 @@ page {
 }
 
 .service-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 120rpx;
+  height: 120rpx;
+  display: block;
 }
 
 .service-icon {
-  width: 100%;
-  height: 100%;
+  width: 120rpx;
+  height: 120rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -151,18 +140,17 @@ page {
 .icon-teal { background: linear-gradient(135deg, #CCFBF1 0%, #14B8A6 100%); }
 .icon-green { background: linear-gradient(135deg, #D1FAE5 0%, #22C55E 100%); }
 
-/* 服务信息区域 - 固定结构 */
+/* 服务信息区域 - 固定宽度 */
 .service-info {
-  flex: 1;
+  width: 310rpx;
+  height: 120rpx;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 120rpx;
-  min-width: 0;
-  width: calc(100% - 140rpx);
+  overflow: hidden;
 }
 
-/* 服务名称 - 固定两行 */
+/* 服务名称 - 固定78rpx高度，最多两行 */
 .service-name {
   font-size: 28rpx;
   font-weight: 600;
@@ -173,10 +161,9 @@ page {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 8rpx;
 }
 
-/* 服务描述 - 固定占位列，确保高度一致 */
+/* 服务描述 - 固定32rpx高度，单行 */
 .service-desc {
   font-size: 22rpx;
   color: #6B7280;
@@ -185,16 +172,14 @@ page {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 8rpx;
 }
 
-/* 底部价格和按钮 - 固定在底部 */
+/* 底部价格和按钮 - 固定50rpx高度 */
 .service-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 50rpx;
-  flex-shrink: 0;
 }
 
 .price-wrapper {
@@ -229,7 +214,6 @@ page {
   align-items: center;
   justify-content: center;
   box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.3);
-  flex-shrink: 0;
 }
 
 .book-icon {
