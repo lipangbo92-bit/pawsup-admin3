@@ -44,10 +44,10 @@ async function loadTechnicians() {
             ...t,
             _id: t._id || t.id,
             // 字段兼容处理
-            name: t.name || '未命名美容师',
+            name: t.name || '未命名',
             specialty: t.specialty || t.skills || t.tags?.join(', ') || '暂无',
-            title: t.title || '中级美容师',  // 职称
-            level: t.level || 'normal',      // 等级 (gold/silver/bronze/normal)
+            position: t.position || '美容师',  // 岗位（美容师/洗护师/助理）
+            level: t.level || '中级',          // 等级（初级/中级/高级/资深/首席）
             rating: t.rating || 5,
             orderCount: t.orderCount || t.orders || 0
         }));
@@ -57,9 +57,9 @@ async function loadTechnicians() {
         // 如果没有数据，初始化默认数据
         if (techniciansList.length === 0) {
             const defaultTechnicians = [
-                { name: '张美容', specialty: '洗护美容、美容造型', title: '高级美容师', level: 'gold', rating: 5, orders: 128 },
-                { name: '李洗护', specialty: 'SPA护理、染毛', title: '中级美容师', level: 'silver', rating: 4, orders: 86 },
-                { name: '王护理', specialty: '洗护美容', title: '初级美容师', level: 'bronze', rating: 3, orders: 45 }
+                { name: '张美容', specialty: '洗护美容、美容造型', position: '美容师', level: '高级', rating: 5, orders: 128 },
+                { name: '李洗护', specialty: 'SPA护理、染毛', position: '洗护师', level: '中级', rating: 4, orders: 86 },
+                { name: '王助理', specialty: '洗护美容', position: '助理', level: '初级', rating: 3, orders: 45 }
             ];
             
             for (const tech of defaultTechnicians) {
@@ -71,10 +71,10 @@ async function loadTechnicians() {
             techniciansList = (reloadResult.data || []).map(t => ({
                 ...t,
                 _id: t._id || t.id,
-                name: t.name || '未命名美容师',
+                name: t.name || '未命名',
                 specialty: t.specialty || t.skills || '暂无',
-                title: t.title || '中级美容师',
-                level: t.level || 'normal',
+                position: t.position || '美容师',
+                level: t.level || '中级',
                 rating: t.rating || 5,
                 orderCount: t.orderCount || t.orders || 0
             }));
@@ -96,12 +96,13 @@ async function loadTechnicians() {
 // 获取等级徽章HTML
 function getLevelBadge(level) {
     const levelMap = {
-        'gold': { text: '🥇 金牌', class: 'badge-gold' },
-        'silver': { text: '🥈 银牌', class: 'badge-silver' },
-        'bronze': { text: '🥉 铜牌', class: 'badge-bronze' },
-        'normal': { text: '⭐ 普通', class: 'badge-normal' }
+        '初级': { text: '初级', class: 'badge-junior' },
+        '中级': { text: '中级', class: 'badge-intermediate' },
+        '高级': { text: '高级', class: 'badge-senior' },
+        '资深': { text: '资深', class: 'badge-expert' },
+        '首席': { text: '首席', class: 'badge-master' }
     };
-    const config = levelMap[level] || levelMap['normal'];
+    const config = levelMap[level] || levelMap['中级'];
     return `<span class="level-badge ${config.class}">${config.text}</span>`;
 }
 
@@ -133,7 +134,7 @@ function renderTechniciansGrid(technicians) {
             <div class="tech-info">
                 <h4>${tech.name}</h4>
                 <div class="tech-meta-row">
-                    <span class="tech-title">${tech.title || '中级美容师'}</span>
+                    <span class="tech-position">${tech.position || '美容师'}</span>
                     ${getLevelBadge(tech.level)}
                 </div>
                 <div class="tech-rating">${getStarsHtml(tech.rating)}</div>
@@ -158,8 +159,8 @@ function openTechnicianModal() {
     document.getElementById('technicianId').value = '';
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     // 设置默认值
-    document.getElementById('techTitle').value = '中级美容师';
-    document.getElementById('techLevel').value = 'silver';
+    document.getElementById('techPosition').value = '美容师';
+    document.getElementById('techLevel').value = '中级';
     document.getElementById('technicianModal').style.display = 'flex';
 }
 
@@ -178,8 +179,8 @@ function editTechnician(techId) {
     document.getElementById('technicianId').value = currentTechnician._id;
     document.getElementById('techName').value = currentTechnician.name || '';
     document.getElementById('techSpecialty').value = currentTechnician.specialty || '';
-    document.getElementById('techTitle').value = currentTechnician.title || '中级美容师';
-    document.getElementById('techLevel').value = currentTechnician.level || 'silver';
+    document.getElementById('techPosition').value = currentTechnician.position || '美容师';
+    document.getElementById('techLevel').value = currentTechnician.level || '中级';
     document.getElementById('techRating').value = currentTechnician.rating || '';
     document.getElementById('techOrderCount').value = currentTechnician.orderCount || '';
     
@@ -197,14 +198,14 @@ function editTechnician(techId) {
 async function saveTechnician() {
     const name = document.getElementById('techName').value.trim();
     const specialty = document.getElementById('techSpecialty').value.trim();
-    const title = document.getElementById('techTitle').value;
+    const position = document.getElementById('techPosition').value;
     const level = document.getElementById('techLevel').value;
     const rating = parseInt(document.getElementById('techRating').value);
     const orderCount = parseInt(document.getElementById('techOrderCount').value) || 0;
     
     // Validation
     if (!name) {
-        showMessage('请输入美容师姓名', 'error');
+        showMessage('请输入姓名', 'error');
         return;
     }
     if (!specialty) {
@@ -212,7 +213,7 @@ async function saveTechnician() {
         return;
     }
     if (!rating || rating < 1 || rating > 5) {
-        showMessage('请选择评级', 'error');
+        showMessage('请选择评分', 'error');
         return;
     }
     
@@ -220,8 +221,8 @@ async function saveTechnician() {
         const techData = {
             name,
             specialty,
-            title,      // 职称
-            level,      // 等级 (gold/silver/bronze/normal)
+            position,   // 岗位（美容师/洗护师/助理）
+            level,      // 等级（初级/中级/高级/资深/首席）
             rating,
             orders: orderCount
         };
@@ -233,11 +234,11 @@ async function saveTechnician() {
                 id: currentTechnician._id, 
                 data: techData 
             });
-            showMessage('美容师信息更新成功', 'success');
+            showMessage('信息更新成功', 'success');
         } else {
             // Add new
             await apiCall('technicians', { action: 'add', data: techData });
-            showMessage('美容师添加成功', 'success');
+            showMessage('添加成功', 'success');
         }
         
         closeTechnicianModal();
@@ -286,7 +287,7 @@ async function confirmTechDelete() {
     
     try {
         await apiCall('technicians', { action: 'delete', id: techId });
-        alert('美容师已删除');
+        alert('已删除');
         loadTechnicians();
     } catch (err) {
         console.error('Delete technician error:', err);
