@@ -1,9 +1,8 @@
-// 首页 - 最终版
+// 首页 - 恢复原设计，同时从数据库加载数据
 Page({
   data: {
-    banner: [],
-    services: [],
-    technicians: []
+    technicians: [],
+    services: []
   },
 
   onLoad() {
@@ -18,7 +17,6 @@ Page({
       ]);
       
       this.setData({
-        banner: [{ id: 1, image: '/assets/banner1.png', url: '' }],
         services: servicesRes,
         technicians: techsRes
       });
@@ -38,12 +36,12 @@ Page({
         return res.result.data.map(s => ({
           id: s._id,
           name: s.name,
-          price: s.price,
-          image: s.image || ''
+          price: s.price
         }));
       }
       return [];
     } catch (err) {
+      console.error('加载服务失败:', err);
       return [];
     }
   },
@@ -55,36 +53,16 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('技师原始数据:', res.result.data);
-      
       if (res.result && res.result.success) {
-        return res.result.data.map(t => {
-          // 获取头像（支持 avatarUrl 和 avatar 字段，支持 URL 和 base64）
-          let avatar = t.avatarUrl || t.avatar || '';
-          
-          // 如果是 base64，确保格式正确
-          if (avatar && avatar.startsWith('data:image')) {
-            // base64 格式，可以直接使用
-            console.log(`技师 ${t.name}: 使用 base64 头像`);
-          } else if (avatar && avatar.startsWith('http')) {
-            // HTTP URL，可以直接使用
-            console.log(`技师 ${t.name}: 使用 URL 头像`);
-          } else if (avatar) {
-            // 其他格式，可能是 fileID，尝试转换
-            console.log(`技师 ${t.name}: 头像格式未知`, avatar.substring(0, 50));
-          } else {
-            console.log(`技师 ${t.name}: 无头像`);
-          }
-          
-          return {
-            id: t._id,
-            name: t.name,
-            level: t.level || '中级',
-            position: t.position || '美容师',
-            displayTitle: `${t.level || '中级'}${t.position || '美容师'}`,
-            avatar: avatar
-          };
-        });
+        return res.result.data.map(t => ({
+          id: t._id,
+          name: t.name,
+          level: t.level || '中级',
+          position: t.position || '美容师',
+          rating: t.rating || 5,
+          orders: t.orders || t.orderCount || 0,
+          avatar: t.avatarUrl || t.avatar || ''
+        }));
       }
       return [];
     } catch (err) {
@@ -93,9 +71,10 @@ Page({
     }
   },
 
-  async onPullDownRefresh() {
-    await this.loadData();
-    wx.stopPullDownRefresh();
+  onPullDownRefresh() {
+    this.loadData().then(() => {
+      wx.stopPullDownRefresh();
+    });
   },
 
   goToServices() {
