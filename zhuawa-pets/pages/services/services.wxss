@@ -1,4 +1,4 @@
-/* pages/services/services.wxss - 完全固定卡片尺寸 */
+/* pages/services/services.wxss - 优化布局 */
 page {
   background-color: #F8FAFC;
   height: 100vh;
@@ -91,7 +91,7 @@ page {
   padding: 20rpx;
 }
 
-/* ========== 服务卡片 - 完全固定尺寸 ========== */
+/* ========== 服务卡片 ========== */
 .service-card {
   display: flex;
   align-items: center;
@@ -100,16 +100,15 @@ page {
   padding: 20rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  /* 完全固定的宽高 */
   width: 490rpx !important;
   height: 200rpx !important;
   box-sizing: border-box;
 }
 
-/* 图片/图标区域 - 固定120x120 */
+/* 图片/图标区域 */
 .service-image-wrapper {
-  width: 162rpx;
-  height: 162rpx;
+  width: 160rpx;
+  height: 160rpx;
   border-radius: 16rpx;
   overflow: hidden;
   margin-right: 20rpx;
@@ -118,18 +117,18 @@ page {
 }
 
 .service-image {
-  width: 162rpx;
-  height: 162rpx;
+  width: 160rpx;
+  height: 160rpx;
   display: block;
 }
 
 .service-icon {
-  width: 162rpx;
-  height: 162rpx;
+  width: 160rpx;
+  height: 160rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 60rpx;
+  font-size: 72rpx;
 }
 
 .icon-blue { background: linear-gradient(135deg, #DBEAFE 0%, #3B82F6 100%); }
@@ -140,46 +139,41 @@ page {
 .icon-teal { background: linear-gradient(135deg, #CCFBF1 0%, #14B8A6 100%); }
 .icon-green { background: linear-gradient(135deg, #D1FAE5 0%, #22C55E 100%); }
 
-/* 服务信息区域 - 固定宽度 */
+/* 服务信息区域 */
 .service-info {
-  width: 310rpx;
-  height: 162rpx;
+  width: 270rpx;
+  height: 160rpx;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
 }
 
-/* 服务名称 - 固定97rpx高度，最多两行 */
+/* 服务名称 - 最多3行 */
 .service-name {
   font-size: 28rpx;
   font-weight: 600;
   color: #1F2937;
-  line-height: 1.4;
-  height: 97rpx;
+  line-height: 1.3;
+  max-height: 110rpx;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* 服务描述 - 固定40rpx高度，单行 */
+/* 服务描述 - 隐藏或极小 */
 .service-desc {
-  font-size: 22rpx;
-  color: #6B7280;
-  line-height: 1.4;
-  height: 40rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 
-/* 底部价格和按钮 - 固定62rpx高度 */
+/* 底部价格和按钮 */
 .service-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 62rpx;
+  height: 50rpx;
+  margin-top: 8rpx;
 }
 
 .price-wrapper {
@@ -188,19 +182,19 @@ page {
 }
 
 .price-symbol {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #EF4444;
   font-weight: 500;
 }
 
 .price-value {
-  font-size: 36rpx;
+  font-size: 40rpx;
   color: #EF4444;
   font-weight: bold;
 }
 
 .price-unit {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #9CA3AF;
   margin-left: 4rpx;
 }
@@ -218,7 +212,7 @@ page {
 
 .book-icon {
   color: #FFFFFF;
-  font-size: 40rpx;
+  font-size: 36rpx;
   font-weight: 300;
 }
 
