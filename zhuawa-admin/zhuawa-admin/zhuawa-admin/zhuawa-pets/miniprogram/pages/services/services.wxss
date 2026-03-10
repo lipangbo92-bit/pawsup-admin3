@@ -1,0 +1,95 @@
+.container {
+  min-height: 100vh;
+  background: var(--bg, #FDF2F8);
+}
+
+.category-tabs {
+  display: flex;
+  background: #fff;
+  padding: 12px 16px;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.tab-item {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-secondary, #6B7280);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.tab-item.active {
+  background: var(--primary, #EC4899);
+  color: #fff;
+}
+
+.service-list {
+  padding: 16px;
+}
+
+.service-card {
+  display: flex;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.service-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  background: var(--bg, #FDF2F8);
+  flex-shrink: 0;
+}
+
+.service-content {
+  flex: 1;
+  margin: 0 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #1F2937);
+}
+
+.service-desc {
+  font-size: 12px;
+  color: var(--text-secondary, #6B7280);
+  margin-top: 4px;
+}
+
+.service-meta {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  gap: 12px;
+}
+
+.service-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary, #EC4899);
+}
+
+.service-duration {
+  font-size: 12px;
+  color: var(--text-secondary, #6B7280);
+}
+
+.book-btn {
+  background: var(--primary, #EC4899);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  height: 36px;
+  line-height: 36px;
+  align-self: center;
+}

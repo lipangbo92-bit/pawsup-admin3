@@ -1,0 +1,173 @@
+/* pages/booking-time/booking-time.wxss */
+page {
+  background: #FDF2F8;
+}
+
+.container {
+  min-height: 100vh;
+  padding-bottom: 160rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back {
+  color: #fff;
+  font-size: 40rpx;
+}
+
+.title {
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.placeholder {
+  width: 40rpx;
+}
+
+/* Info Card */
+.info-card {
+  background: #fff;
+  margin: 32rpx;
+  border-radius: 24rpx;
+  padding: 24rpx 32rpx;
+  display: flex;
+  gap: 48rpx;
+}
+
+.info-item .label {
+  color: #6B7280;
+  font-size: 24rpx;
+  margin-right: 16rpx;
+}
+
+.info-item .value {
+  color: #1F2937;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* Section */
+.section {
+  padding: 0 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 24rpx;
+}
+
+/* Date Scroll */
+.date-scroll {
+  white-space: nowrap;
+}
+
+.date-item {
+  display: inline-block;
+  width: 120rpx;
+  text-align: center;
+  padding: 24rpx 16rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+  position: relative;
+}
+
+.date-item.active {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  color: #fff;
+}
+
+.date-week {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-bottom: 8rpx;
+}
+
+.date-item.active .date-week {
+  color: rgba(255,255,255,0.8);
+}
+
+.date-day {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.date-today {
+  font-size: 18rpx;
+  background: #EC4899;
+  color: #fff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-top: 8rpx;
+}
+
+/* Time Grid */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.time-item {
+  background: #fff;
+  text-align: center;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #1F2937;
+}
+
+.time-item.selected {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  color: #fff;
+}
+
+.time-item.disabled {
+  background: #F3F4F6;
+  color: #D1D5DB;
+  text-decoration: line-through;
+}
+
+/* Bottom Bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.selected-info {
+  color: #EC4899;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.next-btn {
+  background: #D1D5DB;
+  color: #fff;
+  padding: 24rpx 64rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.next-btn.active {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+}

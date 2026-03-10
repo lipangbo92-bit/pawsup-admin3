@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>技师管理 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --secondary: #F9A8D4;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --text-light: #BE185D;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+            --gray-500: #DB2777;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-item .icon { font-size: 18px; }
+        
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-box {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-box-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-box-label {
+            font-size: 13px;
+            color: #6B7280;
+            margin-top: 4px;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .tech-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .tech-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .tech-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--white);
+        }
+        
+        .tech-info {
+            flex: 1;
+        }
+        
+        .tech-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .tech-level {
+            display: inline-block;
+            background: var(--gray-100);
+            color: var(--text-light);
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+        
+        .tech-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .tech-status.active {
+            background: var(--green);
+        }
+        
+        .tech-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 12px 0;
+            border-top: 1px solid #F3F4F6;
+            border-bottom: 1px solid #F3F4F6;
+            margin-bottom: 12px;
+        }
+        
+        .tech-stat {
+            text-align: center;
+        }
+        
+        .tech-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .tech-stat-label {
+            font-size: 11px;
+            color: #6B7280;
+        }
+        
+        .tech-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .stars {
+            color: #F59E0B;
+            font-size: 14px;
+        }
+        
+        .rating-text {
+            font-size: 13px;
+            color: #6B7280;
+        }
+        
+        .tech-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tech-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-edit {
+            background: var(--gray-100);
+            color: var(--text);
+        }
+        
+        .btn-schedule {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>栖游记管理</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </div>
+            <div class="nav-item active">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">👥 技师管理</h1>
+            <button class="btn-primary">
+                <span>+</span>
+                <span>添加技师</span>
+            </button>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-box-value">8</div>
+                <div class="stat-box-label">总技师</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value">6</div>
+                <div class="stat-box-label">在职</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value">2</div>
+                <div class="stat-box-label">休息中</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value">4.8</div>
+                <div class="stat-box-label">平均评分</div>
+            </div>
+        </div>
+        
+        <div class="tech-grid">
+            <div class="tech-card">
+                <div class="tech-header">
+                    <div class="tech-avatar">👩‍🦱</div>
+                    <div class="tech-info">
+                        <div class="tech-name">小美</div>
+                        <span class="tech-level">高级美容师</span>
+                    </div>
+                    <span class="tech-status active"></span>
+                </div>
+                <div class="tech-stats">
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">328</div>
+                        <div class="tech-stat-label">服务单</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">5</div>
+                        <div class="tech-stat-label">今日</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">¥52k</div>
+                        <div class="tech-stat-label">本月业绩</div>
+                    </div>
+                </div>
+                <div class="tech-rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-text">4.9分 (128评价)</span>
+                </div>
+                <div class="tech-actions">
+                    <button class="btn-edit">编辑</button>
+                    <button class="btn-schedule">排班</button>
+                </div>
+            </div>
+            
+            <div class="tech-card">
+                <div class="tech-header">
+                    <div class="tech-avatar">👨‍🦲</div>
+                    <div class="tech-info">
+                        <div class="tech-name">Tony</div>
+                        <span class="tech-level">中级美容师</span>
+                    </div>
+                    <span class="tech-status active"></span>
+                </div>
+                <div class="tech-stats">
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">215</div>
+                        <div class="tech-stat-label">服务单</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">4</div>
+                        <div class="tech-stat-label">今日</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">¥38k</div>
+                        <div class="tech-stat-label">本月业绩</div>
+                    </div>
+                </div>
+                <div class="tech-rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-text">4.8分 (96评价)</span>
+                </div>
+                <div class="tech-actions">
+                    <button class="btn-edit">编辑</button>
+                    <button class="btn-schedule">排班</button>
+                </div>
+            </div>
+            
+            <div class="tech-card">
+                <div class="tech-header">
+                    <div class="tech-avatar">👩</div>
+                    <div class="tech-info">
+                        <div class="tech-name">Lily</div>
+                        <span class="tech-level">护理美容师</span>
+                    </div>
+                    <span class="tech-status active"></span>
+                </div>
+                <div class="tech-stats">
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">156</div>
+                        <div class="tech-stat-label">服务单</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">3</div>
+                        <div class="tech-stat-label">今日</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">¥28k</div>
+                        <div class="tech-stat-label">本月业绩</div>
+                    </div>
+                </div>
+                <div class="tech-rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-text">4.7分 (68评价)</span>
+                </div>
+                <div class="tech-actions">
+                    <button class="btn-edit">编辑</button>
+                    <button class="btn-schedule">排班</button>
+                </div>
+            </div>
+            
+            <div class="tech-card">
+                <div class="tech-header">
+                    <div class="tech-avatar">👨</div>
+                    <div class="tech-info">
+                        <div class="tech-name">阿强</div>
+                        <span class="tech-level">初级美容师</span>
+                    </div>
+                    <span class="tech-status active"></span>
+                </div>
+                <div class="tech-stats">
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">89</div>
+                        <div class="tech-stat-label">服务单</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">2</div>
+                        <div class="tech-stat-label">今日</div>
+                    </div>
+                    <div class="tech-stat">
+                        <div class="tech-stat-value">¥15k</div>
+                        <div class="tech-stat-label">本月业绩</div>
+                    </div>
+                </div>
+                <div class="tech-rating">
+                    <span class="stars">⭐⭐⭐⭐⭐</span>
+                    <span class="rating-text">4.9分 (42评价)</span>
+                </div>
+                <div class="tech-actions">
+                    <button class="btn-edit">编辑</button>
+                    <button class="btn-schedule">排班</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

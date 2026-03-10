@@ -1,19 +1,17 @@
-<!--pages/services/services.wxml-->
+<!--pages/services/services.wxml - 修复版-->
 <view class="container">
-  <!-- 顶部导航栏 -->
+  <!-- 顶部导航栏 - 修复背景覆盖 -->
   <view class="custom-nav">
-    <view class="nav-bg" style="position: absolute; left: 6rpx; top: -20rpx"></view>
-    <view class="nav-content" style="width: 750rpx; display: flex; box-sizing: content-box; left: 0rpx; top: 0rpx; height: -125rpx">
-      <view class="nav-placeholder"></view>
+    <view class="nav-bg"></view>
+    <view class="nav-content">
       <text class="nav-title">服务项目</text>
-      <view class="nav-placeholder"></view>
     </view>
   </view>
 
   <!-- 左右分栏布局 -->
   <view class="main-content">
-    <!-- 左侧分类导航 -->
-    <scroll-view class="category-nav" scroll-top="{{categoryScrollTop}}" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 左侧分类导航 - 6个分类 -->
+    <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
       <view 
         wx:for="{{categories}}" 
         wx:key="index"
@@ -29,9 +27,9 @@
     <scroll-view class="service-list" scroll-y enhanced show-scrollbar="{{false}}">
       <view class="service-content">
         <view 
-          wx:for="{{services[currentCategory]}}" 
+          wx:for="{{services}}" 
           wx:key="id"
-          class="service-card" style="width: 500rpx; display: flex; box-sizing: border-box"
+          class="service-card"
         >
           <view class="service-icon-wrapper {{item.iconClass}}">
             <text class="icon-text">{{item.iconText}}</text>
@@ -52,6 +50,11 @@
               </view>
             </view>
           </view>
+        </view>
+        
+        <!-- 无数据提示 -->
+        <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
+          暂无服务数据
         </view>
       </view>
     </scroll-view>

@@ -1,0 +1,343 @@
+<!--pages/boarding/boarding.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-back" bindtap="handleBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="nav-title">{{pageTitle}}</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 步骤指示器 - 圆点+连线样式 -->
+  <view class="step-indicator">
+    <view class="step-item">
+      <view class="step-dot {{currentStep >= 1 ? 'active' : ''}} {{currentStep === 1 ? 'current' : ''}}"></view>
+      <text class="step-text {{currentStep >= 1 ? 'active' : ''}}">选择房型</text>
+    </view>
+    <view class="step-line">
+      <view class="step-line-fill" style="width: {{currentStep >= 2 ? 100 : 0}}%"></view>
+    </view>
+    <view class="step-item">
+      <view class="step-dot {{currentStep >= 2 ? 'active' : ''}} {{currentStep === 2 ? 'current' : ''}}"></view>
+      <text class="step-text {{currentStep >= 2 ? 'active' : ''}}">选择日期</text>
+    </view>
+    <view class="step-line">
+      <view class="step-line-fill" style="width: {{currentStep >= 3 ? 100 : 0}}%"></view>
+    </view>
+    <view class="step-item">
+      <view class="step-dot {{currentStep >= 3 ? 'active' : ''}} {{currentStep === 3 ? 'current' : ''}}"></view>
+      <text class="step-text {{currentStep >= 3 ? 'active' : ''}}">宠物数量</text>
+    </view>
+    <view class="step-line">
+      <view class="step-line-fill" style="width: {{currentStep >= 4 ? 100 : 0}}%"></view>
+    </view>
+    <view class="step-item">
+      <view class="step-dot {{currentStep >= 4 ? 'active' : ''}} {{currentStep === 4 ? 'current' : ''}}"></view>
+      <text class="step-text {{currentStep >= 4 ? 'active' : ''}}">确认</text>
+    </view>
+  </view>
+
+  <!-- 步骤1：选择房型 -->
+  <view class="step-content" wx:if="{{currentStep === 1}}">
+    <view class="content-wrapper">
+      <view class="section-card">
+        <view class="section-header">
+          <text class="section-icon">🏠</text>
+          <text class="section-title">选择房型</text>
+        </view>
+        
+        <!-- 房型列表 -->
+        <view class="room-list">
+          <view class="room-card {{selectedRoom.type === 'cage' ? 'selected' : ''}}" bindtap="selectRoom" data-type="cage" data-price="88" data-name="围栏/笼养">
+            <view class="room-main">
+              <view class="room-icon-wrap cage">
+                <text class="room-emoji">🏠</text>
+              </view>
+              <view class="room-info">
+                <text class="room-name">围栏/笼养</text>
+                <text class="room-desc">适合小型犬猫咪</text>
+              </view>
+              <view class="room-price-wrap">
+                <text class="room-price">¥88</text>
+                <text class="room-unit">/晚</text>
+              </view>
+            </view>
+            <view class="room-tags">
+              <text class="tag">基础配置</text>
+              <text class="tag">24h监控</text>
+            </view>
+          </view>
+
+          <view class="room-card {{selectedRoom.type === 'standard' ? 'selected' : ''}}" bindtap="selectRoom" data-type="standard" data-price="168" data-name="标准间">
+            <view class="room-main">
+              <view class="room-icon-wrap standard">
+                <text class="room-emoji">🏨</text>
+              </view>
+              <view class="room-info">
+                <text class="room-name">标准间</text>
+                <text class="room-desc">1宠1间，有窗</text>
+              </view>
+              <view class="room-price-wrap">
+                <text class="room-price">¥168</text>
+                <text class="room-unit">/晚</text>
+              </view>
+            </view>
+            <view class="room-tags">
+              <text class="tag orange">独立空间</text>
+              <text class="tag orange">每日遛弯</text>
+            </view>
+          </view>
+
+          <view class="room-card {{selectedRoom.type === 'luxury' ? 'selected' : ''}}" bindtap="selectRoom" data-type="luxury" data-price="268" data-name="豪华间">
+            <view class="room-main">
+              <view class="room-icon-wrap luxury">
+                <text class="room-emoji">🏰</text>
+              </view>
+              <view class="room-info">
+                <text class="room-name">豪华间</text>
+                <text class="room-desc">1宠1间，豪华配置</text>
+              </view>
+              <view class="room-price-wrap">
+                <text class="room-price">¥268</text>
+                <text class="room-unit">/晚</text>
+              </view>
+            </view>
+            <view class="room-tags">
+              <text class="tag gold">VIP服务</text>
+              <text class="tag gold">专属管家</text>
+              <text class="tag gold">SPA服务</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部按钮栏 -->
+    <view class="bottom-bar">
+      <view class="bottom-info">
+        <text class="bottom-label" wx:if="{{!selectedRoom.type}}">请选择房型</text>
+        <view class="bottom-selected" wx:if="{{selectedRoom.type}}">
+          <text class="selected-name">{{selectedRoom.name}}</text>
+          <text class="selected-price">¥{{selectedRoom.price}}/晚</text>
+        </view>
+      </view>
+      <button class="next-btn {{selectedRoom.type ? 'active' : ''}}" bindtap="goToStep2" disabled="{{!selectedRoom.type}}">
+        下一步
+      </button>
+    </view>
+  </view>
+
+  <!-- 步骤2：选择日期 -->
+  <view class="step-content" wx:if="{{currentStep === 2}}">
+    <view class="content-wrapper">
+      <!-- 已选房型提示 -->
+      <view class="selected-room-notice">
+        <text class="notice-text">已选房型：{{selectedRoom.name}} ¥{{selectedRoom.price}}/晚</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header">
+          <text class="section-icon">📅</text>
+          <text class="section-title">选择日期</text>
+        </view>
+        
+        <view class="date-picker">
+          <view class="date-item">
+            <text class="date-label">入住日期</text>
+            <picker mode="date" value="{{checkinDate}}" start="{{today}}" bindchange="onCheckinChange">
+              <view class="date-value {{checkinDate ? 'active' : ''}}">
+                <text wx:if="{{checkinDate}}">{{checkinDate}}</text>
+                <text wx:else class="placeholder">请选择</text>
+              </view>
+            </picker>
+          </view>
+          
+          <view class="date-arrow">
+            <text class="arrow-icon">→</text>
+          </view>
+          
+          <view class="date-item">
+            <text class="date-label">退房日期</text>
+            <picker mode="date" value="{{checkoutDate}}" start="{{checkinDate || today}}" bindchange="onCheckoutChange">
+              <view class="date-value {{checkoutDate ? 'active' : ''}}">
+                <text wx:if="{{checkoutDate}}">{{checkoutDate}}</text>
+                <text wx:else class="placeholder">请选择</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+
+        <view class="nights-summary" wx:if="{{nightCount > 0}}">
+          <text class="summary-text">共 <text class="night-num">{{nightCount}}</text> 晚</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部按钮栏 -->
+    <view class="bottom-bar">
+      <view class="bottom-info">
+        <text class="bottom-label" wx:if="{{nightCount === 0}}">请选择入住和退房日期</text>
+        <view class="bottom-selected" wx:if="{{nightCount > 0}}">
+          <text class="selected-name">{{nightCount}}晚</text>
+          <text class="selected-price">¥{{selectedRoom.price * nightCount}}起</text>
+        </view>
+      </view>
+      <button class="next-btn {{nightCount > 0 ? 'active' : ''}}" bindtap="goToStep3" disabled="{{nightCount === 0}}">
+        下一步
+      </button>
+    </view>
+  </view>
+
+  <!-- 步骤3：选择宠物数量 -->
+  <view class="step-content" wx:if="{{currentStep === 3}}">
+    <view class="content-wrapper">
+      <!-- 已选信息提示 -->
+      <view class="selected-info-notice">
+        <text class="notice-text">{{checkinDate}} - {{checkoutDate}} 共{{nightCount}}晚</text>
+      </view>
+
+      <view class="section-card">
+        <view class="section-header">
+          <text class="section-icon">🐾</text>
+          <text class="section-title">宠物数量</text>
+        </view>
+        
+        <view class="pet-counter">
+          <view class="count-btn {{petCount <= 1 ? 'disabled' : ''}}" bindtap="changePetCount" data-delta="-1">
+            <text class="count-icon">−</text>
+          </view>
+          <text class="count-num">{{petCount}}</text>
+          <view class="count-btn {{petCount >= 3 ? 'disabled' : ''}}" bindtap="changePetCount" data-delta="1">
+            <text class="count-icon">+</text>
+          </view>
+        </view>
+        
+        <text class="pet-hint">可选1-3只宠物</text>
+      </view>
+    </view>
+
+    <!-- 底部按钮栏 -->
+    <view class="bottom-bar">
+      <view class="bottom-info">
+        <view class="bottom-selected">
+          <text class="selected-name">{{nightCount}}晚 · {{petCount}}只宠物</text>
+          <text class="selected-price">¥{{selectedRoom.price * nightCount * petCount}}</text>
+        </view>
+      </view>
+      <button class="next-btn active" bindtap="goToStep4">
+        下一步
+      </button>
+    </view>
+  </view>
+
+  <!-- 步骤4：确认预约 -->
+  <view class="step-content" wx:if="{{currentStep === 4}}">
+    <view class="content-wrapper confirm-wrapper">
+      <!-- 预约信息卡片 -->
+      <view class="section-card">
+        <view class="section-header">
+          <text class="section-icon">📋</text>
+          <text class="section-title">预约信息</text>
+        </view>
+        
+        <view class="info-list">
+          <view class="info-item">
+            <text class="info-label">房型</text>
+            <text class="info-value">{{selectedRoom.name}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">入住日期</text>
+            <text class="info-value">{{checkinDate}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">退房日期</text>
+            <text class="info-value">{{checkoutDate}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">入住天数</text>
+            <text class="info-value">{{nightCount}} 晚</text>
+          </view>
+          <view class="info-item last">
+            <text class="info-label">宠物数量</text>
+            <text class="info-value">{{petCount}} 只</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 价格明细卡片 -->
+      <view class="section-card">
+        <view class="section-header">
+          <text class="section-icon">💰</text>
+          <text class="section-title">价格明细</text>
+        </view>
+        
+        <view class="price-list">
+          <view class="price-item">
+            <text class="price-label">{{selectedRoom.name}} ¥{{selectedRoom.price}} × {{nightCount}}晚 × {{petCount}}只</text>
+            <text class="price-value">¥{{subtotal}}</text>
+          </view>
+          <view class="price-item">
+            <text class="price-label">服务费</text>
+            <text class="price-value">¥0</text>
+          </view>
+        </view>
+        
+        <view class="total-row">
+          <text class="total-label">应付金额</text>
+          <view class="total-price">
+            <text class="currency">¥</text>
+            <text class="amount">{{totalPrice}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 取消政策 -->
+      <view class="policy-card">
+        <text class="policy-icon">⚠️</text>
+        <text class="policy-text"><text class="policy-bold">取消政策：</text>入住前24小时可取消，全额退款；24小时内取消，收取首晚房费。请合理安排您的时间。</text>
+      </view>
+    </view>
+
+    <!-- 底部按钮栏 -->
+    <view class="bottom-bar">
+      <view class="bottom-info">
+        <view class="total-price-wrap">
+          <text class="currency">¥</text>
+          <text class="amount">{{totalPrice}}</text>
+        </view>
+      </view>
+      <button class="pay-btn" bindtap="confirmBooking">
+        确认支付
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部导航栏 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'home' ? 'active' : ''}}" bindtap="switchTab" data-page="home">
+      <image class="tab-icon" src="/images/home.png" mode="aspectFit"/>
+      <text class="tab-text">首页</text>
+  <!-- 底部导航栏 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'home' ? 'active' : ''}}" bindtap="switchTab" data-page="home">
+      <text class="tab-icon">🏠</text>
+      <text class="tab-text">首页</text>
+    </view>
+    <view class="tab-item {{activeTab === 'service' ? 'active' : ''}}" bindtap="switchTab" data-page="service">
+      <text class="tab-icon">📋</text>
+      <text class="tab-text">服务</text>
+    </view>
+    <view class="tab-item {{activeTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-page="orders">
+      <text class="tab-icon">📝</text>
+      <text class="tab-text">订单</text>
+    </view>
+    <view class="tab-item {{activeTab === 'profile' ? 'active' : ''}}" bindtap="switchTab" data-page="profile">
+      <text class="tab-icon">👤</text>
+      <text class="tab-text">我的</text>
+    </view>
+  </view>
+</view>

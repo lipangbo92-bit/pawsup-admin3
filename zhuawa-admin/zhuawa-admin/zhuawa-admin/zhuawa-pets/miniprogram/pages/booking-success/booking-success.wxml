@@ -1,0 +1,29 @@
+<!--预约成功页-->
+<view class="container">
+  <view class="success-icon">
+    <text>✓</text>
+  </view>
+  
+  <view class="success-title">预约成功</view>
+  <view class="success-desc">您的预约已提交，请留意服务通知</view>
+
+  <view class="order-card card">
+    <view class="order-title">预约信息</view>
+    <view class="order-row">
+      <text class="label">预约单号</text>
+      <text class="value">{{orderNo}}</text>
+    </view>
+  </view>
+
+  <view class="tips card">
+    <view class="tip-title">温馨提示</view>
+    <view class="tip-item">• 请按时到店，带好宠物相关证件</view>
+    <view class="tip-item">• 如需取消，请提前1天操作</view>
+    <view class="tip-item">• 到店后请联系技师确认</view>
+  </view>
+
+  <view class="btn-group">
+    <button class="btn-primary" bindtap="goToOrders">查看订单</button>
+    <button class="btn-secondary" bindtap="goToHome">返回首页</button>
+  </view>
+</view>

@@ -1,108 +1,69 @@
-// 首页
+// 首页 - 测试版
 Page({
   data: {
-    banner: [],
-    services: [],
-    technicians: []
+    technicians: [],
+    debugInfo: ''
   },
 
   onLoad() {
+    // 页面加载时自动加载数据
     this.loadData();
+  },
+
+  // 测试加载按钮
+  async testLoadData() {
+    wx.showLoading({ title: '加载中' });
+    await this.loadData();
+    wx.hideLoading();
+    wx.showToast({ title: '加载完成', icon: 'success' });
   },
 
   async loadData() {
     try {
-      // 并行加载服务列表和技师列表
-      const [servicesRes, techsRes] = await Promise.all([
-        this.loadServices(),
-        this.loadTechnicians()
-      ]);
+      console.log('=== 开始加载技师数据 ===');
       
-      this.setData({
-        banner: [
-          { id: 1, image: '/assets/banner1.png', url: '' }
-        ],
-        services: servicesRes,
-        technicians: techsRes
-      });
-    } catch (err) {
-      console.error('加载数据失败:', err);
-      // 使用备用数据
-      this.setData({
-        services: [
-          { id: '1', name: '宠物美容', price: 128, image: '' },
-          { id: '2', name: '宠物洗澡', price: 88, image: '' }
-        ],
-        technicians: [
-          { id: '1', name: '加载中...', level: '请刷新', position: '' }
-        ]
-      });
-    }
-  },
-
-  // 加载服务列表
-  async loadServices() {
-    try {
-      const res = await wx.cloud.callFunction({
-        name: 'services-api',
-        data: { action: 'list' }
-      });
-      
-      if (res.result && res.result.success) {
-        return res.result.data.map(s => ({
-          id: s._id,
-          name: s.name,
-          price: s.price,
-          image: s.image || ''
-        }));
-      }
-      return [];
-    } catch (err) {
-      console.error('加载服务失败:', err);
-      return [];
-    }
-  },
-
-  // 加载技师列表
-  async loadTechnicians() {
-    try {
       const res = await wx.cloud.callFunction({
         name: 'technicians-api',
         data: { action: 'list' }
       });
       
+      console.log('云函数返回:', res);
+      
       if (res.result && res.result.success) {
-        return res.result.data.map(t => ({
-          id: t._id,
-          name: t.name,
-          // 展示等级（初级/中级/高级/资深/首席）
-          level: t.level || '中级',
-          // 展示岗位（美容师/洗护师/助理）
-          position: t.position || '美容师',
-          // 组合展示：高级美容师
-          displayTitle: `${t.level || '中级'}${t.position || '美容师'}`,
-          avatar: t.avatarUrl || ''
-        }));
+        const techs = res.result.data.map(t => {
+          const avatarUrl = t.avatarUrl || t.avatar || '';
+          console.log(`技师: ${t.name}, avatar字段:`, avatarUrl.substring(0, 50) + '...');
+          
+          return {
+            id: t._id,
+            name: t.name || '未命名',
+            displayTitle: `${t.level || '中级'}${t.position || '美容师'}`,
+            avatar: avatarUrl
+          };
+        });
+        
+        this.setData({ technicians: techs });
+        
+        // 弹窗显示结果
+        wx.showModal({
+          title: '数据加载成功',
+          content: `共加载 ${techs.length} 位技师`,
+          showCancel: false
+        });
+      } else {
+        throw new Error(res.result?.error || '返回数据异常');
       }
-      return [];
     } catch (err) {
-      console.error('加载技师失败:', err);
-      return [];
+      console.error('加载失败:', err);
+      wx.showModal({
+        title: '加载失败',
+        content: err.message || '请检查网络',
+        showCancel: false
+      });
     }
-  },
-
-  // 下拉刷新
-  async onPullDownRefresh() {
-    await this.loadData();
-    wx.stopPullDownRefresh();
   },
 
   goToServices() {
     wx.switchTab({ url: '/pages/services/services' });
-  },
-
-  goToBooking(e) {
-    const serviceId = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}` });
   }
 });

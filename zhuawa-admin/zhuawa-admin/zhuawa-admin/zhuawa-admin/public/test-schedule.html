@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排班管理测试</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .test-box { 
+            background: #f0f0f0; 
+            padding: 20px; 
+            margin: 10px 0; 
+            border-radius: 8px;
+            border: 2px solid #ccc;
+        }
+        .success { background: #d4edda; border-color: #28a745; }
+        .error { background: #f8d7da; border-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>排班管理 - 简易测试版</h1>
+    <div id="status" class="test-box">加载中...</div>
+    <div id="techList" class="test-box">美容师列表区域</div>
+    <div id="scheduleGrid" class="test-box">排班设置区域</div>
+    
+    <script>
+        const API_BASE = '/api';
+        
+        async function apiCall(endpoint, data) {
+            const response = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+        
+        async function init() {
+            const statusEl = document.getElementById('status');
+            try {
+                const result = await apiCall('technicians', { action: 'listActive' });
+                if (result.success) {
+                    statusEl.className = 'test-box success';
+                    statusEl.innerHTML = '<h3>✅ API 连接正常</h3><p>美容师数量: ' + result.data.length + '</p>';
+                    
+                    const techEl = document.getElementById('techList');
+                    techEl.innerHTML = '<h3>美容师列表</h3>' + result.data.map(t => 
+                        '<div style="padding:10px;margin:5px 0;background:white;border-radius:4px;">' + 
+                        (t.name || '未命名') + '</div>'
+                    ).join('');
+                } else {
+                    statusEl.className = 'test-box error';
+                    statusEl.innerHTML = '<h3>❌ API 返回错误</h3><p>' + result.error + '</p>';
+                }
+            } catch (e) {
+                statusEl.className = 'test-box error';
+                statusEl.innerHTML = '<h3>❌ 连接失败</h3><p>' + e.message + '</p>';
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
