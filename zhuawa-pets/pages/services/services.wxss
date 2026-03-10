@@ -39,7 +39,7 @@ page {
 }
 
 .nav-title {
-  font-size: 36rpx;
+  font-size: 28rpx;
   font-weight: 600;
   color: #FFFFFF;
 }
@@ -200,10 +200,10 @@ page {
 }
 
 .book-btn {
-  width: 56rpx;
-  height: 56rpx;
+  width: 42rpx;
+  height: 42rpx;
   background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  border-radius: 28rpx;
+  border-radius: 21rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,7 +212,7 @@ page {
 
 .book-icon {
   color: #FFFFFF;
-  font-size: 36rpx;
+  font-size: 28rpx;
   font-weight: 300;
 }
 
