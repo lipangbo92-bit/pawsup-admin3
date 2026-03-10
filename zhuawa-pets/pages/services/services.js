@@ -1,4 +1,6 @@
 // pages/services/services.js
+const app = getApp();
+
 Page({
   data: {
     currentCategory: 0,
@@ -7,8 +9,29 @@ Page({
     allServices: []
   },
 
-  onLoad() {
+  onLoad(options) {
+    // 检查是否有传入的分类参数
+    if (options && options.category !== undefined) {
+      const categoryIndex = parseInt(options.category);
+      if (!isNaN(categoryIndex) && categoryIndex >= 0 && categoryIndex < this.data.categories.length) {
+        this.setData({ currentCategory: categoryIndex });
+      }
+    }
     this.loadServices();
+  },
+
+  onShow() {
+    // 检查全局数据是否有需要切换的分类
+    const app = getApp();
+    if (app.globalData && app.globalData.selectedCategory !== undefined) {
+      const categoryIndex = app.globalData.selectedCategory;
+      // 清除标记
+      app.globalData.selectedCategory = undefined;
+      // 切换到对应分类
+      if (categoryIndex >= 0 && categoryIndex < this.data.categories.length) {
+        this.filterServices(categoryIndex);
+      }
+    }
   },
 
   async loadServices() {
@@ -32,7 +55,8 @@ Page({
         }));
         
         this.setData({ allServices: services });
-        this.filterServices(0);
+        // 使用当前选中的分类
+        this.filterServices(this.data.currentCategory);
       }
     } catch (err) {
       console.error('加载失败:', err);
@@ -77,5 +101,12 @@ Page({
 
   onPullDownRefresh() {
     this.loadServices().finally(() => wx.stopPullDownRefresh());
+  }
+});
+
+// 添加全局数据
+App({
+  globalData: {
+    selectedCategory: undefined
   }
 });

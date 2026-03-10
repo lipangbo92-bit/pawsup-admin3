@@ -1,4 +1,6 @@
 // 首页 - 修复头像显示
+const app = getApp();
+
 Page({
   data: {
     technicians: [],
@@ -44,7 +46,6 @@ Page({
       
       if (res.result && res.result.success && res.result.data) {
         return res.result.data.map(item => {
-          // 检查头像字段
           const avatarUrl = item.avatarUrl || item.avatar || '';
           console.log('技师:', item.name, '头像:', avatarUrl ? '有' : '无', '长度:', avatarUrl.length);
           
@@ -85,14 +86,27 @@ Page({
     }
   },
 
+  // 快速预约按钮点击 - 跳转到服务页面并选择对应分类
   goToService(e) {
-    const serviceName = e.currentTarget.dataset.service;
-    const service = this.data.services.find(s => s.name.includes(serviceName));
-    if (service) {
-      wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${service.id}` });
-    } else {
-      wx.showToast({ title: '服务加载中', icon: 'none' });
-    }
+    const serviceType = e.currentTarget.dataset.service;
+    
+    // 映射快速预约类型到分类索引
+    const categoryMap = {
+      '洗护美容': 0,  // 狗狗洗护
+      '寄养日托': 2,  // 狗狗寄养
+      '上门服务': 6   // 上门服务
+    };
+    
+    const categoryIndex = categoryMap[serviceType] || 0;
+    
+    // 设置全局数据，让服务页面知道要切换的分类
+    app.globalData = app.globalData || {};
+    app.globalData.selectedCategory = categoryIndex;
+    
+    // 跳转到服务页面
+    wx.switchTab({
+      url: '/pages/services/services'
+    });
   },
 
   goToBooking(e) {
