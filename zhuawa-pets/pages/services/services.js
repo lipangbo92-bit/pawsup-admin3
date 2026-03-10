@@ -1,35 +1,54 @@
-// pages/services/services.js - 使用本地数据（云函数部署前临时方案）
+// pages/services/services.js - 从数据库获取服务
 Page({
   data: {
     currentCategory: 0,
     categories: ['狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
     services: [],
     allServices: [],
-    debugInfo: '本地数据模式'
+    debugInfo: '加载中...'
   },
 
   onLoad() {
-    this.setLocalServices();
+    this.loadServices();
   },
 
-  setLocalServices() {
-    // 临时本地数据 - 请根据管理端实际配置修改
-    const localServices = [
-      { id: '1', name: '狗狗基础洗护', desc: '洗澡、吹干、基础清理', price: 99, unit: '起', category: '狗狗洗护', image: '' },
-      { id: '2', name: '狗狗精致美容', desc: '造型修剪、精细护理', price: 199, unit: '起', category: '狗狗造型', image: '' },
-      { id: '3', name: '狗狗寄养', desc: '舒适笼位、每日运动', price: 80, unit: '/晚', category: '狗狗寄养', image: '' },
-      { id: '4', name: '猫咪轻柔洗护', desc: '轻柔沐浴、精细护理', price: 129, unit: '起', category: '猫猫洗护', image: '' },
-      { id: '5', name: '猫咪美容造型', desc: '专业造型、精细修剪', price: 168, unit: '起', category: '猫猫造型', image: '' },
-      { id: '6', name: '猫咪寄养', desc: '独立空间、专业陪护', price: 88, unit: '/晚', category: '猫猫寄养', image: '' },
-      { id: '7', name: '上门洗护服务', desc: '专业洗护、上门服务', price: 168, unit: '起', category: '上门服务', image: '' }
-    ].map(s => ({
-      ...s,
-      iconText: this.getIconText(s.category),
-      iconClass: this.getIconClass(s.category)
-    }));
+  async loadServices() {
+    this.setData({ debugInfo: '调用API...' });
     
-    this.setData({ allServices: localServices });
-    this.filterServices(0);
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'services-api',
+        data: { action: 'list' }
+      });
+      
+      console.log('API返回:', res);
+      
+      if (res.result && res.result.success && res.result.data) {
+        const services = res.result.data.map(item => ({
+          id: item._id,
+          name: item.name,
+          desc: item.desc || item.description || '专业服务',
+          price: item.price,
+          unit: item.unit || '起',
+          category: item.category || '狗狗洗护',
+          image: item.image || '',
+          iconText: this.getIconText(item.category),
+          iconClass: this.getIconClass(item.category)
+        }));
+        
+        this.setData({ 
+          allServices: services,
+          debugInfo: `获取${services.length}条数据`
+        });
+        
+        this.filterServices(0);
+      } else {
+        this.setData({ debugInfo: 'API返回为空' });
+      }
+    } catch (err) {
+      console.error('加载失败:', err);
+      this.setData({ debugInfo: '错误:' + err.message });
+    }
   },
 
   getIconText(category) {
@@ -67,5 +86,9 @@ Page({
   bookService(e) {
     const serviceId = e.currentTarget.dataset.service;
     wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}` });
+  },
+
+  onPullDownRefresh() {
+    this.loadServices().finally(() => wx.stopPullDownRefresh());
   }
 });
