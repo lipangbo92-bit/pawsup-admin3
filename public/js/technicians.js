@@ -1,37 +1,20 @@
-// Technicians Management Module - 修复头像上传到云存储
+// Technicians Management Module - 修复头像上传
 const API_BASE = '/api';
 
 let currentTechnician = null;
 let techniciansList = [];
 let worksImages = [];
 
-// 云存储配置
-const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
-
-// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     loadTechnicians();
-    initCloudStorage();
 });
 
-// 初始化云存储
-function initCloudStorage() {
-    // 使用云开发 Web SDK
-    if (typeof cloudbase !== 'undefined') {
-        cloudbase.init({
-            env: CLOUD_ENV
-        });
-    }
-}
-
-// API 调用封装
 async function apiCall(endpoint, data) {
     const response = await fetch(`${API_BASE}/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP ${response.status}`);
@@ -47,21 +30,16 @@ function compressImage(base64, maxWidth = 400, quality = 0.8) {
             const canvas = document.createElement('canvas');
             let width = img.width;
             let height = img.height;
-            
-            // 按比例缩放
             if (width > maxWidth) {
                 height = (height * maxWidth) / width;
                 width = maxWidth;
             }
-            
             canvas.width = width;
             canvas.height = height;
-            
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
-            
-            // 转为 base64，压缩质量
             const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            console.log('压缩后大小:', Math.round(compressedBase64.length / 1024), 'KB');
             resolve(compressedBase64);
         };
         img.onerror = reject;
@@ -69,24 +47,12 @@ function compressImage(base64, maxWidth = 400, quality = 0.8) {
     });
 }
 
-// 上传图片到云存储
+// 上传图片到云存储 - 增强版
 async function uploadToCloudStorage(base64Data, fileName) {
+    console.log('开始上传到云存储...');
+    
     try {
-        // 方法1: 尝试使用云开发 Web SDK
-        if (typeof cloudbase !== 'undefined' && cloudbase.uploadFile) {
-            // 将 base64 转为 Blob
-            const response = await fetch(base64Data);
-            const blob = await response.blob();
-            
-            const result = await cloudbase.uploadFile({
-                cloudPath: `avatars/${Date.now()}_${fileName}`,
-                filePath: blob
-            });
-            
-            return result.url || result.fileID;
-        }
-        
-        // 方法2: 使用 API 上传到云存储
+        // 使用 API 上传到云存储
         const res = await fetch(`${API_BASE}/upload`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -98,13 +64,18 @@ async function uploadToCloudStorage(base64Data, fileName) {
         });
         
         const result = await res.json();
-        if (result.success) {
-            return result.url || result.fileID;
+        console.log('上传结果:', result);
+        
+        if (result.success && result.url) {
+            console.log('上传成功, URL:', result.url);
+            return result.url;
         }
-        throw new Error(result.error || '上传失败');
+        
+        throw new Error(result.error || '上传返回数据异常');
     } catch (err) {
-        console.error('上传失败:', err);
-        // 如果上传失败，返回压缩后的 base64（降级方案）
+        console.error('上传到云存储失败:', err);
+        // 降级方案：返回压缩后的 base64
+        console.log('使用 base64 降级方案');
         return base64Data;
     }
 }
@@ -139,47 +110,65 @@ async function loadTechnicians() {
     }
 }
 
-// Render grid
+function getLevelBadge(level) {
+    const levelMap = {
+        '初级': { text: '初级', class: 'badge-junior' },
+        '中级': { text: '中级', class: 'badge-intermediate' },
+        '高级': { text: '高级', class: 'badge-senior' },
+        '资深': { text: '资深', class: 'badge-expert' },
+        '首席': { text: '首席', class: 'badge-master' }
+    };
+    const config = levelMap[level] || levelMap['中级'];
+    return `<span class="level-badge ${config.class}">${config.text}</span>`;
+}
+
+function renderWorksPreview(works) {
+    if (!works || works.length === 0) return '';
+    return `
+        <div class="works-preview">
+            ${works.slice(0, 3).map((img, idx) => `
+                <div class="work-thumb"><img src="${img}" alt="作品${idx + 1}"></div>
+            `).join('')}
+            ${works.length > 3 ? `<div class="work-more">+${works.length - 3}</div>` : ''}
+        </div>
+    `;
+}
+
 function renderTechniciansGrid(technicians) {
     const container = document.getElementById('techniciansGrid');
     if (!container) return;
     
     if (technicians.length === 0) {
-        container.innerHTML = '<div class="empty-state">暂无美容师，请添加</div>';
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无美容师，请添加</div>';
         return;
     }
     
     container.innerHTML = technicians.map(tech => `
         <div class="technician-card">
             <div class="tech-avatar">
-                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span>👤</span>'}
+                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
                 <div class="tech-meta-row">
-                    <span class="tech-position">${tech.position}</span>
-                    <span class="level-badge badge-${getLevelClass(tech.level)}">${tech.level}</span>
+                    <span class="tech-position">${tech.position || '美容师'}</span>
+                    ${getLevelBadge(tech.level)}
                 </div>
                 <div class="tech-rating">${'⭐'.repeat(tech.rating || 0)}</div>
-                <p class="tech-specialty">专业：${tech.specialty}</p>
+                <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
+                ${renderWorksPreview(tech.works)}
                 <div class="tech-meta">
                     <span class="tech-orders">订单数：${tech.orderCount || 0}</span>
                 </div>
             </div>
             <div class="tech-actions">
-                <button class="btn-icon" onclick="editTechnician('${tech._id}')">✏️</button>
-                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)">🗑️</button>
+                <button class="btn-icon" onclick="editTechnician('${tech._id}')" title="编辑">✏️</button>
+                <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)" title="删除">🗑️</button>
             </div>
         </div>
     `).join('');
 }
 
-function getLevelClass(level) {
-    const map = { '初级': 'junior', '中级': 'intermediate', '高级': 'senior', '资深': 'expert', '首席': 'master' };
-    return map[level] || 'intermediate';
-}
-
-// Open modal
 function openTechnicianModal() {
     currentTechnician = null;
     worksImages = [];
@@ -200,7 +189,6 @@ function closeTechnicianModal() {
     worksImages = [];
 }
 
-// Edit
 function editTechnician(techId) {
     currentTechnician = techniciansList.find(t => t._id === techId);
     if (!currentTechnician) return;
@@ -247,7 +235,6 @@ function renderWorksGrid() {
     if (addBtn) addBtn.style.display = worksImages.length >= 6 ? 'none' : 'flex';
 }
 
-// Handle works upload
 function handleWorksUpload(input) {
     if (!input.files || input.files.length === 0) return;
     
@@ -284,17 +271,14 @@ function deleteWork(index) {
     }
 }
 
-// Preview avatar - 关键修改：先压缩再保存
-function previewAvatar(input) {
-    console.log('previewAvatar called, files:', input.files);
+// 预览头像 - 关键修改：压缩后保存
+async function previewAvatar(input) {
+    console.log('选择文件:', input.files);
     
-    if (!input.files || input.files.length === 0) {
-        console.log('No files selected');
-        return;
-    }
+    if (!input.files || input.files.length === 0) return;
     
     const file = input.files[0];
-    console.log('Selected file:', file.name, file.size, file.type);
+    console.log('文件信息:', file.name, file.size, file.type);
     
     if (file.size > 5 * 1024 * 1024) {
         alert('图片大小超过5MB限制');
@@ -311,18 +295,19 @@ function previewAvatar(input) {
     const reader = new FileReader();
     
     reader.onload = async function(e) {
-        console.log('File loaded, compressing...');
-        const preview = document.getElementById('avatarPreview');
+        console.log('文件读取完成，开始压缩...');
         
         try {
             // 压缩图片
             const compressedBase64 = await compressImage(e.target.result, 400, 0.8);
-            console.log('Compressed size:', compressedBase64.length);
+            console.log('压缩完成');
             
+            const preview = document.getElementById('avatarPreview');
             if (preview) {
                 preview.innerHTML = `<img src="${compressedBase64}" alt="头像预览">`;
             }
             
+            // 保存压缩后的图片到临时变量
             if (!currentTechnician) {
                 currentTechnician = {};
             }
@@ -336,7 +321,7 @@ function previewAvatar(input) {
     };
     
     reader.onerror = function(e) {
-        console.error('FileReader error:', e);
+        console.error('读取失败:', e);
         alert('读取图片失败');
     };
     
@@ -344,7 +329,7 @@ function previewAvatar(input) {
     input.value = '';
 }
 
-// Save technician - 关键修改：上传头像到云存储
+// 保存技师 - 关键修改：确保头像正确上传
 async function saveTechnician() {
     const name = document.getElementById('techName').value.trim();
     const specialty = document.getElementById('techSpecialty').value.trim();
@@ -357,18 +342,24 @@ async function saveTechnician() {
     if (!specialty) { alert('请输入专业'); return; }
     if (!rating || rating < 1 || rating > 5) { alert('请选择评分'); return; }
     
+    // 获取保存按钮并显示加载状态
+    const saveBtn = document.querySelector('.btn-primary[onclick="saveTechnician()"]');
+    const originalText = saveBtn ? saveBtn.textContent : '保存';
+    if (saveBtn) saveBtn.textContent = '上传中...';
+    
     try {
-        // 显示上传中
-        const saveBtn = document.querySelector('.btn-primary[onclick="saveTechnician()"]');
-        if (saveBtn) saveBtn.textContent = '上传中...';
+        let avatarUrl = '';
         
-        let avatarUrl = currentTechnician && currentTechnician.avatarUrl ? currentTechnician.avatarUrl : '';
+        // 如果有旧头像，先保留
+        if (currentTechnician && currentTechnician.avatarUrl) {
+            avatarUrl = currentTechnician.avatarUrl;
+        }
         
         // 如果有新头像，上传到云存储
         if (currentTechnician && currentTechnician._tempAvatar) {
-            console.log('Uploading avatar to cloud storage...');
+            console.log('检测到新头像，开始上传...');
             avatarUrl = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
-            console.log('Avatar uploaded:', avatarUrl);
+            console.log('头像上传完成:', avatarUrl);
         }
         
         const techData = {
@@ -379,10 +370,13 @@ async function saveTechnician() {
             rating,
             orders: orderCount,
             works: worksImages,
-            avatarUrl: avatarUrl
+            avatarUrl: avatarUrl  // 确保这个字段有值
         };
         
+        console.log('保存数据:', techData);
+        
         if (currentTechnician && currentTechnician._id) {
+            // 更新现有
             await apiCall('technicians', { 
                 action: 'update', 
                 id: currentTechnician._id, 
@@ -390,6 +384,7 @@ async function saveTechnician() {
             });
             alert('信息更新成功');
         } else {
+            // 添加新
             await apiCall('technicians', { action: 'add', data: techData });
             alert('添加成功');
         }
@@ -397,15 +392,13 @@ async function saveTechnician() {
         closeTechnicianModal();
         loadTechnicians();
     } catch (err) {
-        console.error('Save error:', err);
+        console.error('保存失败:', err);
         alert('保存失败：' + (err.message || '请重试'));
     } finally {
-        const saveBtn = document.querySelector('.btn-primary[onclick="saveTechnician()"]');
-        if (saveBtn) saveBtn.textContent = '保存';
+        if (saveBtn) saveBtn.textContent = originalText;
     }
 }
 
-// Delete
 let pendingDeleteTechId = null;
 
 function showDeleteTechConfirm(techId) {
