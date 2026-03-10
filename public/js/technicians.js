@@ -51,37 +51,11 @@ async function loadTechnicians() {
             level: t.level || '中级',
             rating: t.rating || 5,
             orderCount: t.orderCount || t.orders || 0,
-            works: t.works || [] // 作品图片数组
+            works: t.works || [], // 作品图片数组
+            avatarUrl: t.avatarUrl || t.avatar || ''
         }));
         
         console.log('Parsed technicians:', techniciansList);
-
-        // 如果没有数据，初始化默认数据
-        if (techniciansList.length === 0) {
-            const defaultTechnicians = [
-                { name: '张美容', specialty: '洗护美容、美容造型', position: '美容师', level: '高级', rating: 5, orders: 128, works: [] },
-                { name: '李洗护', specialty: 'SPA护理、染毛', position: '洗护师', level: '中级', rating: 4, orders: 86, works: [] },
-                { name: '王助理', specialty: '洗护美容', position: '助理', level: '初级', rating: 3, orders: 45, works: [] }
-            ];
-            
-            for (const tech of defaultTechnicians) {
-                await apiCall('technicians', { action: 'add', data: tech });
-            }
-            
-            // 重新加载
-            const reloadResult = await apiCall('technicians', { action: 'list' });
-            techniciansList = (reloadResult.data || []).map(t => ({
-                ...t,
-                _id: t._id || t.id,
-                name: t.name || '未命名',
-                specialty: t.specialty || t.skills || '暂无',
-                position: t.position || '美容师',
-                level: t.level || '中级',
-                rating: t.rating || 5,
-                orderCount: t.orderCount || t.orders || 0,
-                works: t.works || []
-            }));
-        }
 
         renderTechniciansGrid(techniciansList);
     } catch (error) {
@@ -180,6 +154,11 @@ function openTechnicianModal() {
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     document.getElementById('techPosition').value = '美容师';
     document.getElementById('techLevel').value = '中级';
+    
+    // 关键修复：清空头像input的value，确保可以重复选择
+    const avatarInput = document.getElementById('avatarInput');
+    if (avatarInput) avatarInput.value = '';
+    
     renderWorksGrid();
     document.getElementById('technicianModal').style.display = 'flex';
 }
@@ -208,6 +187,10 @@ function editTechnician(techId) {
     // 加载作品图片
     worksImages = currentTechnician.works || [];
     renderWorksGrid();
+    
+    // 关键修复：清空头像input的value
+    const avatarInput = document.getElementById('avatarInput');
+    if (avatarInput) avatarInput.value = '';
     
     // Set avatar preview
     if (currentTechnician.avatarUrl) {
@@ -253,27 +236,40 @@ function handleWorksUpload(input) {
     const remainingSlots = 6 - worksImages.length;
     if (remainingSlots <= 0) {
         alert('最多只能上传6张作品图片');
+        input.value = '';
         return;
     }
     
     const files = Array.from(input.files).slice(0, remainingSlots);
+    let loadedCount = 0;
     
     files.forEach(file => {
         // 检查文件大小（5MB限制）
         if (file.size > 5 * 1024 * 1024) {
             alert(`图片 ${file.name} 超过5MB限制，已跳过`);
+            loadedCount++;
             return;
         }
         
         const reader = new FileReader();
         reader.onload = function(e) {
             worksImages.push(e.target.result);
-            renderWorksGrid();
+            loadedCount++;
+            if (loadedCount >= files.length) {
+                renderWorksGrid();
+            }
+        };
+        reader.onerror = function() {
+            console.error('读取图片失败:', file.name);
+            loadedCount++;
+            if (loadedCount >= files.length) {
+                renderWorksGrid();
+            }
         };
         reader.readAsDataURL(file);
     });
     
-    // 清空input以便重复选择相同文件
+    // 关键修复：清空input以便重复选择相同文件
     input.value = '';
 }
 
@@ -283,6 +279,67 @@ function deleteWork(index) {
         worksImages.splice(index, 1);
         renderWorksGrid();
     }
+}
+
+// 预览头像 - 增强版，带错误处理
+function previewAvatar(input) {
+    console.log('previewAvatar called, files:', input.files);
+    
+    if (!input.files || input.files.length === 0) {
+        console.log('No files selected');
+        return;
+    }
+    
+    const file = input.files[0];
+    console.log('Selected file:', file.name, file.size, file.type);
+    
+    // 检查文件大小（5MB限制）
+    if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小超过5MB限制，请选择较小的图片');
+        input.value = '';
+        return;
+    }
+    
+    // 检查文件类型
+    if (!file.type.startsWith('image/')) {
+        alert('请选择图片文件（JPG/PNG）');
+        input.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        console.log('FileReader onload success');
+        const preview = document.getElementById('avatarPreview');
+        if (preview) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="头像预览">`;
+            // 保存到currentTechnician用于提交
+            if (!currentTechnician) {
+                currentTechnician = {};
+            }
+            currentTechnician._tempAvatar = e.target.result;
+        }
+    };
+    
+    reader.onerror = function(e) {
+        console.error('FileReader error:', e);
+        alert('读取图片失败，请重试');
+    };
+    
+    reader.onabort = function() {
+        console.log('FileReader aborted');
+    };
+    
+    try {
+        reader.readAsDataURL(file);
+    } catch (err) {
+        console.error('readAsDataURL error:', err);
+        alert('读取图片出错：' + err.message);
+    }
+    
+    // 关键修复：清空input以便可以再次选择相同或不同的文件
+    input.value = '';
 }
 
 // Save technician
@@ -316,10 +373,15 @@ async function saveTechnician() {
             level,
             rating,
             orders: orderCount,
-            works: worksImages // 作品图片数组
+            works: worksImages
         };
         
-        if (currentTechnician) {
+        // 如果有新上传的头像，添加到数据中
+        if (currentTechnician && currentTechnician._tempAvatar) {
+            techData.avatarUrl = currentTechnician._tempAvatar;
+        }
+        
+        if (currentTechnician && currentTechnician._id) {
             // Update existing
             await apiCall('technicians', { 
                 action: 'update', 
@@ -394,17 +456,6 @@ function deleteTechnician(techId, event) {
         event.stopPropagation();
     }
     showDeleteTechConfirm(techId);
-}
-
-// Preview avatar
-function previewAvatar(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('avatarPreview').innerHTML = `<img src="${e.target.result}" alt="头像预览">`;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
 }
 
 // Close modal when clicking outside
