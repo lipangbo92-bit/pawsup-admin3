@@ -1,4 +1,4 @@
-<!--首页 - 按照原型图修正-->
+<!--首页 - 正确版本-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -18,21 +18,21 @@
     </swiper>
   </view>
 
-  <!-- 快速预约区 - 3个正方形图标 -->
+  <!-- 快速预约区 - 3个长方形服务项目 -->
   <view class="quick-book-section">
     <text class="section-title">快速预约</text>
-    <view class="quick-book-list">
-      <view class="quick-book-item" bindtap="goToServices">
-        <view class="quick-book-icon" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">✂️</view>
-        <text class="quick-book-name">预约美容</text>
+    <view class="quick-book-row">
+      <view class="quick-book-card" bindtap="goToService" data-service="洗护美容">
+        <view class="quick-book-icon" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">🛁</view>
+        <text class="quick-book-name">洗护美容</text>
       </view>
-      <view class="quick-book-item">
-        <view class="quick-book-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);">🛁</view>
-        <text class="quick-book-name">预约洗澡</text>
+      <view class="quick-book-card" bindtap="goToService" data-service="寄养日托">
+        <view class="quick-book-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);">🏠</view>
+        <text class="quick-book-name">寄养日托</text>
       </view>
-      <view class="quick-book-item">
-        <view class="quick-book-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">🏥</view>
-        <text class="quick-book-name">宠物医疗</text>
+      <view class="quick-book-card" bindtap="goToService" data-service="上门服务">
+        <view class="quick-book-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">🚗</view>
+        <text class="quick-book-name">上门服务</text>
       </view>
     </view>
   </view>
@@ -66,24 +66,17 @@
     </view>
   </view>
 
-  <!-- 热门服务 - 3个长方形并排 -->
-  <view class="service-section">
+  <!-- 热门服务 - 从数据库拉取 -->
+  <view class="hot-service-section">
     <view class="section-header">
       <text class="section-title">热门服务</text>
       <text class="section-more" bindtap="goToServices">更多 ›</text>
     </view>
-    <view class="service-row-list">
-      <view class="service-row-item" bindtap="goToServices">
-        <view class="service-row-icon" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">🛁</view>
-        <text class="service-row-name">洗护美容</text>
-      </view>
-      <view class="service-row-item">
-        <view class="service-row-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);">🏠</view>
-        <text class="service-row-name">寄养日托</text>
-      </view>
-      <view class="service-row-item">
-        <view class="service-row-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">🚗</view>
-        <text class="service-row-name">上门服务</text>
+    <view class="hot-service-list">
+      <view wx:for="{{services}}" wx:key="index" class="hot-service-item" bindtap="goToBooking" data-id="{{item.id}}">
+        <view class="hot-service-icon">🐾</view>
+        <text class="hot-service-name">{{item.name}}</text>
+        <text class="hot-service-price">¥{{item.price}}起</text>
       </view>
     </view>
   </view>
