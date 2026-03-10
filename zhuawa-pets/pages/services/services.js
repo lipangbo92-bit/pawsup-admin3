@@ -1,301 +1,120 @@
-// pages/services/services.js
+// pages/services/services.js - 从数据库加载服务
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
     currentCategory: 0,
-    categories: ['推荐', '基础护理', '美容', 'SPA', '寄养', '医疗', '周边'],
-    services: [
-      // 推荐
-      [
-        {
-          id: 'dog-bath',
-          name: '狗狗基础洗护',
-          desc: '洗澡、吹干、基础清理，约60分钟',
-          price: '99',
-          unit: '起',
-          iconText: '🐕',
-          iconClass: 'icon-orange'
-        },
-        {
-          id: 'cat-bath',
-          name: '猫咪轻柔洗护',
-          desc: '轻柔沐浴、精细护理，约90分钟',
-          price: '129',
-          unit: '起',
-          iconText: '🐱',
-          iconClass: 'icon-pink'
-        },
-        {
-          id: 'beauty',
-          name: '美容造型',
-          desc: '专业造型、精细修剪，约120分钟',
-          price: '199',
-          unit: '起',
-          iconText: '✂️',
-          iconClass: 'icon-purple'
-        },
-        {
-          id: 'boarding',
-          name: '宠物寄养',
-          desc: '舒适笼位、每日运动、专业陪玩',
-          price: '80',
-          unit: '/晚',
-          iconText: '🏠',
-          iconClass: 'icon-blue'
-        },
-        {
-          id: 'pickup',
-          name: '上门接送',
-          desc: '专车接送、安全保障、方便快捷',
-          price: '30',
-          unit: '/次',
-          iconText: '🚗',
-          iconClass: 'icon-green'
-        }
-      ],
-      // 基础护理
-      [
-        {
-          id: 'basic-dog',
-          name: '狗狗洗护套餐',
-          desc: '洗澡、吹干、剪指甲、清耳朵',
-          price: '99',
-          unit: '起',
-          iconText: '🛁',
-          iconClass: 'icon-orange'
-        },
-        {
-          id: 'basic-cat',
-          name: '猫咪洗护套餐',
-          desc: '洗澡、吹干、梳毛、清耳朵',
-          price: '129',
-          unit: '起',
-          iconText: '🧼',
-          iconClass: 'icon-pink'
-        },
-        {
-          id: 'nail-trim',
-          name: '单独剪指甲',
-          desc: '专业修剪、打磨光滑',
-          price: '29',
-          unit: '/次',
-          iconText: '💅',
-          iconClass: 'icon-yellow'
-        }
-      ],
-      // 美容
-      [
-        {
-          id: 'grooming-basic',
-          name: '基础美容',
-          desc: '洗澡、修剪、造型',
-          price: '168',
-          unit: '起',
-          iconText: '✂️',
-          iconClass: 'icon-purple'
-        },
-        {
-          id: 'grooming-premium',
-          name: '精致美容',
-          desc: '全身造型、精修细节',
-          price: '298',
-          unit: '起',
-          iconText: '💇',
-          iconClass: 'icon-indigo'
-        }
-      ],
-      // SPA
-      [
-        {
-          id: 'spa-basic',
-          name: '基础SPA',
-          desc: '精油按摩、药浴',
-          price: '188',
-          unit: '起',
-          iconText: '🧘',
-          iconClass: 'icon-teal'
-        },
-        {
-          id: 'spa-luxury',
-          name: '奢华SPA',
-          desc: '全身护理、顶级精油',
-          price: '388',
-          unit: '起',
-          iconText: '💎',
-          iconClass: 'icon-cyan'
-        }
-      ],
-      // 寄养
-      [
-        {
-          id: 'boarding-standard',
-          name: '标准寄养',
-          desc: '舒适笼位、每日遛弯',
-          price: '80',
-          unit: '/晚',
-          iconText: '🏨',
-          iconClass: 'icon-blue'
-        },
-        {
-          id: 'boarding-vip',
-          name: 'VIP寄养',
-          desc: '独立房间、专属陪护',
-          price: '168',
-          unit: '/晚',
-          iconText: '👑',
-          iconClass: 'icon-violet'
-        }
-      ],
-      // 医疗
-      [
-        {
-          id: 'checkup',
-          name: '健康体检',
-          desc: '基础体检项目',
-          price: '128',
-          unit: '起',
-          iconText: '🏥',
-          iconClass: 'icon-red'
-        },
-        {
-          id: 'vaccine',
-          name: '疫苗接种',
-          desc: '各类宠物疫苗',
-          price: '88',
-          unit: '起',
-          iconText: '💉',
-          iconClass: 'icon-green'
-        }
-      ],
-      // 周边
-      [
-        {
-          id: 'pickup-service',
-          name: '上门接送',
-          desc: '专车接送、安全保障',
-          price: '30',
-          unit: '/次',
-          iconText: '🚕',
-          iconClass: 'icon-green'
-        },
-        {
-          id: 'pet-food',
-          name: '宠物食品',
-          desc: '优质猫粮狗粮',
-          price: '58',
-          unit: '起',
-          iconText: '🍖',
-          iconClass: 'icon-lime'
-        }
-      ]
-    ]
+    categories: ['全部', '洗护', '美容', '寄养', '医疗'],
+    services: [],
+    allServices: []
   },
 
-  /**
-   * 切换分类
-   */
-  switchCategory(e) {
-    const index = e.currentTarget.dataset.index;
-    this.setData({
-      currentCategory: index,
-      categoryScrollTop: 0
-    });
-  },
-
-  /**
-   * 返回上一页
-   */
-  goBack() {
-    wx.navigateBack({
-      delta: 1
-    });
-  },
-
-  /**
-   * 预约服务
-   */
-  bookService(e) {
-    const serviceId = e.currentTarget.dataset.service;
-    console.log('预约服务:', serviceId);
-    // 跳转到预约时间页面
-    wx.navigateTo({
-      url: `/pages/booking-time-1/booking-time-1?service=${serviceId}`
-    });
-  },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad(options) {
-    // 从云数据库读取服务列表
-    const db = wx.cloud.database()
-    db.collection('services').get().then(res => {
-      console.log('services data:', res.data)
-      this.setData({ services: res.data })
-    }).catch(err => {
-      console.log('error:', err)
-    })
+    this.loadServices();
+  },
 
-    // 可以从options中获取参数
-    if (options.category) {
-      const categoryIndex = this.data.categories.indexOf(options.category);
-      if (categoryIndex !== -1) {
+  async loadServices() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'services-api',
+        data: { action: 'list' }
+      });
+      
+      console.log('服务数据:', res);
+      
+      if (res.result && res.result.success && res.result.data) {
+        // 转换数据格式
+        const services = res.result.data.map(item => ({
+          id: item._id,
+          name: item.name,
+          desc: item.desc || item.description || '专业服务',
+          price: item.price,
+          unit: item.unit || '起',
+          category: item.category || '洗护',
+          iconText: this.getIconText(item.name),
+          iconClass: this.getIconClass(item.category)
+        }));
+        
         this.setData({
-          currentCategory: categoryIndex
+          allServices: services,
+          services: services
         });
+      } else {
+        // 使用本地数据
+        this.setLocalServices();
       }
+    } catch (err) {
+      console.error('加载服务失败:', err);
+      this.setLocalServices();
     }
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
+  setLocalServices() {
+    const localServices = [
+      { id: '1', name: '狗狗基础洗护', desc: '洗澡、吹干、基础清理', price: '99', unit: '起', category: '洗护', iconText: '🐕', iconClass: 'icon-orange' },
+      { id: '2', name: '猫咪轻柔洗护', desc: '轻柔沐浴、精细护理', price: '129', unit: '起', category: '洗护', iconText: '🐱', iconClass: 'icon-pink' },
+      { id: '3', name: '美容造型', desc: '专业造型、精细修剪', price: '199', unit: '起', category: '美容', iconText: '✂️', iconClass: 'icon-purple' },
+      { id: '4', name: '宠物寄养', desc: '舒适笼位、每日运动', price: '80', unit: '/晚', category: '寄养', iconText: '🏠', iconClass: 'icon-blue' },
+      { id: '5', name: '健康体检', desc: '基础体检项目', price: '128', unit: '起', category: '医疗', iconText: '🏥', iconClass: 'icon-red' }
+    ];
+    
+    this.setData({
+      allServices: localServices,
+      services: localServices
+    });
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
-
+  getIconText(name) {
+    if (name.includes('狗')) return '🐕';
+    if (name.includes('猫')) return '🐱';
+    if (name.includes('美容')) return '✂️';
+    if (name.includes('寄养')) return '🏠';
+    if (name.includes('医疗')) return '🏥';
+    if (name.includes('洗澡')) return '🛁';
+    return '🐾';
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  getIconClass(category) {
+    const map = {
+      '洗护': 'icon-orange',
+      '美容': 'icon-purple',
+      '寄养': 'icon-blue',
+      '医疗': 'icon-red'
+    };
+    return map[category] || 'icon-orange';
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
+  switchCategory(e) {
+    const index = parseInt(e.currentTarget.dataset.index);
+    const category = this.data.categories[index];
+    
+    let filteredServices = this.data.allServices;
+    
+    // 如果不是"全部"，则过滤
+    if (category !== '全部') {
+      filteredServices = this.data.allServices.filter(s => 
+        s.category === category || s.name.includes(category)
+      );
+    }
+    
+    this.setData({
+      currentCategory: index,
+      services: filteredServices
+    });
   },
 
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
+  bookService(e) {
+    const serviceId = e.currentTarget.dataset.service;
+    wx.navigateTo({
+      url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}`
+    });
+  },
+
+  goBack() {
+    wx.navigateBack({ delta: 1 });
+  },
+
   onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+    this.loadServices().finally(() => {
+      wx.stopPullDownRefresh();
+    });
   }
-})
+});
