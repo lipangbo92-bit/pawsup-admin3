@@ -1,4 +1,4 @@
-<!--首页 - 添加美容师详情弹窗-->
+<!--首页 - 从数据库加载Banner-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -8,9 +8,19 @@
     </view>
   </view>
 
-  <!-- Banner轮播图 -->
+  <!-- Banner轮播图 - 从数据库加载 -->
   <view class="banner-section">
-    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000">
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" wx:if="{{banners.length > 0}}">
+      <swiper-item wx:for="{{banners}}" wx:key="_id" class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="banner-bg-image"/>
+        <view class="banner-text-wrapper">
+          <text class="banner-title">{{item.title}}</text>
+          <text class="banner-subtitle">{{item.subtitle}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+    <!-- 默认Banner（无数据时显示） -->
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" wx:if="{{banners.length === 0}}">
       <swiper-item class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
         <text class="banner-title">专业宠物美容</text>
         <text class="banner-subtitle">让您的爱宠焕然一新</text>
@@ -57,19 +67,16 @@
         </view>
         
         <view class="technician-info" catchtap="preventBubble">
-          <!-- 第一排：名字 + 岗位 + 等级 -->
           <view class="technician-name-row">
             <text class="technician-name">{{item.name}}</text>
             <text class="technician-position">{{item.position}}</text>
             <text class="technician-badge">{{item.level}}</text>
           </view>
-          <!-- 第二排：评分和订单数 -->
           <view class="technician-stats">
             <text class="technician-rating">⭐ {{item.rating}}分</text>
             <text class="technician-orders">{{item.orders}}单</text>
           </view>
         </view>
-        <!-- 预约按钮 - 阻止冒泡 -->
         <view class="technician-book-btn" catchtap="bookTechnician" data-index="{{index}}">预约</view>
       </view>
     </view>
@@ -98,7 +105,6 @@
       <text class="modal-close" bindtap="closeModal">×</text>
     </view>
     <view class="modal-body" wx:if="{{selectedTechnician}}">
-      <!-- 头像 -->
       <view class="modal-avatar">
         <block wx:if="{{selectedTechnician.avatar && selectedTechnician.avatar.length > 10}}">
           <image src="{{selectedTechnician.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
@@ -107,7 +113,6 @@
           <text style="font-size:80rpx;">👤</text>
         </block>
       </view>
-      <!-- 基本信息 -->
       <view class="modal-info">
         <text class="modal-name">{{selectedTechnician.name}}</text>
         <view class="modal-tags">
@@ -119,12 +124,10 @@
           <text class="modal-stat">📋 {{selectedTechnician.orders}}单</text>
         </view>
       </view>
-      <!-- 详细介绍 -->
       <view class="modal-desc">
         <text class="desc-title">个人简介</text>
-        <text class="desc-content">{{selectedTechnician.intro || '专业宠物美容师，拥有多年美容经验，擅长各类犬猫造型修剪，服务细致周到，深受客户好评。'}}</text>
+        <text class="desc-content">{{selectedTechnician.intro}}</text>
       </view>
-      <!-- 预约按钮 -->
       <view class="modal-book-btn" bindtap="bookFromModal">立即预约</view>
     </view>
   </view>

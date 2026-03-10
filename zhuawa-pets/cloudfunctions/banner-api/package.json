@@ -1,0 +1,9 @@
+{
+  "name": "banner-api",
+  "version": "1.0.0",
+  "description": "Banner管理API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

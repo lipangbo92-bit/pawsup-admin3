@@ -1,16 +1,18 @@
-// 首页 - 添加美容师详情弹窗
+// 首页 - 从数据库加载Banner
 const app = getApp();
 
 Page({
   data: {
     technicians: [],
     services: [],
+    banners: [], // Banner数据
     showModal: false,
     selectedTechnician: null
   },
 
   onLoad() {
     this.loadData();
+    this.loadBanners(); // 加载Banner
   },
 
   async loadData() {
@@ -32,6 +34,22 @@ Page({
         technicians: this.getLocalTechnicians(),
         services: []
       });
+    }
+  },
+
+  // 加载Banner
+  async loadBanners() {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'banner-api',
+        data: { action: 'list' }
+      });
+      
+      if (res.result && res.result.success && res.result.data) {
+        this.setData({ banners: res.result.data });
+      }
+    } catch (err) {
+      console.error('加载Banner失败:', err);
     }
   },
 
@@ -92,44 +110,27 @@ Page({
     });
   },
 
-  // 关闭弹窗
   closeModal() {
-    this.setData({
-      showModal: false,
-      selectedTechnician: null
-    });
+    this.setData({ showModal: false, selectedTechnician: null });
   },
 
-  // 阻止事件冒泡
-  preventBubble() {
-    // 什么都不做，只是阻止冒泡
-    return;
-  },
+  preventBubble() { return; },
 
-  // 点击预约按钮（卡片上）
   bookTechnician(e) {
     e.stopPropagation();
     const index = e.currentTarget.dataset.index;
     const technician = this.data.technicians[index];
-    // 跳转到预约页面，传递美容师ID
-    wx.navigateTo({
-      url: `/pages/booking-time-1/booking-time-1?technicianId=${technician.id || ''}`
-    });
+    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?technicianId=${technician.id || ''}` });
   },
 
-  // 从弹窗预约
   bookFromModal() {
     const technician = this.data.selectedTechnician;
     this.closeModal();
-    wx.navigateTo({
-      url: `/pages/booking-time-1/booking-time-1?technicianId=${technician.id || ''}`
-    });
+    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?technicianId=${technician.id || ''}` });
   },
 
-  // 快速预约按钮点击
   goToService(e) {
     const serviceType = e.currentTarget.dataset.service;
-    
     switch(serviceType) {
       case '洗护美容':
         app.globalData = app.globalData || {};
@@ -165,6 +166,8 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadData().finally(() => wx.stopPullDownRefresh());
+    Promise.all([this.loadData(), this.loadBanners()]).finally(() => {
+      wx.stopPullDownRefresh();
+    });
   }
 });
