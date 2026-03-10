@@ -1,4 +1,4 @@
-// 首页
+// 首页 - 诊断版
 Page({
   data: {
     banner: [],
@@ -12,35 +12,21 @@ Page({
 
   async loadData() {
     try {
-      // 并行加载服务列表和技师列表
       const [servicesRes, techsRes] = await Promise.all([
         this.loadServices(),
         this.loadTechnicians()
       ]);
       
       this.setData({
-        banner: [
-          { id: 1, image: '/assets/banner1.png', url: '' }
-        ],
+        banner: [{ id: 1, image: '/assets/banner1.png', url: '' }],
         services: servicesRes,
         technicians: techsRes
       });
     } catch (err) {
       console.error('加载数据失败:', err);
-      // 使用备用数据
-      this.setData({
-        services: [
-          { id: '1', name: '宠物美容', price: 128, image: '' },
-          { id: '2', name: '宠物洗澡', price: 88, image: '' }
-        ],
-        technicians: [
-          { id: '1', name: '加载中...', level: '请刷新', position: '' }
-        ]
-      });
     }
   },
 
-  // 加载服务列表
   async loadServices() {
     try {
       const res = await wx.cloud.callFunction({
@@ -58,12 +44,10 @@ Page({
       }
       return [];
     } catch (err) {
-      console.error('加载服务失败:', err);
       return [];
     }
   },
 
-  // 加载技师列表
   async loadTechnicians() {
     try {
       const res = await wx.cloud.callFunction({
@@ -71,18 +55,25 @@ Page({
         data: { action: 'list' }
       });
       
+      console.log('=== 技师原始数据 ===', res.result.data);
+      
       if (res.result && res.result.success) {
-        return res.result.data.map(t => ({
-          id: t._id,
-          name: t.name,
-          // 展示等级（初级/中级/高级/资深/首席）
-          level: t.level || '中级',
-          // 展示岗位（美容师/洗护师/助理）
-          position: t.position || '美容师',
-          // 组合展示：高级美容师
-          displayTitle: `${t.level || '中级'}${t.position || '美容师'}`,
-          avatar: t.avatarUrl || ''
-        }));
+        return res.result.data.map(t => {
+          // 兼容多种可能的头像字段名
+          const avatarUrl = t.avatarUrl || t.avatar || '';
+          
+          console.log(`技师: ${t.name}, avatarUrl: ${avatarUrl ? '有' : '无'}`);
+          
+          return {
+            id: t._id,
+            name: t.name,
+            level: t.level || '中级',
+            position: t.position || '美容师',
+            displayTitle: `${t.level || '中级'}${t.position || '美容师'}`,
+            avatar: avatarUrl,
+            hasAvatar: !!avatarUrl  // 用于调试显示
+          };
+        });
       }
       return [];
     } catch (err) {
@@ -91,7 +82,6 @@ Page({
     }
   },
 
-  // 下拉刷新
   async onPullDownRefresh() {
     await this.loadData();
     wx.stopPullDownRefresh();

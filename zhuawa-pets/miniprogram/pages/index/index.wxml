@@ -54,8 +54,9 @@
           <text wx:else>👤</text>
         </view>
         <text class="tech-name">{{item.name}}</text>
-        <!-- 显示完整职称：如"高级美容师" -->
         <text class="tech-level">{{item.displayTitle}}</text>
+        <!-- 调试信息：显示是否有头像 -->
+        <text class="tech-debug" style="font-size:10px;color:#999;">{{item.hasAvatar ? '有头像' : '无头像'}}</text>
       </view>
     </view>
   </view>
