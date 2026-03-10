@@ -1,68 +1,36 @@
-<view class="container">
-  <view style="background:#ffeb3b;padding:10rpx 20rpx;margin:10rpx;border-radius:8rpx;">
-    <text style="font-size:22rpx;color:#333;">{{debugInfo}}</text>
+<view style="padding:20rpx;">
+  <view style="background:#ffeb3b;padding:20rpx;margin-bottom:20rpx;border-radius:12rpx;">
+    <text style="font-size:28rpx;color:#333;font-weight:bold;">{{debugInfo}}</text>
+    <text style="font-size:22rpx;color:#666;display:block;margin-top:10rpx;">当前分类: {{categories[currentCategory]}}</text>
   </view>
 
-  <!-- 顶部导航栏 -->
-  <view class="custom-nav">
-    <view class="nav-bg"></view>
-    <view class="nav-content">
-      <text class="nav-title">服务项目</text>
+  <!-- 分类按钮 -->
+  <view style="display:flex;flex-wrap:wrap;margin-bottom:20rpx;">
+    <view wx:for="{{categories}}" wx:key="index" bindtap="switchCategory" data-index="{{index}}" style="padding:15rpx 25rpx;margin:10rpx;background:{{currentCategory===index?'#F97316':'#f0f0f0'}};color:{{currentCategory===index?'#fff':'#333'}};border-radius:30rpx;font-size:26rpx;">
+      {{item}}
     </view>
   </view>
 
-  <!-- 左右分栏布局 -->
-  <view class="main-content">
-    <!-- 左侧分类导航 -->
-    <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
-      <view 
-        wx:for="{{categories}}" 
-        wx:key="index"
-        class="category-item {{currentCategory === index ? 'active' : ''}}"
-        bindtap="switchCategory"
-        data-index="{{index}}"
-      >
-        <text class="category-text">{{item}}</text>
-      </view>
-    </scroll-view>
+  <!-- 显示过滤后的服务 -->
+  <view style="font-size:30rpx;font-weight:bold;margin:20rpx 0;">匹配的服务 ({{filteredServices.length}}条):</view>
+  
+  <view wx:for="{{filteredServices}}" wx:key="_id" style="background:#fff;padding:25rpx;margin-bottom:20rpx;border-radius:16rpx;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.1);">
+    <text style="font-size:34rpx;font-weight:bold;color:#333;">{{item.name}}</text>
+    <text style="font-size:24rpx;color:#F97316;background:#fff7ed;padding:8rpx 16rpx;border-radius:8rpx;display:inline-block;margin:10rpx 0;">{{item.category}}</text>
+    <text style="font-size:26rpx;color:#666;display:block;margin-top:10rpx;">{{item.desc}}</text>
+    <text style="font-size:32rpx;color:#F97316;font-weight:bold;display:block;margin-top:15rpx;">¥{{item.price}}</text>
+  </view>
 
-    <!-- 右侧服务列表 -->
-    <scroll-view class="service-list" scroll-y enhanced show-scrollbar="{{false}}">
-      <view class="service-content">
-        <view 
-          wx:for="{{services}}" 
-          wx:key="id"
-          class="service-card"
-        >
-          <view class="service-image-wrapper">
-            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
-            <view wx:else class="service-icon {{item.iconClass}}">
-              <text>{{item.iconText}}</text>
-            </view>
-          </view>
-          
-          <view class="service-info">
-            <view>
-              <text class="service-name">{{item.name}}</text>
-              <text class="service-desc">{{item.desc}}</text>
-            </view>
-            <view class="service-bottom">
-              <view class="price-wrapper">
-                <text class="price-symbol">¥</text>
-                <text class="price-value">{{item.price}}</text>
-                <text class="price-unit">{{item.unit}}</text>
-              </view>
-              <view class="book-btn" bindtap="bookService" data-service="{{item.id}}">
-                <text class="book-icon">+</text>
-              </view>
-            </view>
-          </view>
-        </view>
-        
-        <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
-          暂无该分类服务
-        </view>
-      </view>
-    </scroll-view>
+  <view wx:if="{{filteredServices.length===0}}" style="text-align:center;padding:60rpx;color:#999;">
+    <text style="font-size:60rpx;">🛁</text>
+    <text style="font-size:28rpx;display:block;margin-top:20rpx;">该分类暂无服务</text>
+  </view>
+
+  <!-- 显示所有原始数据 -->
+  <view style="margin-top:40rpx;padding-top:40rpx;border-top:2rpx dashed #ddd;">
+    <view style="font-size:26rpx;color:#999;margin-bottom:20rpx;">数据库所有数据 ({{allServices.length}}条):</view>
+    <view wx:for="{{allServices}}" wx:key="_id" style="padding:15rpx;background:#f9f9f9;margin-bottom:10rpx;border-radius:8rpx;">
+      <text style="font-size:24rpx;">{{item.name}} | {{item.category}} | ¥{{item.price}}</text>
+    </view>
   </view>
 </view>
