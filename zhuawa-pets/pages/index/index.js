@@ -1,64 +1,87 @@
-// 首页 - 修复数据加载
+// 首页
 Page({
   data: {
     technicians: [],
-    services: [],
-    debugMsg: '初始化...'
+    debugMsg: '初始化'
   },
 
   onLoad() {
+    console.log('页面加载');
     this.loadData();
   },
 
   async loadData() {
-    this.setData({ debugMsg: '加载中...' });
+    console.log('开始加载数据');
+    this.setData({ debugMsg: '调用API...' });
     
     try {
-      // 加载美容师
       const res = await wx.cloud.callFunction({
         name: 'technicians-api',
         data: { action: 'list' }
       });
       
-      console.log('API返回:', res);
+      console.log('API返回:', JSON.stringify(res, null, 2));
       
-      if (res.result && res.result.success) {
-        // 直接使用返回的数据
-        const rawData = res.result.data;
-        console.log('原始数据:', rawData);
-        console.log('数据类型:', typeof rawData);
-        console.log('是否是数组:', Array.isArray(rawData));
-        console.log('数据长度:', rawData ? rawData.length : 0);
-        
-        if (rawData && rawData.length > 0) {
-          // 转换数据格式
-          const techs = rawData.map((item, idx) => {
-            console.log(`处理第${idx}条:`, item);
-            return {
-              name: item.name || '未命名',
-              level: item.level || '中级',
-              position: item.position || '美容师',
-              rating: item.rating || 5,
-              orders: item.orders || 0,
-              avatar: item.avatarUrl || item.avatar || ''
-            };
-          });
-          
-          console.log('转换后:', techs);
-          
-          this.setData({
-            technicians: techs,
-            debugMsg: `美容师:${techs.length}人`
-          });
-        } else {
-          this.setData({ debugMsg: '数据为空' });
-        }
-      } else {
-        this.setData({ debugMsg: 'API失败' });
+      // 检查返回结构
+      if (!res) {
+        console.error('res为空');
+        this.setData({ debugMsg: 'res为空' });
+        return;
       }
+      
+      if (!res.result) {
+        console.error('res.result为空');
+        this.setData({ debugMsg: 'res.result为空' });
+        return;
+      }
+      
+      console.log('res.result:', res.result);
+      console.log('res.result.success:', res.result.success);
+      
+      if (res.result.success !== true) {
+        console.error('success不为true:', res.result);
+        this.setData({ debugMsg: 'success=false' });
+        return;
+      }
+      
+      const rawData = res.result.data;
+      console.log('原始数据:', rawData);
+      console.log('数据长度:', rawData?.length);
+      
+      if (!rawData || rawData.length === 0) {
+        console.log('数据为空');
+        this.setData({ debugMsg: '数据为空' });
+        return;
+      }
+      
+      // 转换数据
+      const techs = [];
+      for (let i = 0; i < rawData.length; i++) {
+        const item = rawData[i];
+        console.log(`处理第${i}条:`, item);
+        
+        techs.push({
+          name: item.name || '未命名',
+          level: item.level || '中级',
+          position: item.position || '美容师',
+          rating: item.rating || 5,
+          orders: item.orders || 0,
+          avatar: item.avatarUrl || item.avatar || ''
+        });
+      }
+      
+      console.log('最终数据:', techs);
+      
+      this.setData({
+        technicians: techs,
+        debugMsg: `成功:${techs.length}人`
+      });
+      
+      console.log('设置完成');
+      
     } catch (err) {
       console.error('错误:', err);
-      this.setData({ debugMsg: '错误:' + err.message });
+      this.setData({ debugMsg: '异常:' + err.message });
     }
   },
 
