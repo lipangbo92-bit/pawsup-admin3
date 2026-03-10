@@ -1,4 +1,4 @@
-// 首页 - 测试版
+// 首页 - 修复API处理
 Page({
   data: {
     technicians: [],
@@ -6,16 +6,6 @@ Page({
   },
 
   onLoad() {
-    // 先显示测试数据
-    this.setData({
-      technicians: [
-        { name: '测试-小美', level: '高级', position: '美容师', rating: 5, orders: 100, avatar: '' },
-        { name: '测试-文子', level: '中级', position: '洗护师', rating: 4, orders: 80, avatar: '' }
-      ],
-      debugMsg: '测试数据'
-    });
-    
-    // 然后再调用API
     this.loadData();
   },
 
@@ -35,42 +25,52 @@ Page({
         return;
       }
       
-      // 打印详细结构
-      console.log('res.result类型:', typeof res.result);
-      console.log('res.result:', JSON.stringify(res.result, null, 2));
+      // 从之前的截图看到，res.result 直接是 {_id: ..., name: ...} 单条记录
+      // 或者可能是 {data: [...]} 格式
       
-      // 尝试提取数据
-      let data = null;
+      let data = [];
       
-      if (Array.isArray(res.result)) {
+      // 情况1: res.result 直接是对象（单条记录）
+      if (res.result._id && !Array.isArray(res.result)) {
+        console.log('发现单条记录:', res.result.name);
+        data = [res.result];
+      }
+      // 情况2: res.result 是数组
+      else if (Array.isArray(res.result)) {
+        console.log('发现数组:', res.result.length);
         data = res.result;
-      } else if (res.result.data && Array.isArray(res.result.data)) {
+      }
+      // 情况3: res.result.data 是数组
+      else if (res.result.data && Array.isArray(res.result.data)) {
+        console.log('发现标准格式:', res.result.data.length);
         data = res.result.data;
-      } else if (typeof res.result === 'object') {
-        // 可能是单条记录，也可能是其他格式
-        // 尝试找到数组
+      }
+      // 情况4: res.result 包含其他字段
+      else {
+        console.log('尝试遍历查找...');
         for (let key in res.result) {
-          if (Array.isArray(res.result[key])) {
-            data = res.result[key];
-            console.log('找到数组在 key:', key);
+          const val = res.result[key];
+          if (Array.isArray(val) && val.length > 0) {
+            console.log('在', key, '中找到数组');
+            data = val;
+            break;
+          }
+          if (val && val._id) {
+            console.log('在', key, '中找到记录');
+            data = [val];
             break;
           }
         }
-        
-        // 如果没找到数组，且是单条记录
-        if (!data && res.result._id) {
-          data = [res.result];
-        }
       }
       
-      if (!data || data.length === 0) {
-        console.log('无法提取有效数据');
-        this.setData({ debugMsg: 'API无数据,显示测试数据' });
+      console.log('最终数据:', data.length, '条');
+      
+      if (data.length === 0) {
+        this.setData({ debugMsg: 'API无数据' });
         return;
       }
       
-      console.log('提取到数据:', data.length, '条');
-      
+      // 转换
       const techs = data.map(item => ({
         name: item.name || '未命名',
         level: item.level || '中级',
@@ -82,12 +82,12 @@ Page({
       
       this.setData({
         technicians: techs,
-        debugMsg: `API成功:${techs.length}人`
+        debugMsg: `成功:${techs.length}人`
       });
       
     } catch (err) {
       console.error('错误:', err);
-      this.setData({ debugMsg: 'API错误,显示测试数据' });
+      this.setData({ debugMsg: '错误:' + err.message });
     }
   }
 });
