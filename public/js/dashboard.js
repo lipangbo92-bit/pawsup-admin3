@@ -24,17 +24,6 @@ function getTodayString() {
     return date.toISOString().split('T')[0];
 }
 
-// Get today's start and end timestamps
-function getTodayRange() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-    return {
-        start: start.toISOString(),
-        end: end.toISOString()
-    };
-}
-
 // API 调用封装
 async function apiCall(endpoint, data) {
     try {
@@ -65,32 +54,56 @@ async function loadDashboardData() {
         const ordersResult = await apiCall('orders', { action: 'list' });
         const orders = ordersResult.data || [];
         
-        const todayRange = getTodayRange();
+        const todayStr = getTodayString();
         
-        // 今日订单数
+        // 今日订单数（根据日期字段匹配）
         const todayOrders = orders.filter(o => {
-            const orderDate = o.createdAt || o.createTime || o.date;
-            return orderDate >= todayRange.start && orderDate <= todayRange.end;
+            const orderDate = extractDate(o.createdAt || o.createTime || o.date || o.appointmentDate);
+            return orderDate === todayStr;
         });
         document.getElementById('todayOrders').textContent = todayOrders.length;
         
         // 待处理订单数
-        const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === '待处理');
+        const pendingOrders = orders.filter(o => {
+            const status = (o.status || '').toLowerCase();
+            return status === 'pending' || status === '待处理' || status === '待确认';
+        });
         document.getElementById('pendingOrders').textContent = pendingOrders.length;
         
-        // 今日收入
+        // 今日收入（已完成的今日订单）
         const todayRevenue = todayOrders
-            .filter(o => o.status === 'completed' || o.status === '已完成')
+            .filter(o => {
+                const status = (o.status || '').toLowerCase();
+                return status === 'completed' || status === '已完成';
+            })
             .reduce((sum, o) => sum + (parseFloat(o.amount) || parseFloat(o.price) || 0), 0);
         document.getElementById('todayRevenue').textContent = '¥' + todayRevenue.toFixed(2);
         
         // 获取美容师数量
         const techsResult = await apiCall('technicians', { action: 'list' });
         const technicians = techsResult.data || [];
-        // 统计在职美容师（status 为 active 或 active 字段为 true）
-        const activeTechs = technicians.filter(t => 
-            t.status === 'active' || t.active === true || t.status === '在职'
-        );
+        console.log('Technicians data:', technicians);
+        
+        // 统计在职美容师 - 兼容多种状态字段
+        const activeTechs = technicians.filter(t => {
+            // 检查各种可能的状态字段
+            const status = t.status || '';
+            const active = t.active;
+            const level = t.level || '';
+            
+            // 默认如果没有明确标记为离职/休息，则视为在职
+            const isActive = (
+                status === 'active' || 
+                status === '在职' || 
+                active === true ||
+                (status !== 'inactive' && status !== '休息中' && status !== '离职')
+            );
+            
+            console.log(`Tech ${t.name}: status=${status}, active=${active}, isActive=${isActive}`);
+            return isActive;
+        });
+        
+        console.log('Active techs count:', activeTechs.length);
         document.getElementById('activeTechs').textContent = activeTechs.length;
         
         // 加载最近订单
@@ -104,6 +117,21 @@ async function loadDashboardData() {
         // Use mock data for demo
         loadMockData();
     }
+}
+
+// 从时间字符串提取日期 (YYYY-MM-DD)
+function extractDate(dateStr) {
+    if (!dateStr) return '';
+    // 处理 ISO 格式: 2024-03-10T12:00:00.000Z
+    if (dateStr.includes('T')) {
+        return dateStr.split('T')[0];
+    }
+    // 处理空格分隔: 2024-03-10 12:00:00
+    if (dateStr.includes(' ')) {
+        return dateStr.split(' ')[0];
+    }
+    // 已经是日期格式
+    return dateStr;
 }
 
 // Render recent orders
