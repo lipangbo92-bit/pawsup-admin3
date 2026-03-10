@@ -1,10 +1,10 @@
+// pages/services/services.js
 Page({
   data: {
-    categories: ['狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
-    allServices: [],
-    filteredServices: [],
     currentCategory: 0,
-    debugInfo: '加载中...'
+    categories: ['狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
+    services: [],
+    allServices: []
   },
 
   onLoad() {
@@ -18,26 +18,41 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('完整返回:', res);
-      
-      if (res.result && res.result.success) {
-        const services = res.result.data || [];
+      if (res.result && res.result.success && res.result.data) {
+        const services = res.result.data.map(item => ({
+          id: item._id,
+          name: item.name,
+          desc: item.desc || item.description || '',
+          price: item.price,
+          unit: item.unit || '起',
+          category: item.category || '',
+          image: item.image || '',
+          iconText: this.getIconText(item.category),
+          iconClass: this.getIconClass(item.category)
+        }));
         
-        // 打印每条数据的详细信息
-        services.forEach((s, i) => {
-          console.log(`服务${i}:`, s.name, '分类:', s.category, 'ID:', s._id);
-        });
-        
-        this.setData({ 
-          allServices: services,
-          debugInfo: `共${services.length}条数据`
-        });
-        
+        this.setData({ allServices: services });
         this.filterServices(0);
       }
     } catch (err) {
-      this.setData({ debugInfo: '错误:' + err.message });
+      console.error('加载失败:', err);
     }
+  },
+
+  getIconText(category) {
+    const map = {
+      '狗狗洗护': '🛁', '狗狗造型': '✂️', '狗狗寄养': '🏠',
+      '猫猫洗护': '🧼', '猫猫造型': '💇', '猫猫寄养': '🏨', '上门服务': '🚗'
+    };
+    return map[category] || '🐾';
+  },
+
+  getIconClass(category) {
+    const map = {
+      '狗狗洗护': 'icon-blue', '狗狗造型': 'icon-purple', '狗狗寄养': 'icon-orange',
+      '猫猫洗护': 'icon-pink', '猫猫造型': 'icon-indigo', '猫猫寄养': 'icon-teal', '上门服务': 'icon-green'
+    };
+    return map[category] || 'icon-blue';
   },
 
   switchCategory(e) {
@@ -47,17 +62,20 @@ Page({
 
   filterServices(index) {
     const category = this.data.categories[index];
-    
-    // 精确匹配分类
-    const filtered = this.data.allServices.filter(s => {
-      const match = s.category === category;
-      console.log('匹配:', s.name, s.category, 'vs', category, match ? '✓' : '✗');
-      return match;
-    });
+    const filtered = this.data.allServices.filter(s => s.category === category);
     
     this.setData({ 
-      currentCategory: index,
-      filteredServices: filtered
+      currentCategory: index, 
+      services: filtered
     });
+  },
+
+  bookService(e) {
+    const serviceId = e.currentTarget.dataset.service;
+    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}` });
+  },
+
+  onPullDownRefresh() {
+    this.loadServices().finally(() => wx.stopPullDownRefresh());
   }
 });
