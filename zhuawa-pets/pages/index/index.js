@@ -1,4 +1,4 @@
-// 首页
+// 首页 - 兼容版
 Page({
   data: {
     technicians: [],
@@ -6,12 +6,10 @@ Page({
   },
 
   onLoad() {
-    console.log('页面加载');
     this.loadData();
   },
 
   async loadData() {
-    console.log('开始加载数据');
     this.setData({ debugMsg: '调用API...' });
     
     try {
@@ -20,64 +18,50 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('API返回:', JSON.stringify(res, null, 2));
+      console.log('完整返回:', res);
       
-      // 检查返回结构
-      if (!res) {
-        console.error('res为空');
-        this.setData({ debugMsg: 'res为空' });
+      let data = null;
+      
+      // 兼容两种返回格式
+      if (res.result && res.result.success === true && res.result.data) {
+        // 正常格式: {success: true, data: [...]}
+        data = res.result.data;
+        console.log('使用正常格式');
+      } else if (res.result && Array.isArray(res.result)) {
+        // 异常格式: 直接返回数组
+        data = res.result;
+        console.log('使用数组格式');
+      } else if (res.result && res.result._id) {
+        // 异常格式: 直接返回单条记录
+        data = [res.result];
+        console.log('使用单条记录格式');
+      } else {
+        console.error('未知格式:', res.result);
+        this.setData({ debugMsg: '未知数据格式' });
         return;
       }
       
-      if (!res.result) {
-        console.error('res.result为空');
-        this.setData({ debugMsg: 'res.result为空' });
-        return;
-      }
+      console.log('数据条数:', data.length);
       
-      console.log('res.result:', res.result);
-      console.log('res.result.success:', res.result.success);
-      
-      if (res.result.success !== true) {
-        console.error('success不为true:', res.result);
-        this.setData({ debugMsg: 'success=false' });
-        return;
-      }
-      
-      const rawData = res.result.data;
-      console.log('原始数据:', rawData);
-      console.log('数据长度:', rawData?.length);
-      
-      if (!rawData || rawData.length === 0) {
-        console.log('数据为空');
+      if (!data || data.length === 0) {
         this.setData({ debugMsg: '数据为空' });
         return;
       }
       
       // 转换数据
-      const techs = [];
-      for (let i = 0; i < rawData.length; i++) {
-        const item = rawData[i];
-        console.log(`处理第${i}条:`, item);
-        
-        techs.push({
-          name: item.name || '未命名',
-          level: item.level || '中级',
-          position: item.position || '美容师',
-          rating: item.rating || 5,
-          orders: item.orders || 0,
-          avatar: item.avatarUrl || item.avatar || ''
-        });
-      }
-      
-      console.log('最终数据:', techs);
+      const techs = data.map(item => ({
+        name: item.name || '未命名',
+        level: item.level || '中级',
+        position: item.position || '美容师',
+        rating: item.rating || 5,
+        orders: item.orders || 0,
+        avatar: item.avatarUrl || item.avatar || ''
+      }));
       
       this.setData({
         technicians: techs,
         debugMsg: `成功:${techs.length}人`
       });
-      
-      console.log('设置完成');
       
     } catch (err) {
       console.error('错误:', err);
