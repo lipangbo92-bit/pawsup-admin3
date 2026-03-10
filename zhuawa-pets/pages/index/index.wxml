@@ -1,10 +1,5 @@
-<!--首页 - 带调试-->
+<!--首页 - 修复版-->
 <view class="home-container">
-  <!-- 调试信息 -->
-  <view style="background:#fff3cd;padding:10px;margin:10px;border-radius:8px;" bindtap="loadData">
-    <text style="color:#856404;font-size:12px;">点击重新加载 | {{debugInfo}}</text>
-  </view>
-
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
     <view class="nav-bg"></view>
@@ -25,33 +20,83 @@
     </swiper>
   </view>
 
+  <!-- 快速预约区 -->
+  <view class="quick-book-section">
+    <text class="section-title">快速预约</text>
+    <view class="quick-book-list">
+      <view class="quick-book-card quick-book-card-1" bindtap="goToServices">
+        <view class="quick-book-icon">✂️</view>
+        <view class="quick-book-info">
+          <text class="quick-book-name">预约美容</text>
+        </view>
+      </view>
+      <view class="quick-book-card quick-book-card-2">
+        <view class="quick-book-icon">🛁</view>
+        <view class="quick-book-info">
+          <text class="quick-book-name">预约洗澡</text>
+        </view>
+      </view>
+      <view class="quick-book-card quick-book-card-3">
+        <view class="quick-book-icon">🏥</view>
+        <view class="quick-book-info">
+          <text class="quick-book-name">宠物医疗</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 金牌技师推荐 -->
   <view class="technician-section">
     <view class="section-header">
       <text class="section-title">金牌技师推荐 ({{technicians.length}}人)</text>
       <text class="section-more">更多 ›</text>
     </view>
-    <view class="technician-list">
-      <view wx:for="{{technicians}}" wx:key="id" class="technician-card">
-        <view class="technician-avatar">
-          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
-          <text wx:else style="font-size:48rpx;">👤</text>
-        </view>
-        <view class="technician-info">
-          <view class="technician-name-row">
-            <text class="technician-name">{{item.name}}</text>
-            <text class="technician-badge">{{item.level}}</text>
+    
+    <!-- 技师列表 -->
+    <block wx:if="{{technicians.length > 0}}">
+      <view class="technician-list">
+        <view wx:for="{{technicians}}" wx:key="id" class="technician-card">
+          <view class="technician-avatar">
+            <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+            <text wx:else style="font-size:48rpx;">👤</text>
           </view>
-          <text class="technician-skill">{{item.position}}</text>
-          <view class="technician-stats">
-            <text class="technician-rating">⭐ {{item.rating}}分</text>
-            <text class="technician-orders">{{item.orders}}单</text>
+          <view class="technician-info">
+            <view class="technician-name-row">
+              <text class="technician-name">{{item.name}}</text>
+              <text class="technician-badge">{{item.level}}</text>
+            </view>
+            <text class="technician-skill">{{item.position}}</text>
+            <view class="technician-stats">
+              <text class="technician-rating">⭐ {{item.rating}}分</text>
+              <text class="technician-orders">{{item.orders}}单</text>
+            </view>
           </view>
+          <view class="technician-book-btn">预约</view>
         </view>
-        <view class="technician-book-btn">预约</view>
       </view>
-      <view wx:if="{{technicians.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
-        暂无技师数据，点击上方黄色区域重新加载
+    </block>
+    
+    <!-- 无数据提示 -->
+    <block wx:else>
+      <view style="text-align:center;padding:40rpx;color:#999;">
+        暂无技师数据
+      </view>
+    </block>
+  </view>
+
+  <!-- 热门服务 -->
+  <view class="service-section">
+    <view class="section-header">
+      <text class="section-title">热门服务</text>
+      <text class="section-more" bindtap="goToServices">更多 ›</text>
+    </view>
+    <view class="service-grid">
+      <view wx:for="{{services}}" wx:key="id" class="service-card" bindtap="goToBooking" data-id="{{item.id}}">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">🐾</text>
+        </view>
+        <text class="service-name">{{item.name}}</text>
+        <text class="service-price">¥{{item.price}}起</text>
       </view>
     </view>
   </view>
