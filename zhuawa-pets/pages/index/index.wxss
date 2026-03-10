@@ -1,4 +1,4 @@
-/* pages/index/index.wxss - 正确版本 */
+/* pages/index/index.wxss - 修正版 */
 
 .home-container {
   min-height: 100vh;
@@ -40,10 +40,10 @@
   color: #FFFFFF;
 }
 
-/* ========== Banner轮播图 ========== */
+/* ========== Banner轮播图 - 下移避免重叠 ========== */
 .banner-section {
   margin: 24rpx;
-  margin-top: -40rpx;
+  margin-top: 20rpx;  /* 从负值改为正值，避免与顶部重叠 */
   position: relative;
   z-index: 2;
 }
@@ -77,7 +77,7 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* ========== 快速预约区 - 长方形卡片 ========== */
+/* ========== 快速预约区 ========== */
 .quick-book-section {
   margin: 32rpx 24rpx;
   padding: 32rpx;
@@ -135,7 +135,7 @@
   font-weight: 500;
 }
 
-/* ========== 金牌美容师推荐 ========== */
+/* ========== 金牌美容师推荐 - 岗位在名字和等级之间 ========== */
 .technician-section {
   margin: 0 24rpx 32rpx;
   padding: 32rpx;
@@ -187,17 +187,27 @@
   flex: 1;
 }
 
+/* 第一排：名字 + 岗位 + 等级 */
 .technician-name-row {
   display: flex;
   align-items: center;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .technician-name {
   font-size: 30rpx;
   font-weight: 600;
   color: #1F2937;
-  margin-right: 12rpx;
+}
+
+.technician-position {
+  font-size: 24rpx;
+  color: #6B7280;
+  background-color: #E5E7EB;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
 }
 
 .technician-badge {
@@ -208,13 +218,7 @@
   border-radius: 8rpx;
 }
 
-.technician-skill {
-  display: block;
-  font-size: 24rpx;
-  color: #6B7280;
-  margin-bottom: 12rpx;
-}
-
+/* 第二排：评分和订单数 */
 .technician-stats {
   display: flex;
   align-items: center;
@@ -241,7 +245,7 @@
   font-weight: 500;
 }
 
-/* ========== 热门服务 - 从数据库拉取 ========== */
+/* ========== 热门服务 ========== */
 .hot-service-section {
   margin: 0 24rpx;
   padding: 32rpx;

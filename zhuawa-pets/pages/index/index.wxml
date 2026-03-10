@@ -1,4 +1,4 @@
-<!--首页 - 正确版本-->
+<!--首页 - 修正版-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -8,7 +8,7 @@
     </view>
   </view>
 
-  <!-- Banner轮播图 -->
+  <!-- Banner轮播图 - 下移避免重叠 -->
   <view class="banner-section">
     <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000">
       <swiper-item class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
@@ -37,7 +37,7 @@
     </view>
   </view>
 
-  <!-- 金牌美容师推荐 -->
+  <!-- 金牌美容师推荐 - 岗位放在名字和等级之间 -->
   <view class="technician-section">
     <view class="section-header">
       <text class="section-title">金牌美容师推荐</text>
@@ -51,11 +51,13 @@
           <text wx:else style="font-size:48rpx;">👤</text>
         </view>
         <view class="technician-info">
+          <!-- 第一排：名字 + 岗位 + 等级 -->
           <view class="technician-name-row">
             <text class="technician-name">{{item.name}}</text>
+            <text class="technician-position">{{item.position}}</text>
             <text class="technician-badge">{{item.level}}</text>
           </view>
-          <text class="technician-skill">{{item.position}}</text>
+          <!-- 第二排：评分和订单数 -->
           <view class="technician-stats">
             <text class="technician-rating">⭐ {{item.rating}}分</text>
             <text class="technician-orders">{{item.orders}}单</text>
