@@ -1,4 +1,4 @@
-<!--首页 - 修正版-->
+<!--首页 - 修复头像渲染-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -8,7 +8,7 @@
     </view>
   </view>
 
-  <!-- Banner轮播图 - 下移避免重叠 -->
+  <!-- Banner轮播图 -->
   <view class="banner-section">
     <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000">
       <swiper-item class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
@@ -18,7 +18,7 @@
     </swiper>
   </view>
 
-  <!-- 快速预约区 - 3个长方形服务项目 -->
+  <!-- 快速预约区 -->
   <view class="quick-book-section">
     <text class="section-title">快速预约</text>
     <view class="quick-book-row">
@@ -37,7 +37,7 @@
     </view>
   </view>
 
-  <!-- 金牌美容师推荐 - 岗位放在名字和等级之间 -->
+  <!-- 金牌美容师推荐 -->
   <view class="technician-section">
     <view class="section-header">
       <text class="section-title">金牌美容师推荐</text>
@@ -46,10 +46,16 @@
     
     <view class="technician-list">
       <view wx:for="{{technicians}}" wx:key="index" class="technician-card">
+        <!-- 头像 - 修复渲染 -->
         <view class="technician-avatar">
-          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
-          <text wx:else style="font-size:48rpx;">👤</text>
+          <block wx:if="{{item.avatar && item.avatar.length > 10}}">
+            <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+          </block>
+          <block wx:else>
+            <text style="font-size:48rpx;">👤</text>
+          </block>
         </view>
+        
         <view class="technician-info">
           <!-- 第一排：名字 + 岗位 + 等级 -->
           <view class="technician-name-row">
@@ -68,7 +74,7 @@
     </view>
   </view>
 
-  <!-- 热门服务 - 从数据库拉取 -->
+  <!-- 热门服务 -->
   <view class="hot-service-section">
     <view class="section-header">
       <text class="section-title">热门服务</text>
