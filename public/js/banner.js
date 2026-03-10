@@ -2,20 +2,22 @@
 const API_BASE = '/api';
 let banners = [];
 let currentImageBase64 = '';
+let editingId = null;
 
 // 加载Banner列表
 async function loadBanners() {
     try {
         const res = await fetch(`${API_BASE}/banners`);
         const data = await res.json();
-        banners = data.data || [];
+        if (data.success) {
+            banners = data.data || [];
+        } else {
+            banners = [];
+        }
         renderBanners();
     } catch (err) {
         console.error('加载失败:', err);
-        // 使用本地数据演示
-        banners = [
-            { _id: '1', title: '专业宠物美容', subtitle: '让您的爱宠焕然一新', image: '', sort: 1, status: 'active' }
-        ];
+        banners = [];
         renderBanners();
     }
 }
@@ -24,7 +26,7 @@ async function loadBanners() {
 function renderBanners() {
     const tbody = document.getElementById('bannerList');
     if (banners.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无Banner</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无Banner，点击右上角新增</td></tr>';
         return;
     }
     
@@ -80,7 +82,7 @@ function openModal(bannerId = null) {
     document.getElementById('modal').classList.add('flex');
     
     // 重置表单
-    document.getElementById('bannerId').value = '';
+    editingId = null;
     document.getElementById('bannerTitle').value = '';
     document.getElementById('bannerSubtitle').value = '';
     document.getElementById('bannerSort').value = '0';
@@ -93,8 +95,8 @@ function openModal(bannerId = null) {
     if (bannerId) {
         const banner = banners.find(b => b._id === bannerId);
         if (banner) {
+            editingId = bannerId;
             document.getElementById('modalTitle').textContent = '编辑Banner';
-            document.getElementById('bannerId').value = banner._id;
             document.getElementById('bannerTitle').value = banner.title || '';
             document.getElementById('bannerSubtitle').value = banner.subtitle || '';
             document.getElementById('bannerSort').value = banner.sort || 0;
@@ -115,11 +117,11 @@ function openModal(bannerId = null) {
 function closeModal() {
     document.getElementById('modal').classList.add('hidden');
     document.getElementById('modal').classList.remove('flex');
+    editingId = null;
 }
 
 // 保存Banner
 async function saveBanner() {
-    const id = document.getElementById('bannerId').value;
     const title = document.getElementById('bannerTitle').value.trim();
     const subtitle = document.getElementById('bannerSubtitle').value.trim();
     const sort = parseInt(document.getElementById('bannerSort').value) || 0;
@@ -139,34 +141,35 @@ async function saveBanner() {
     };
     
     try {
-        const url = id ? `${API_BASE}/banners/${id}` : `${API_BASE}/banners`;
-        const method = id ? 'PUT' : 'POST';
-        
-        const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bannerData)
-        });
-        
-        if (res.ok) {
-            closeModal();
-            loadBanners();
+        let res;
+        if (editingId) {
+            // 更新
+            res = await fetch(`${API_BASE}/banners`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: editingId, ...bannerData })
+            });
         } else {
-            alert('保存失败');
+            // 新增
+            res = await fetch(`${API_BASE}/banners`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bannerData)
+            });
+        }
+        
+        const result = await res.json();
+        
+        if (result.success) {
+            closeModal();
+            await loadBanners();
+            alert(editingId ? '更新成功' : '新增成功');
+        } else {
+            alert('保存失败: ' + (result.error || '未知错误'));
         }
     } catch (err) {
         console.error('保存失败:', err);
-        // 模拟保存成功
-        if (id) {
-            const index = banners.findIndex(b => b._id === id);
-            if (index > -1) {
-                banners[index] = { ...banners[index], ...bannerData };
-            }
-        } else {
-            banners.push({ _id: Date.now().toString(), ...bannerData });
-        }
-        closeModal();
-        renderBanners();
+        alert('保存失败: ' + err.message);
     }
 }
 
@@ -180,16 +183,20 @@ async function deleteBanner(id) {
     if (!confirm('确定要删除这个Banner吗？')) return;
     
     try {
-        const res = await fetch(`${API_BASE}/banners/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-            loadBanners();
+        const res = await fetch(`${API_BASE}/banners?id=${id}`, { 
+            method: 'DELETE'
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+            await loadBanners();
+            alert('删除成功');
         } else {
-            alert('删除失败');
+            alert('删除失败: ' + (result.error || '未知错误'));
         }
     } catch (err) {
         console.error('删除失败:', err);
-        banners = banners.filter(b => b._id !== id);
-        renderBanners();
+        alert('删除失败: ' + err.message);
     }
 }
 
