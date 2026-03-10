@@ -83,7 +83,7 @@ async function uploadToCloudStorage(base64Data, fileName) {
                 filePath: blob
             });
             
-            return result.fileID;
+            return result.url || result.fileID;
         }
         
         // 方法2: 使用 API 上传到云存储
@@ -99,7 +99,7 @@ async function uploadToCloudStorage(base64Data, fileName) {
         
         const result = await res.json();
         if (result.success) {
-            return result.fileID;
+            return result.url || result.fileID;
         }
         throw new Error(result.error || '上传失败');
     } catch (err) {

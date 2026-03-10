@@ -1,12 +1,11 @@
 // Vercel API Route: /api/upload - 上传图片到云存储
 const cloudbase = require('@cloudbase/node-sdk');
+
 const app = cloudbase.init({
   env: 'cloud1-4gy1jyan842d73ab',
   secretId: process.env.TENCENT_SECRET_ID,
   secretKey: process.env.TENCENT_SECRET_KEY
 });
-
-const db = app.database();
 
 // 将 base64 转为 Buffer
 function base64ToBuffer(base64) {
@@ -33,20 +32,46 @@ module.exports = async (req, res) => {
       const buffer = base64ToBuffer(data);
       
       // 生成文件名
-      const fileName = path || `images/${Date.now()}.jpg`;
+      const timestamp = Date.now();
+      const fileName = path || `avatars/${timestamp}.jpg`;
+      
+      console.log('[API Upload] Uploading to:', fileName);
       
       // 上传到云存储
-      const result = await app.uploadFile({
+      const uploadResult = await app.uploadFile({
         cloudPath: fileName,
         fileContent: buffer
       });
       
-      console.log('[API Upload] Success:', result.fileID);
+      console.log('[API Upload] Upload result:', uploadResult);
+      
+      // 获取临时访问链接（HTTPS URL）
+      // fileID 格式: cloud://env-id.bucket/avatars/xxx.jpg
+      const fileID = uploadResult.fileID;
+      
+      // 获取 HTTPS URL
+      let fileUrl = fileID;
+      try {
+        const urlResult = await app.getTempFileURL({
+          fileList: [fileID]
+        });
+        console.log('[API Upload] Temp URL result:', urlResult);
+        
+        if (urlResult.fileList && urlResult.fileList[0] && urlResult.fileList[0].tempFileURL) {
+          fileUrl = urlResult.fileList[0].tempFileURL;
+        }
+      } catch (urlErr) {
+        console.error('[API Upload] Get temp URL error:', urlErr);
+        // 如果获取临时链接失败，使用 fileID，小程序可以直接用 cloud:// 协议
+        fileUrl = fileID;
+      }
+      
+      console.log('[API Upload] Success, URL:', fileUrl);
       
       return res.json({
         success: true,
-        fileID: result.fileID,
-        url: result.fileID  // 云存储文件ID可以直接作为URL使用
+        fileID: fileID,
+        url: fileUrl
       });
     }
     
