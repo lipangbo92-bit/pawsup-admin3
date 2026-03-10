@@ -1,4 +1,4 @@
-/* pages/index/index.wxss - 专业设计版 */
+/* pages/index/index.wxss - 按照原型图修正 */
 
 .home-container {
   min-height: 100vh;
@@ -78,7 +78,7 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* ========== 快速预约区 ========== */
+/* ========== 快速预约区 - 正方形图标 ========== */
 .quick-book-section {
   margin: 32rpx 24rpx;
   padding: 32rpx;
@@ -98,102 +98,37 @@
 .quick-book-list {
   display: flex;
   flex-direction: row;
-  gap: 20rpx;
+  justify-content: space-around;
+  gap: 40rpx;
 }
 
-.quick-book-card {
-  flex: 1;
+.quick-book-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 32rpx 16rpx;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-}
-
-.quick-book-card-1 {
-  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-}
-
-.quick-book-card-2 {
-  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-}
-
-.quick-book-card-3 {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
 .quick-book-icon {
-  width: 80rpx;
-  height: 80rpx;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 20rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40rpx;
+  font-size: 48rpx;
   margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
 }
 
 .quick-book-name {
   font-size: 26rpx;
-  color: #FFFFFF;
-  font-weight: 500;
-}
-
-/* ========== 服务项目 - 长方形并排 ========== */
-.service-row-section {
-  margin: 0 24rpx 32rpx;
-  padding: 32rpx;
-  background-color: #FFFFFF;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-
-.service-row-list {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 20rpx;
-}
-
-.service-row-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32rpx 16rpx;
-  background-color: #F9FAFB;
-  border-radius: 16rpx;
-  transition: all 0.2s;
-}
-
-.service-row-item:active {
-  transform: scale(0.98);
-  background-color: #F3F4F6;
-}
-
-.service-row-icon {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44rpx;
-  margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-}
-
-.service-row-name {
-  font-size: 28rpx;
   color: #1F2937;
   font-weight: 500;
 }
 
 /* ========== 金牌美容师推荐 ========== */
 .technician-section {
-  margin: 0 24rpx;
+  margin: 0 24rpx 32rpx;
   padding: 32rpx;
   background-color: #FFFFFF;
   border-radius: 24rpx;
@@ -296,4 +231,54 @@
   border-radius: 28rpx;
   font-weight: 500;
   box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.3);
+}
+
+/* ========== 热门服务 - 长方形并排 ========== */
+.service-section {
+  margin: 0 24rpx;
+  padding: 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.service-row-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.service-row-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 16rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+
+.service-row-item:active {
+  transform: scale(0.98);
+  background-color: #F3F4F6;
+}
+
+.service-row-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.service-row-name {
+  font-size: 28rpx;
+  color: #1F2937;
+  font-weight: 500;
 }
