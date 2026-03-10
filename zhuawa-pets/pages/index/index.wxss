@@ -401,3 +401,61 @@
 .quick-book-card-3 {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
 }
+
+/* ========== 服务项目 - 长方形并排 ========== */
+.service-row-section {
+  margin: 32rpx 24rpx;
+  padding: 24rpx;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.service-row-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.service-row-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 20rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+  transition: transform 0.2s;
+}
+
+.service-row-item:active {
+  transform: scale(0.98);
+}
+
+.service-row-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.service-row-name {
+  font-size: 28rpx;
+  color: #1F2937;
+  font-weight: 500;
+}
+
+/* ========== 调整间距 ========== */
+.quick-book-section {
+  margin: 0 24rpx 32rpx;  /* 底部增加间距 */
+}
+
+.technician-section {
+  margin: 0 24rpx;  /* 与上方保持距离 */
+}

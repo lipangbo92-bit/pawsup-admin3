@@ -1,4 +1,4 @@
-<!--首页 - 正常显示-->
+<!--首页 - 修正设计-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -37,6 +37,24 @@
     </view>
   </view>
 
+  <!-- 服务项目 - 长方形并排 -->
+  <view class="service-row-section">
+    <view class="service-row-list">
+      <view class="service-row-item" bindtap="goToServices">
+        <view class="service-row-icon" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">🛁</view>
+        <text class="service-row-name">洗护美容</text>
+      </view>
+      <view class="service-row-item">
+        <view class="service-row-icon" style="background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);">🏠</view>
+        <text class="service-row-name">寄养日托</text>
+      </view>
+      <view class="service-row-item">
+        <view class="service-row-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">🚗</view>
+        <text class="service-row-name">上门服务</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 金牌美容师推荐 -->
   <view class="technician-section">
     <view class="section-header">
@@ -62,23 +80,6 @@
           </view>
         </view>
         <view class="technician-book-btn">预约</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 热门服务 -->
-  <view class="service-section">
-    <view class="section-header">
-      <text class="section-title">热门服务</text>
-      <text class="section-more" bindtap="goToServices">更多 ›</text>
-    </view>
-    <view class="service-grid">
-      <view wx:for="{{services}}" wx:key="index" class="service-card" bindtap="goToBooking" data-id="{{item.id}}">
-        <view class="service-icon-wrapper">
-          <text class="service-icon">🐾</text>
-        </view>
-        <text class="service-name">{{item.name}}</text>
-        <text class="service-price">¥{{item.price}}起</text>
       </view>
     </view>
   </view>
