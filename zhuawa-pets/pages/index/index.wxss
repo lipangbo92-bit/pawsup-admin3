@@ -1,8 +1,8 @@
-/* pages/index/index.wxss */
+/* pages/index/index.wxss - 专业设计版 */
 
 .home-container {
   min-height: 100vh;
-  background-color: #FFF7ED;
+  background-color: #f5f5f5;
   padding-bottom: 40rpx;
 }
 
@@ -29,24 +29,9 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   height: 88rpx;
   padding: 0 20rpx;
-}
-
-.nav-back {
-  width: 88rpx;
-  height: 88rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-icon {
-  font-size: 52rpx;
-  color: #FFFFFF;
-  font-weight: 300;
-  line-height: 1;
 }
 
 .nav-title {
@@ -55,99 +40,19 @@
   color: #FFFFFF;
 }
 
-.nav-placeholder {
-  width: 88rpx;
-}
-
-/* 原header样式 */
-.header {
-  display: flex;
-  align-items: center;
-  padding: 20rpx 24rpx;
-  background: linear-gradient(180deg, #F97316 0%, #EA580C 100%);
-}
-
-.location-box {
-  display: flex;
-  align-items: center;
-  margin-right: 20rpx;
-}
-
-.location-icon {
-  font-size: 28rpx;
-  margin-right: 4rpx;
-}
-
-.location-text {
-  font-size: 26rpx;
-  color: #FFFFFF;
-  max-width: 120rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.location-arrow {
-  font-size: 20rpx;
-  color: #FFFFFF;
-  margin-left: 4rpx;
-}
-
-.search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 32rpx;
-  padding: 14rpx 24rpx;
-  margin-right: 20rpx;
-}
-
-.search-icon {
-  font-size: 28rpx;
-  margin-right: 12rpx;
-  color: #9CA3AF;
-}
-
-.search-placeholder {
-  font-size: 26rpx;
-  color: #9CA3AF;
-}
-
-.message-box {
-  position: relative;
-  padding: 10rpx;
-}
-
-.message-icon {
-  font-size: 44rpx;
-}
-
-.message-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 32rpx;
-  height: 32rpx;
-  background-color: #EF4444;
-  color: #FFFFFF;
-  font-size: 20rpx;
-  border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8rpx;
-}
-
-/* Banner轮播图 */
+/* ========== Banner轮播图 ========== */
 .banner-section {
   margin: 24rpx;
+  margin-top: -40rpx;
+  position: relative;
+  z-index: 2;
 }
 
 .banner-swiper {
   height: 280rpx;
   border-radius: 20rpx;
   overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.3);
 }
 
 .banner-item {
@@ -161,28 +66,33 @@
 }
 
 .banner-title {
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: bold;
   color: #FFFFFF;
   margin-bottom: 12rpx;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
 }
 
 .banner-subtitle {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* 快速预约区 */
+/* ========== 快速预约区 ========== */
 .quick-book-section {
-  margin: 0 24rpx 32rpx;
+  margin: 32rpx 24rpx;
+  padding: 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 .section-title {
   font-size: 34rpx;
   font-weight: bold;
   color: #1F2937;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
+  display: block;
 }
 
 .quick-book-list {
@@ -196,17 +106,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  border-radius: 16rpx;
-  padding: 32rpx 20rpx;
+  padding: 32rpx 16rpx;
+  border-radius: 20rpx;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 }
 
-.quick-book-card:nth-child(2) {
+.quick-book-card-1 {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+.quick-book-card-2 {
   background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
 }
 
-.quick-book-card:nth-child(3) {
+.quick-book-card-3 {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
 }
 
@@ -222,39 +135,81 @@
   margin-bottom: 16rpx;
 }
 
-.quick-book-info {
-  text-align: center;
-}
-
 .quick-book-name {
-  display: block;
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 26rpx;
   color: #FFFFFF;
-  margin-bottom: 8rpx;
+  font-weight: 500;
 }
 
-.quick-book-desc {
-  display: block;
-  font-size: 24rpx;
-  color: #666;
-}
-
-/* 金牌技师推荐 */
-.technician-section {
+/* ========== 服务项目 - 长方形并排 ========== */
+.service-row-section {
   margin: 0 24rpx 32rpx;
+  padding: 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.service-row-list {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.service-row-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32rpx 16rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+  transition: all 0.2s;
+}
+
+.service-row-item:active {
+  transform: scale(0.98);
+  background-color: #F3F4F6;
+}
+
+.service-row-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.service-row-name {
+  font-size: 28rpx;
+  color: #1F2937;
+  font-weight: 500;
+}
+
+/* ========== 金牌美容师推荐 ========== */
+.technician-section {
+  margin: 0 24rpx;
+  padding: 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 
 .section-more {
   font-size: 26rpx;
-  color: #6B7280;
+  color: #9CA3AF;
 }
 
 .technician-list {
@@ -266,10 +221,9 @@
 .technician-card {
   display: flex;
   align-items: center;
-  background-color: #FFFFFF;
-  border-radius: 16rpx;
+  background-color: #F9FAFB;
+  border-radius: 20rpx;
   padding: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
 .technician-avatar {
@@ -280,9 +234,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48rpx;
   margin-right: 24rpx;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .technician-info {
@@ -341,121 +295,5 @@
   padding: 16rpx 32rpx;
   border-radius: 28rpx;
   font-weight: 500;
-}
-
-/* 热门服务 */
-.service-section {
-  margin: 0 24rpx;
-}
-
-.service-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20rpx;
-}
-
-.service-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: #FFFFFF;
-  border-radius: 16rpx;
-  padding: 24rpx 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
-}
-
-.service-icon-wrapper {
-  width: 88rpx;
-  height: 88rpx;
-  background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%);
-  border-radius: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16rpx;
-}
-
-.service-icon {
-  font-size: 44rpx;
-}
-
-.service-name {
-  font-size: 26rpx;
-  color: #1F2937;
-  margin-bottom: 8rpx;
-}
-
-.service-price {
-  font-size: 24rpx;
-  color: #F97316;
-  font-weight: 600;
-}
-
-/* 快速预约卡片颜色 */
-.quick-book-card-1 {
-  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
-}
-.quick-book-card-2 {
-  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
-}
-.quick-book-card-3 {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-}
-
-/* ========== 服务项目 - 长方形并排 ========== */
-.service-row-section {
-  margin: 32rpx 24rpx;
-  padding: 24rpx;
-  background-color: #FFFFFF;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
-}
-
-.service-row-list {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 20rpx;
-}
-
-.service-row-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32rpx 20rpx;
-  background-color: #F9FAFB;
-  border-radius: 16rpx;
-  transition: transform 0.2s;
-}
-
-.service-row-item:active {
-  transform: scale(0.98);
-}
-
-.service-row-icon {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44rpx;
-  margin-bottom: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-}
-
-.service-row-name {
-  font-size: 28rpx;
-  color: #1F2937;
-  font-weight: 500;
-}
-
-/* ========== 调整间距 ========== */
-.quick-book-section {
-  margin: 0 24rpx 32rpx;  /* 底部增加间距 */
-}
-
-.technician-section {
-  margin: 0 24rpx;  /* 与上方保持距离 */
+  box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.3);
 }
