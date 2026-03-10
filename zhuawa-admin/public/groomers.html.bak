@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PawsUp 爪哇宠屋 - 技师管理</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>PawsUp 爪哇宠屋 - 美容师管理</title>
     <link rel="stylesheet" href="css/style.css">
+
 </head>
 <body>
     <div class="dashboard-container">
@@ -22,18 +26,20 @@
         <div class="dashboard-layout">
             <nav class="sidebar">
                 <ul class="nav-menu">
-                    <li><a href="dashboard.html">📊 仪表盘</a></li>
-                    <li><a href="orders.html">📋 订单管理</a></li>
-                    <li><a href="services.html">🛁 服务管理</a></li>
-                    <li class="active"><a href="technicians.html">👨‍🔧 技师管理</a></li>
-                    <li><a href="statistics.html">📈 数据统计</a></li>
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
                 </ul>
             </nav>
             
             <main class="main-content">
                 <div class="page-header">
-                    <h2>技师管理</h2>
-                    <button class="btn-primary" onclick="openTechnicianModal()">+ 添加技师</button>
+                    <h2>美容师管理</h2>
+                    <button class="btn-primary" onclick="openTechnicianModal()">+ 添加美容师</button>
                 </div>
                 
                 <div class="technicians-grid" id="techniciansGrid"></div>
@@ -41,11 +47,11 @@
         </div>
     </div>
     
-    <!-- 添加/编辑技师模态框 -->
+    <!-- 添加/编辑美容师模态框 -->
     <div class="modal" id="technicianModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="technicianModalTitle">添加技师</h3>
+                <h3 id="technicianModalTitle">添加美容师</h3>
                 <button class="close-btn" onclick="closeTechnicianModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -62,8 +68,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>技师姓名 *</label>
-                        <input type="text" id="techName" required placeholder="技师姓名">
+                        <label>美容师姓名 *</label>
+                        <input type="text" id="techName" required placeholder="美容师姓名">
                     </div>
                     <div class="form-group">
                         <label>专业 *</label>
@@ -94,7 +100,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js"></script>
     <script src="js/app.js"></script>
     <script src="js/technicians.js"></script>

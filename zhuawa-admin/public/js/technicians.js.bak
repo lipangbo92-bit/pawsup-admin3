@@ -44,7 +44,7 @@ async function loadTechnicians() {
             ...t,
             _id: t._id || t.id,
             // 字段兼容处理
-            name: t.name || '未命名技师',
+            name: t.name || '未命名美容师',
             specialty: t.specialty || t.skills || t.tags?.join(', ') || '暂无',
             rating: t.rating || 5,
             orderCount: t.orderCount || t.orders || 0
@@ -69,7 +69,7 @@ async function loadTechnicians() {
             techniciansList = (reloadResult.data || []).map(t => ({
                 ...t,
                 _id: t._id || t.id,
-                name: t.name || '未命名技师',
+                name: t.name || '未命名美容师',
                 specialty: t.specialty || t.skills || '暂无',
                 rating: t.rating || 5,
                 orderCount: t.orderCount || t.orders || 0
@@ -92,30 +92,27 @@ async function loadTechnicians() {
 // Render technicians grid
 function renderTechniciansGrid(technicians) {
     const container = document.getElementById('techniciansGrid');
-
+    
     if (!container) {
         console.error('techniciansGrid not found');
         return;
     }
-
+    
     if (technicians.length === 0) {
-        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无技师，请添加</div>';
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">暂无美容师，请添加</div>';
         return;
     }
-
+    
     // Generate star rating HTML
     function getStarsHtml(rating) {
         const stars = '⭐'.repeat(rating || 0);
         return `<span class="star-rating">${stars}</span>`;
     }
-
-    container.innerHTML = technicians.map(tech => {
-        const isActive = tech.status !== 'inactive';
-        return `
-        <div class="technician-card ${!isActive ? 'inactive' : ''}">
+    
+    container.innerHTML = technicians.map(tech => `
+        <div class="technician-card">
             <div class="tech-avatar">
                 ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
-                <span class="status-badge ${isActive ? 'active' : 'inactive'}">${isActive ? '在职' : '已离职'}</span>
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
@@ -127,17 +124,16 @@ function renderTechniciansGrid(technicians) {
             </div>
             <div class="tech-actions">
                 <button class="btn-icon" onclick="editTechnician('${tech._id}')" title="编辑">✏️</button>
-                <button class="btn-icon ${isActive ? 'warning' : ''}" onclick="toggleTechStatus('${tech._id}', '${isActive ? 'inactive' : 'active'}')" title="${isActive ? '设为离职' : '设为在职'}">${isActive ? '🚫' : '✅'}</button>
                 <button class="btn-icon danger" onclick="deleteTechnician('${tech._id}', event)" title="删除">🗑️</button>
             </div>
         </div>
-    `}).join('');
+    `).join('');
 }
 
 // Open technician modal for add
 function openTechnicianModal() {
     currentTechnician = null;
-    document.getElementById('technicianModalTitle').textContent = '添加技师';
+    document.getElementById('technicianModalTitle').textContent = '添加美容师';
     document.getElementById('technicianForm').reset();
     document.getElementById('technicianId').value = '';
     document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
@@ -155,7 +151,7 @@ function editTechnician(techId) {
     currentTechnician = techniciansList.find(t => t._id === techId);
     if (!currentTechnician) return;
     
-    document.getElementById('technicianModalTitle').textContent = '编辑技师';
+    document.getElementById('technicianModalTitle').textContent = '编辑美容师';
     document.getElementById('technicianId').value = currentTechnician._id;
     document.getElementById('techName').value = currentTechnician.name || '';
     document.getElementById('techSpecialty').value = currentTechnician.specialty || '';
@@ -181,7 +177,7 @@ async function saveTechnician() {
     
     // Validation
     if (!name) {
-        showMessage('请输入技师姓名', 'error');
+        showMessage('请输入美容师姓名', 'error');
         return;
     }
     if (!specialty) {
@@ -208,11 +204,11 @@ async function saveTechnician() {
                 id: currentTechnician._id, 
                 data: techData 
             });
-            showMessage('技师信息更新成功', 'success');
+            showMessage('美容师信息更新成功', 'success');
         } else {
             // Add new
             await apiCall('technicians', { action: 'add', data: techData });
-            showMessage('技师添加成功', 'success');
+            showMessage('美容师添加成功', 'success');
         }
         
         closeTechnicianModal();
@@ -234,7 +230,7 @@ function showDeleteTechConfirm(techId) {
             <div style="background:white; padding:24px; border-radius:8px; max-width:360px; width:90%; text-align:center;">
                 <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
                 <h3 style="margin:0 0 12px 0; font-size:18px;">确认删除</h3>
-                <p style="margin:0 0 24px 0; color:#666;">确定要删除该技师吗？此操作不可恢复。</p>
+                <p style="margin:0 0 24px 0; color:#666;">确定要删除该美容师吗？此操作不可恢复。</p>
                 <div style="display:flex; gap:12px; justify-content:center;">
                     <button onclick="closeDeleteTechConfirm()" style="padding:10px 24px; border:1px solid #ddd; background:white; border-radius:4px; cursor:pointer;">取消</button>
                     <button onclick="confirmTechDelete()" style="padding:10px 24px; border:none; background:#f44336; color:white; border-radius:4px; cursor:pointer;">删除</button>
@@ -261,7 +257,7 @@ async function confirmTechDelete() {
     
     try {
         await apiCall('technicians', { action: 'delete', id: techId });
-        alert('技师已删除');
+        alert('美容师已删除');
         loadTechnicians();
     } catch (err) {
         console.error('Delete technician error:', err);
@@ -277,30 +273,6 @@ function deleteTechnician(techId, event) {
         event.stopPropagation();
     }
     showDeleteTechConfirm(techId);
-}
-
-// 切换技师状态（在职/离职）
-async function toggleTechStatus(techId, newStatus) {
-    const statusText = newStatus === 'active' ? '在职' : '离职';
-    const confirmMsg = newStatus === 'active'
-        ? '确定要将该技师设为在职吗？'
-        : '确定要将该技师设为离职吗？离职后将不会在排班管理中显示。';
-
-    if (!confirm(confirmMsg)) return;
-
-    try {
-        await apiCall('technicians', {
-            action: 'toggleStatus',
-            id: techId,
-            status: newStatus
-        });
-
-        showMessage(`技师已设为${statusText}`, 'success');
-        loadTechnicians();
-    } catch (err) {
-        console.error('Toggle status error:', err);
-        showMessage('操作失败：' + (err.message || '请重试'), 'error');
-    }
 }
 
 // Preview avatar

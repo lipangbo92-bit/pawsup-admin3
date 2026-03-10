@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容师管理 - PawsUp 管理端</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-box-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-box-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .tech-card {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .tech-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tech-avatar {
+            width: 56px;
+            height: 56px;
+            background: #E8F5E9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .tech-info {
+            flex: 1;
+        }
+
+        .tech-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tech-level {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .tech-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .tech-status.active {
+            background: var(--success);
+        }
+
+        .tech-status.inactive {
+            background: var(--danger);
+        }
+
+        .tech-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+            padding: 12px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tech-stat {
+            flex: 1;
+            text-align: center;
+        }
+
+        .tech-stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .tech-stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .tech-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stars {
+            color: #FFC107;
+        }
+
+        .rating-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tech-tag {
+            background: var(--bg-light);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .tech-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-edit {
+            background: #E3F2FD;
+            color: var(--info);
+        }
+
+        .btn-edit:hover {
+            background: #BBDEFB;
+        }
+
+        .btn-schedule {
+            background: #F3E5F5;
+            color: #9C27B0;
+        }
+
+        .btn-schedule:hover {
+            background: #E1BEE7;
+        }
+
+        .btn-toggle {
+            background: #FFF3E0;
+            color: var(--warning);
+        }
+
+        .btn-toggle:hover {
+            background: #FFE0B2;
+        }
+
+        .btn-toggle.active {
+            background: #E8F5E9;
+            color: var(--success);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 16px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            justify-content: flex-end;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .avatar-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .avatar-option {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .avatar-option:hover {
+            border-color: var(--primary);
+        }
+
+        .avatar-option.selected {
+            border-color: var(--primary);
+            background: #E8F5E9;
+        }
+
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            min-height: 42px;
+        }
+
+        .tags-input input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .tag {
+            background: #E3F2FD;
+            color: var(--info);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: #FFEBEE;
+            color: var(--danger);
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🐾</span>
+                <span>PawsUp</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>仪表盘</span>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>订单管理</span>
+                </a>
+                <a href="services.html" class="nav-item">
+                    <span class="nav-icon">✂️</span>
+                    <span>服务管理</span>
+                </a>
+                <a href="groomers.html" class="nav-item active">
+                    <span class="nav-icon">👨‍✂️</span>
+                    <span>美容师管理</span>
+                </a>
+                <a href="statistics.html" class="nav-item">
+                    <span class="nav-icon">📈</span>
+                    <span>数据统计</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">A</div>
+                    <div class="user-detail">
+                        <span class="name">管理员</span>
+                        <span class="role">Admin</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <header class="topbar">
+                <h1 class="page-title">美容师管理</h1>
+                <div class="topbar-actions">
+                    <button class="btn-primary" onclick="openModal()">
+                        <span>+</span>
+                        <span>添加美容师</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="statTotal">0</div>
+                        <div class="stat-box-label">总美容师数</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="statActive">0</div>
+                        <div class="stat-box-label">在职</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="statInactive">0</div>
+                        <div class="stat-box-label">休息中</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="statAvgRating">0.0</div>
+                        <div class="stat-box-label">平均评分</div>
+                    </div>
+                </div>
+
+                <div class="tech-grid" id="techGrid">
+                    <!-- Technicians will be rendered here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Technician Modal -->
+    <div id="techModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加美容师</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="techId">
+                <div class="form-group">
+                    <label>选择头像</label>
+                    <div class="avatar-selector" id="avatarSelector">
+                        <div class="avatar-option selected" data-avatar="👩‍🦱">👩‍🦱</div>
+                        <div class="avatar-option" data-avatar="👨‍🦲">👨‍🦲</div>
+                        <div class="avatar-option" data-avatar="👩">👩</div>
+                        <div class="avatar-option" data-avatar="👨">👨</div>
+                        <div class="avatar-option" data-avatar="👱‍♀️">👱‍♀️</div>
+                        <div class="avatar-option" data-avatar="👱‍♂️">👱‍♂️</div>
+                        <div class="avatar-option" data-avatar="👩‍🦰">👩‍🦰</div>
+                        <div class="avatar-option" data-avatar="👨‍🦱">👨‍🦱</div>
+                    </div>
+                    <input type="hidden" id="techAvatar" value="👩‍🦱">
+                </div>
+                <div class="form-group">
+                    <label>姓名 *</label>
+                    <input type="text" id="techName" placeholder="美容师姓名">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>级别 *</label>
+                        <select id="techLevel">
+                            <option value="首席美容师">首席美容师</option>
+                            <option value="高级美容师">高级美容师</option>
+                            <option value="资深美容师">资深美容师</option>
+                            <option value="中级美容师" selected>中级美容师</option>
+                            <option value="初级美容师">初级美容师</option>
+                            <option value="实习美容师">实习美容师</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>评分 (0-5)</label>
+                        <input type="number" id="techRating" value="5.0" step="0.1" min="0" max="5">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>擅长技能标签</label>
+                    <div class="tags-input" id="tagsInput">
+                        <input type="text" id="tagInput" placeholder="输入标签后按回车">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>个人简介</label>
+                    <textarea id="techBio" placeholder="请输入美容师简介..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>服务单数</label>
+                        <input type="number" id="techOrders" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>评价数量</label>
+                        <input type="number" id="techReviews" value="0" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="techStatus">
+                        <option value="active">在职</option>
+                        <option value="inactive">休息中</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn-primary" onclick="saveTech()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloudbase Web SDK -->
+    <script>
+        // API 配置 - 调用 Vercel API Routes
+        const API_BASE = '/api';
+        let technicians = [];
+        let selectedTags = [];
+
+        function showError(msg) {
+            document.getElementById('techGrid').innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:60px;color:#F44336;">
+                    <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+                    <div>${msg}</div>
+                    <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer;">刷新重试</button>
+                </div>
+            `;
+        }
+
+        // API 调用封装
+        async function apiCall(endpoint, data) {
+            const response = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        // Load technicians from API
+        async function loadTechnicians() {
+            try {
+                const result = await apiCall('technicians', { action: 'list' });
+                
+                if (!result.success) {
+                    throw new Error(result.error || '加载失败');
+                }
+
+                technicians = (result.data || []).map(t => ({...t, id: t._id || t.id}));
+
+                if (technicians.length === 0) {
+                    const defaultTechnicians = [
+                        {avatar: '👩‍🦱', name: '小美', level: '高级美容师', tags: ['美容', 'SPA', '造型'], bio: '8年宠物美容经验，擅长泰迪造型、比熊修剪', rating: 4.9, orders: 328, todayOrders: 5, monthlyRevenue: 52000, reviews: 128, status: 'active'},
+                        {avatar: '👨‍🦲', name: 'Tony', level: '中级美容师', tags: ['洗澡', '护理', '大型犬'], bio: '专注大型犬洗护，手法温和专业', rating: 4.8, orders: 215, todayOrders: 4, monthlyRevenue: 38000, reviews: 96, status: 'active'},
+                        {avatar: '👩', name: 'Lily', level: '资深美容师', tags: ['猫咪', '精细修剪', '染色'], bio: '猫咪专属美容师，擅长各种猫种的专业护理', rating: 4.7, orders: 156, todayOrders: 3, monthlyRevenue: 28000, reviews: 68, status: 'active'},
+                        {avatar: '👨', name: '阿强', level: '初级美容师', tags: ['基础洗护', '助理'], bio: '新进美容师，认真负责，学习能力强', rating: 4.9, orders: 89, todayOrders: 2, monthlyRevenue: 15000, reviews: 42, status: 'active'}
+                    ];
+                    
+                    for (const tech of defaultTechnicians) {
+                        await apiCall('technicians', { action: 'add', data: tech });
+                    }
+                    
+                    const reloadResult = await apiCall('technicians', { action: 'list' });
+                    technicians = (reloadResult.data || []).map(t => ({...t, id: t._id || t.id}));
+                }
+
+                renderTechnicians();
+            } catch (error) {
+                console.error('Load technicians error:', error);
+                showError('加载美容师数据失败: ' + error.message);
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const total = technicians.length;
+            const active = technicians.filter(t => t.status === 'active').length;
+            const inactive = total - active;
+            const avgRating = total > 0 ? (technicians.reduce((sum, t) => sum + t.rating, 0) / total).toFixed(1) : '0.0';
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statInactive').textContent = inactive;
+            document.getElementById('statAvgRating').textContent = avgRating;
+        }
+
+        // Render technicians
+        function renderTechnicians() {
+            const grid = document.getElementById('techGrid');
+
+            if (technicians.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">👤</div>
+                        <div>暂无美容师数据</div>
+                        <div style="font-size: 14px; margin-top: 8px;">点击"添加美容师"创建第一个美容师</div>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+
+            grid.innerHTML = technicians.map(tech => `
+                <div class="tech-card">
+                    <div class="tech-header">
+                        <div class="tech-avatar">${tech.avatar}</div>
+                        <div class="tech-info">
+                            <h3>${tech.name}</h3>
+                            <div class="tech-level">${tech.level}</div>
+                        </div>
+                        <span class="tech-status ${tech.status}" title="${tech.status === 'active' ? '在职' : '休息中'}"></span>
+                    </div>
+                    <div class="tech-stats">
+                        <div class="tech-stat">
+                            <div class="tech-stat-value">${tech.orders}</div>
+                            <div class="tech-stat-label">服务单</div>
+                        </div>
+                        <div class="tech-stat">
+                            <div class="tech-stat-value">${tech.todayOrders || 0}</div>
+                            <div class="tech-stat-label">今日</div>
+                        </div>
+                        <div class="tech-stat">
+                            <div class="tech-stat-value">${formatRevenue(tech.monthlyRevenue || 0)}</div>
+                            <div class="tech-stat-label">本月业绩</div>
+                        </div>
+                    </div>
+                    <div class="tech-rating">
+                        <span class="stars">${'⭐'.repeat(Math.floor(tech.rating))}</span>
+                        <span class="rating-text">${tech.rating}分 (${tech.reviews}评价)</span>
+                    </div>
+                    <div class="tech-tags">
+                        ${(tech.tags || []).map(tag => `<span class="tech-tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="tech-actions">
+                        <button class="btn-sm btn-edit" onclick="editTech('${tech.id}')">编辑</button>
+                        <button class="btn-sm btn-schedule" onclick="window.location.href='schedule.html?tech=${tech.id}'">排班</button>
+                        <button class="btn-sm btn-toggle ${tech.status === 'inactive' ? 'active' : ''}" onclick="toggleStatus('${tech.id}')">
+                            ${tech.status === 'active' ? '休息' : '复工'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateStats();
+        }
+
+        function formatRevenue(num) {
+            if (num >= 10000) return '¥' + (num / 10000).toFixed(1) + '万';
+            return '¥' + num;
+        }
+
+        // Avatar selector
+        document.querySelectorAll('.avatar-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('techAvatar').value = this.dataset.avatar;
+            });
+        });
+
+        // Tags input
+        const tagInput = document.getElementById('tagInput');
+        const tagsContainer = document.getElementById('tagsInput');
+
+        function renderTags() {
+            tagsContainer.querySelectorAll('.tag').forEach(t => t.remove());
+            selectedTags.forEach((tag, index) => {
+                const tagEl = document.createElement('div');
+                tagEl.className = 'tag';
+                tagEl.innerHTML = `${tag} <span class="tag-remove" onclick="removeTag(${index})">×</span>`;
+                tagsContainer.insertBefore(tagEl, tagInput);
+            });
+        }
+
+        function removeTag(index) {
+            selectedTags.splice(index, 1);
+            renderTags();
+        }
+
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = this.value.trim();
+                if (value && !selectedTags.includes(value)) {
+                    selectedTags.push(value);
+                    renderTags();
+                    this.value = '';
+                }
+            }
+        });
+
+        // Modal functions
+        function openModal(techId = null) {
+            const modal = document.getElementById('techModal');
+            const title = document.getElementById('modalTitle');
+
+            selectedTags = [];
+            renderTags();
+
+            if (techId) {
+                const tech = technicians.find(t => t.id === techId);
+                if (!tech) return;
+
+                title.textContent = '编辑美容师';
+                document.getElementById('techId').value = tech.id;
+                document.getElementById('techName').value = tech.name;
+                document.getElementById('techLevel').value = tech.level;
+                document.getElementById('techRating').value = tech.rating;
+                document.getElementById('techBio').value = tech.bio || '';
+                document.getElementById('techOrders').value = tech.orders;
+                document.getElementById('techReviews').value = tech.reviews;
+                document.getElementById('techStatus').value = tech.status;
+                document.getElementById('techAvatar').value = tech.avatar;
+
+                document.querySelectorAll('.avatar-option').forEach(o => {
+                    o.classList.toggle('selected', o.dataset.avatar === tech.avatar);
+                });
+
+                selectedTags = [...(tech.tags || [])];
+                renderTags();
+            } else {
+                title.textContent = '添加美容师';
+                document.getElementById('techId').value = '';
+                document.getElementById('techName').value = '';
+                document.getElementById('techLevel').value = '中级美容师';
+                document.getElementById('techRating').value = 5.0;
+                document.getElementById('techBio').value = '';
+                document.getElementById('techOrders').value = 0;
+                document.getElementById('techReviews').value = 0;
+                document.getElementById('techStatus').value = 'active';
+                document.getElementById('techAvatar').value = '👩‍🦱';
+
+                document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
+                document.querySelector('.avatar-option[data-avatar="👩‍🦱"]').classList.add('selected');
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('techModal').classList.remove('show');
+        }
+
+        // Save technician via API
+        async function saveTech() {
+            const id = document.getElementById('techId').value;
+            const name = document.getElementById('techName').value.trim();
+
+            if (!name) {
+                alert('请输入美容师姓名');
+                return;
+            }
+
+            const techData = {
+                avatar: document.getElementById('techAvatar').value,
+                name: name,
+                level: document.getElementById('techLevel').value,
+                rating: parseFloat(document.getElementById('techRating').value) || 5.0,
+                tags: [...selectedTags],
+                bio: document.getElementById('techBio').value.trim(),
+                orders: parseInt(document.getElementById('techOrders').value) || 0,
+                reviews: parseInt(document.getElementById('techReviews').value) || 0,
+                status: document.getElementById('techStatus').value
+            };
+
+            try {
+                if (id) {
+                    const existing = technicians.find(t => t.id === id);
+                    if (existing) {
+                        techData.todayOrders = existing.todayOrders || 0;
+                        techData.monthlyRevenue = existing.monthlyRevenue || 0;
+                    }
+                    console.log('Updating technician:', id, techData);
+                    const result = await apiCall('technicians', { 
+                        action: 'update', 
+                        id: id, 
+                        data: techData 
+                    });
+                    if (!result.success) throw new Error(result.error || '更新失败');
+                    console.log('Update success');
+                } else {
+                    console.log('Adding new technician:', techData);
+                    const result = await apiCall('technicians', { 
+                        action: 'add', 
+                        data: { ...techData, todayOrders: 0, monthlyRevenue: 0 } 
+                    });
+                    if (!result.success) throw new Error(result.error || '添加失败');
+                    console.log('Add success');
+                }
+                await loadTechnicians();
+                closeModal();
+            } catch (error) {
+                console.error('Save technician error:', error);
+                alert('保存失败: ' + error.message);
+            }
+        }
+
+        function editTech(id) {
+            openModal(id);
+        }
+
+        async function toggleStatus(id) {
+            const tech = technicians.find(t => t.id === id);
+            if (!tech) return;
+
+            try {
+                const newStatus = tech.status === 'active' ? 'inactive' : 'active';
+                const result = await apiCall('technicians', { 
+                    action: 'update', 
+                    id: id, 
+                    data: { status: newStatus } 
+                });
+                if (!result.success) throw new Error(result.error || '更新失败');
+                await loadTechnicians();
+            } catch (error) {
+                console.error('Toggle status error:', error);
+                alert('操作失败: ' + error.message);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('techModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Initialize - load technicians on page load
+        loadTechnicians();
+    </script>
+</body>
+</html>

@@ -62,3 +62,22 @@
 - 主题色：橙色 #F97316
 - 跳转：tabBar 页面用 wx.switchTab，非 tabBar 页面用 wx.navigateTo
 - 云开发环境 ID：cloud1-4gy1jyan842d73ab
+
+---
+
+# 2026-03-04 工作进展
+
+## 今日完成
+
+### 管理端 Vercel 部署
+- 多次调试登录跳转问题
+- 最终完全重写管理端代码
+- 成功部署到 Vercel: https://pawsup-admin3-ibrp6nf00-lipangbo92-6662s-projects.vercel.app
+- GitHub: lipangbo92-bit/pawsup-admin3
+
+### 云开发升级
+- 升级到进阶版 (19.9元/月)
+- 集成微信云开发 Web SDK，管理端可直接连接云数据库
+
+### 云函数
+- services-api, technicians-api, orders-api, upload-avatar

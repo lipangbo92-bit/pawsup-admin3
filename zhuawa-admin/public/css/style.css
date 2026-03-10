@@ -1514,3 +1514,264 @@ body {
         font-size: 20px;
     }
 }
+
+/* 美容师等级徽章样式 */
+.level-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #7C4A00;
+}
+
+.badge-silver {
+    background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%);
+    color: #555;
+}
+
+.badge-bronze {
+    background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+    color: white;
+}
+
+.badge-normal {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.tech-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.tech-title {
+    font-size: 12px;
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* ===== 新等级系统样式 ===== */
+
+/* 岗位标签 */
+.tech-position {
+    font-size: 12px;
+    color: #4B5563;
+    background: #E5E7EB;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* 等级徽章 - 新系统（初级/中级/高级/资深/首席） */
+.level-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+/* 初级 - 浅绿色 */
+.badge-junior {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+/* 中级 - 蓝色 */
+.badge-intermediate {
+    background: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* 高级 - 紫色 */
+.badge-senior {
+    background: #E9D5FF;
+    color: #6B21A8;
+}
+
+/* 资深 - 橙色 */
+.badge-expert {
+    background: #FFEDD5;
+    color: #9A3412;
+}
+
+/* 首席 - 金色渐变 */
+.badge-master {
+    background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%);
+    color: #92400E;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.3);
+}
+
+/* 旧系统兼容 - 保留但降级处理 */
+.badge-gold {
+    background: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%);
+    color: #92400E;
+}
+
+.badge-silver {
+    background: #E5E7EB;
+    color: #4B5563;
+}
+
+.badge-bronze {
+    background: #FED7AA;
+    color: #9A3412;
+}
+
+.badge-normal {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+/* ===== 作品图片样式 ===== */
+
+/* 模态框加大 */
+.modal-large {
+    max-width: 600px;
+}
+
+/* 作品上传容器 */
+.works-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+/* 作品图片网格 */
+.works-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* 单个作品项 */
+.work-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #E5E7EB;
+    background: #F9FAFB;
+}
+
+.work-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 删除按钮 */
+.work-delete {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.work-item:hover .work-delete {
+    opacity: 1;
+}
+
+.work-delete:hover {
+    background: #DC2626;
+}
+
+/* 添加图片按钮 */
+.works-add-btn {
+    width: 100px;
+    height: 100px;
+    border: 2px dashed #D1D5DB;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #F9FAFB;
+    color: #6B7280;
+}
+
+.works-add-btn:hover {
+    border-color: #F97316;
+    color: #F97316;
+    background: #FFF7ED;
+}
+
+.works-add-btn span:first-child {
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+.works-add-btn span:last-child {
+    font-size: 12px;
+}
+
+/* 表单提示 */
+.form-hint {
+    font-size: 12px;
+    color: #9CA3AF;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+/* 技师卡片中的作品预览 */
+.works-preview {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.work-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+}
+
+.work-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.work-more {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: #F3F4F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #6B7280;
+    font-weight: 600;
+}

@@ -1,9 +1,9 @@
 {
   "name": "technicians-api",
   "version": "1.0.0",
-  "description": "Technicians CRUD API for H5 Admin",
+  "description": "技师管理 API",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "^2.6.3"
+    "wx-server-sdk": "latest"
   }
 }

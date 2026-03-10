@@ -59,6 +59,7 @@ function simulateLogin(username, password) {
 
 // Logout function
 function logout() {
+    console.log('Logout function called');
     localStorage.removeItem('adminLoggedIn');
     localStorage.removeItem('adminUser');
     window.location.href = 'index.html';
@@ -116,6 +117,7 @@ function showMessage(message, type = 'info') {
 function checkAuth() {
     const isLoggedIn = localStorage.getItem('adminLoggedIn');
     const currentPage = window.location.pathname.split('/').pop();
+    console.log('app.js checkAuth - login status:', isLoggedIn, 'page:', currentPage);
     
     if (!isLoggedIn && currentPage !== 'index.html' && currentPage !== '') {
         // Optional: redirect to login
