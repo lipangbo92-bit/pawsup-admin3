@@ -1,62 +1,32 @@
-<!--首页-->
+<!--首页 - 测试版-->
 <view class="container">
   <!--Banner-->
   <view class="banner">
-    <view class="banner-placeholder">爪哇宠物店</view>
+    <view class="banner-placeholder">爪哇宠物店 - 测试版</view>
   </view>
 
-  <!--快捷入口-->
-  <view class="quick-entry">
-    <view class="entry-item" bindtap="goToServices">
-      <text class="entry-icon">✂️</text>
-      <text class="entry-text">预约美容</text>
-    </view>
-    <view class="entry-item">
-      <text class="entry-icon">🛁</text>
-      <text class="entry-text">预约洗澡</text>
-    </view>
-    <view class="entry-item">
-      <text class="entry-icon">🏥</text>
-      <text class="entry-text">宠物医疗</text>
-    </view>
-  </view>
-
-  <!--热门服务-->
-  <view class="section">
-    <view class="section-header">
-      <text class="section-title">热门服务</text>
-      <text class="section-more" bindtap="goToServices">更多 ›</text>
-    </view>
-    <view class="service-list">
-      <view 
-        wx:for="{{services}}" 
-        wx:key="id"
-        class="service-card"
-        data-id="{{item.id}}"
-        bindtap="goToBooking"
-      >
-        <view class="service-img"></view>
-        <text class="service-name">{{item.name}}</text>
-        <text class="service-price">¥{{item.price}}</text>
-      </view>
-    </view>
+  <!--测试按钮-->
+  <view style="padding:20px;background:#fff3cd;margin:10px;border-radius:8px;">
+    <text style="color:#856404;display:block;margin-bottom:10px;">🔧 调试模式</text>
+    <button bindtap="testLoadData" style="background:#007bff;color:white;padding:10px 20px;border-radius:4px;">点击加载技师数据</button>
   </view>
 
   <!--推荐技师-->
   <view class="section">
     <view class="section-header">
-      <text class="section-title">推荐技师</text>
+      <text class="section-title">推荐技师 ({{technicians.length}}人)</text>
     </view>
     <view class="tech-list">
-      <view wx:for="{{technicians}}" wx:key="id" class="tech-card">
-        <view class="tech-avatar">
-          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
+      <view wx:for="{{technicians}}" wx:key="id" class="tech-card" style="padding:10px;background:#f5f5f5;margin:5px;border-radius:8px;">
+        <view style="background:#ddd;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" style="width:100%;height:100%;border-radius:50%;"/>
           <text wx:else>👤</text>
         </view>
-        <text class="tech-name">{{item.name}}</text>
-        <!-- 显示完整职称：如"高级美容师" -->
-        <text class="tech-level">{{item.displayTitle}}</text>
+        <text style="display:block;text-align:center;margin-top:8px;font-weight:bold;">{{item.name}}</text>
+        <text style="display:block;text-align:center;font-size:12px;color:#666;">{{item.displayTitle}}</text>
+        <text style="display:block;text-align:center;font-size:10px;color:red;word-break:break-all;padding:5px;">{{item.avatar || '无头像'}}</text>
       </view>
     </view>
+    <text wx:if="{{technicians.length === 0}}" style="display:block;text-align:center;color:#999;padding:20px;">暂无技师数据，请点击上方按钮加载</text>
   </view>
 </view>

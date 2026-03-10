@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>服务管理 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --secondary: #F9A8D4;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --text-light: #BE185D;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+            --gray-500: #DB2777;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-item .icon { font-size: 18px; }
+        
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .category-tab {
+            padding: 10px 20px;
+            background: var(--white);
+            border: 2px solid transparent;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .category-tab.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .service-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        
+        .service-image {
+            height: 140px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+        
+        .service-content {
+            padding: 16px;
+        }
+        
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .service-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .service-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 10px;
+        }
+        
+        .service-status.active {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        
+        .service-desc {
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .service-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+        
+        .service-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+        
+        .service-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .service-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-edit {
+            background: var(--gray-100);
+            color: var(--text);
+        }
+        
+        .btn-delete {
+            background: #FEE2E2;
+            color: var(--red);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>栖游记管理</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </div>
+            <div class="nav-item active">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">✂️ 服务管理</h1>
+            <button class="btn-primary">
+                <span>+</span>
+                <span>添加服务</span>
+            </button>
+        </div>
+        
+        <div class="category-tabs">
+            <button class="category-tab active">全部服务</button>
+            <button class="category-tab">洗美护理</button>
+            <button class="category-tab">美容造型</button>
+            <button class="category-tab">寄养服务</button>
+            <button class="category-tab">增值服务</button>
+        </div>
+        
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-image">🐕</div>
+                <div class="service-content">
+                    <div class="service-header">
+                        <h3 class="service-title">狗狗洗护套餐</h3>
+                        <span class="service-status active">上架中</span>
+                    </div>
+                    <p class="service-desc">包含洗澡、吹干、修剪指甲、清洁耳朵等基础护理服务</p>
+                    <div class="service-meta">
+                        <span class="meta-item">⏱️ 约60分钟</span>
+                        <span class="meta-item">📋 已预约 328次</span>
+                    </div>
+                    <div class="service-price">¥99</div>
+                    <div class="service-actions">
+                        <button class="btn-edit">编辑</button>
+                        <button class="btn-delete">下架</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-image">🐈</div>
+                <div class="service-content">
+                    <div class="service-header">
+                        <h3 class="service-title">猫咪洗护套餐</h3>
+                        <span class="service-status active">上架中</span>
+                    </div>
+                    <p class="service-desc">专为猫咪设计的轻柔洗护，包含洗澡、吹干、梳毛等服务</p>
+                    <div class="service-meta">
+                        <span class="meta-item">⏱️ 约90分钟</span>
+                        <span class="meta-item">📋 已预约 156次</span>
+                    </div>
+                    <div class="service-price">¥129</div>
+                    <div class="service-actions">
+                        <button class="btn-edit">编辑</button>
+                        <button class="btn-delete">下架</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-image">✂️</div>
+                <div class="service-content">
+                    <div class="service-header">
+                        <h3 class="service-title">宠物美容造型</h3>
+                        <span class="service-status active">上架中</span>
+                    </div>
+                    <p class="service-desc">专业美容师定制造型，包含精修、造型设计等服务</p>
+                    <div class="service-meta">
+                        <span class="meta-item">⏱️ 约120分钟</span>
+                        <span class="meta-item">📋 已预约 89次</span>
+                    </div>
+                    <div class="service-price">¥199</div>
+                    <div class="service-actions">
+                        <button class="btn-edit">编辑</button>
+                        <button class="btn-delete">下架</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="service-card">
+                <div class="service-image">🏠</div>
+                <div class="service-content">
+                    <div class="service-header">
+                        <h3 class="service-title">宠物寄养</h3>
+                        <span class="service-status active">上架中</span>
+                    </div>
+                    <p class="service-desc">24小时专人照顾，每日遛弯、喂食、清洁，让爱宠安心</p>
+                    <div class="service-meta">
+                        <span class="meta-item">⏱️ 按间夜</span>
+                        <span class="meta-item">📋 已预约 45次</span>
+                    </div>
+                    <div class="service-price">¥80<span style="font-size:14px;font-weight:400">/晚</span></div>
+                    <div class="service-actions">
+                        <button class="btn-edit">编辑</button>
+                        <button class="btn-delete">下架</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

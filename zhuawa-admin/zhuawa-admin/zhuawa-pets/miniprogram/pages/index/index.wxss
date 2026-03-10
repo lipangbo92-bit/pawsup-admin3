@@ -1,0 +1,143 @@
+.container {
+  min-height: 100vh;
+  background: var(--bg, #FDF2F8);
+  padding-bottom: 20px;
+}
+
+.banner {
+  height: 180px;
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-placeholder {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.quick-entry {
+  display: flex;
+  background: #fff;
+  margin: -30px 16px 16px;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.entry-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.entry-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.entry-text {
+  font-size: 13px;
+  color: var(--text, #1F2937);
+}
+
+.section {
+  margin: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text, #1F2937);
+}
+
+.section-more {
+  font-size: 14px;
+  color: var(--text-secondary, #6B7280);
+}
+
+.service-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.service-card {
+  flex-shrink: 0;
+  width: 140px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.service-img {
+  width: 100%;
+  height: 100px;
+  background: var(--bg, #FDF2F8);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.service-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text, #1F2937);
+  display: block;
+}
+
+.service-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--primary, #EC4899);
+  margin-top: 4px;
+  display: block;
+}
+
+.tech-list {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.tech-card {
+  flex-shrink: 0;
+  width: 100px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.tech-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--bg, #FDF2F8);
+  margin: 0 auto 8px;
+}
+
+.tech-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text, #1F2937);
+  display: block;
+}
+
+.tech-level {
+  font-size: 12px;
+  color: var(--text-secondary, #6B7280);
+  margin-top: 4px;
+  display: block;
+}

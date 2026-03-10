@@ -1,0 +1,25 @@
+/* app.wxss - 全局样式 */
+page {
+  --primary: #EC4899;
+  --primary-light: #F9A8D4;
+  --primary-dark: #DB2777;
+  --secondary: #10B981;
+  --secondary-light: #6EE7B7;
+  --bg: #FDF2F8;
+  --surface: #FFFFFF;
+  --text: #1F2937;
+  --text-secondary: #6B7280;
+  --border: #E5E7EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --gradient: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container {
+  min-height: 100vh;
+}

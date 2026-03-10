@@ -1,0 +1,62 @@
+<!--首页-->
+<view class="container">
+  <!--Banner-->
+  <view class="banner">
+    <view class="banner-placeholder">爪哇宠物店</view>
+  </view>
+
+  <!--快捷入口-->
+  <view class="quick-entry">
+    <view class="entry-item" bindtap="goToServices">
+      <text class="entry-icon">✂️</text>
+      <text class="entry-text">预约美容</text>
+    </view>
+    <view class="entry-item">
+      <text class="entry-icon">🛁</text>
+      <text class="entry-text">预约洗澡</text>
+    </view>
+    <view class="entry-item">
+      <text class="entry-icon">🏥</text>
+      <text class="entry-text">宠物医疗</text>
+    </view>
+  </view>
+
+  <!--热门服务-->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">热门服务</text>
+      <text class="section-more" bindtap="goToServices">更多 ›</text>
+    </view>
+    <view class="service-list">
+      <view 
+        wx:for="{{services}}" 
+        wx:key="id"
+        class="service-card"
+        data-id="{{item.id}}"
+        bindtap="goToBooking"
+      >
+        <view class="service-img"></view>
+        <text class="service-name">{{item.name}}</text>
+        <text class="service-price">¥{{item.price}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!--推荐技师-->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">推荐技师</text>
+    </view>
+    <view class="tech-list">
+      <view wx:for="{{technicians}}" wx:key="id" class="tech-card">
+        <view class="tech-avatar">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
+          <text wx:else>👤</text>
+        </view>
+        <text class="tech-name">{{item.name}}</text>
+        <!-- 显示完整职称：如"高级美容师" -->
+        <text class="tech-level">{{item.displayTitle}}</text>
+      </view>
+    </view>
+  </view>
+</view>

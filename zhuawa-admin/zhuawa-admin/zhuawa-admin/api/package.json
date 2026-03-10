@@ -1,0 +1,8 @@
+{
+  "name": "pawsup-admin-api",
+  "version": "1.0.0",
+  "description": "PawsUp Admin API Routes for WeChat Cloud",
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.11.0"
+  }
+}

@@ -1,0 +1,126 @@
+<!--pages/booking-time-2/booking-time-2.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="nav-title">选择时间</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}}">
+      <view class="step-dot">1</view>
+      <text class="step-text">选择技师</text>
+    </view>
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}}">
+      <view class="step-dot">2</view>
+      <text class="step-text">选择服务</text>
+    </view>
+    <view class="step-line {{currentStep >= 3 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 3 ? 'active' : ''}}">
+      <view class="step-dot">3</view>
+      <text class="step-text">选择时间</text>
+    </view>
+  </view>
+
+  <!-- 已选技师信息卡片 -->
+  <view class="selected-technician-card" wx:if="{{selectedTechnician}}">
+    <view class="technician-header">
+      <view class="technician-avatar">{{selectedTechnician.avatar}}</view>
+      <view class="technician-info">
+        <view class="technician-name-row">
+          <text class="technician-name">{{selectedTechnician.name}}</text>
+          <view class="technician-badge" wx:if="{{selectedTechnician.isGold}}">金牌</view>
+        </view>
+        <text class="technician-skill">{{selectedTechnician.skill}}</text>
+        <view class="technician-stats">
+          <text class="technician-rating">⭐ {{selectedTechnician.rating}}</text>
+          <text class="technician-orders">已接{{selectedTechnician.orders}}单</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 已选服务信息卡片 -->
+  <view class="selected-service-card" wx:if="{{selectedService}}">
+    <view class="service-header">
+      <text class="service-icon">{{selectedService.icon}}</text>
+      <view class="service-info">
+        <text class="service-name">{{selectedService.name}}</text>
+        <text class="service-price">¥{{selectedService.price}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 日期选择区 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="title-icon">📅</text>
+      <text>选择日期</text>
+    </view>
+    <scroll-view class="date-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="date-list">
+        <view class="date-item {{selectedDateIndex === index ? 'active' : ''}} {{!item.available ? 'disabled' : ''}}" 
+              wx:for="{{dateList}}" 
+              wx:key="index"
+              bindtap="onDateSelect"
+              data-index="{{index}}">
+          <text class="date-week">{{item.week}}</text>
+          <text class="date-day">{{item.day}}</text>
+          <text class="date-status" wx:if="{{!item.available}}">约满</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 时间选择区 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="title-icon">⏰</text>
+      <text>选择时间</text>
+    </view>
+    <view class="time-sections">
+      <view class="time-section" wx:for="{{timeSections}}" wx:key="period">
+        <view class="period-label">{{item.period}}</view>
+        <view class="time-grid">
+          <view class="time-item {{time.selected ? 'active' : ''}} {{time.disabled ? 'disabled' : ''}}" 
+                wx:for="{{item.times}}" 
+                wx:for-item="time"
+                wx:for-index="tIndex"
+                wx:key="tIndex"
+                bindtap="onTimeSelect"
+                data-period="{{item.period}}"
+                data-index="{{tIndex}}">
+            <text class="time-text">{{time.time}}</text>
+            <text class="time-status" wx:if="{{time.status}}">{{time.status}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view class="bottom-space"></view>
+</view>
+
+<!-- 底部确认按钮 -->
+<view class="bottom-bar">
+  <view class="price-info">
+    <view class="total-row">
+      <text class="total-label">合计：</text>
+      <text class="total-price">¥{{totalPrice}}</text>
+    </view>
+    <text class="time-info" wx:if="{{selectedTime}}">{{selectedDateStr}} {{selectedTime}}</text>
+    <text class="time-info" wx:else>请选择预约时间</text>
+  </view>
+  <button class="confirm-btn {{selectedTime ? 'active' : ''}}" bindtap="onConfirm" disabled="{{!selectedTime}}">
+    确认预约
+  </button>
+</view>

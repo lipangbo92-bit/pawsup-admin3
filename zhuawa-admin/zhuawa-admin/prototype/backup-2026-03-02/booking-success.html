@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约成功 - 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --green: #10B981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); max-width: 375px; margin: 0 auto; position: relative; }
+        
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            margin: 60px auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            animation: pop 0.5s ease-out;
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6B7280;
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+        
+        .card {
+            background: var(--white);
+            margin: 0 16px 16px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
+        }
+        
+        .card-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 15px;
+            margin-bottom: 16px;
+            color: #6B7280;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #6B7280; }
+        .info-value { font-weight: 600; }
+        
+        .btns {
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+        }
+        
+        .btn-secondary {
+            background: var(--white);
+            color: var(--text);
+            border: 2px solid var(--gray-100);
+        }
+        
+        .btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div class="success-icon">✓</div>
+    <div class="title">预约成功</div>
+    <div class="subtitle">已发送通知到您的微信</div>
+    
+    <div class="card">
+        <div class="card-title">📋 预约详情</div>
+        <div class="info-row">
+            <span class="info-label">订单编号</span>
+            <span class="info-value">202402271530</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务项目</span>
+            <span class="info-value">狗狗洗护套餐</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务技师</span>
+            <span class="info-value">小美</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">预约时间</span>
+            <span class="info-value">02月27日 15:30</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">服务宠物</span>
+            <span class="info-value">豆豆</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">支付金额</span>
+            <span class="info-value" style="color: var(--primary);">¥99</span>
+        </div>
+    </div>
+    
+    <div class="btns">
+        <button class="btn btn-primary">查看预约</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">返回首页</button>
+    </div>
+    
+    <!-- 底部Tab栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='index.html'">
+            <span class="icon">🏠</span>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='services.html'">
+            <span class="icon">📋</span>
+            <span>服务</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='orders.html'">
+            <span class="icon">📝</span>
+            <span>订单</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+    
+    <style>
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9CA3AF;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: var(--primary);
+        }
+        .tab-item .icon {
+            font-size: 22px;
+        }
+    </style>
+</body>
+</html>
