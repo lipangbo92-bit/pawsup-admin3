@@ -1,18 +1,16 @@
-<!--pages/services/services.wxml-->
+<!--pages/services/services.wxml - 修复版-->
 <view class="container">
-  <!-- 顶部导航栏 -->
+  <!-- 顶部导航栏 - 修复背景覆盖 -->
   <view class="custom-nav">
     <view class="nav-bg"></view>
     <view class="nav-content">
-      <view class="nav-placeholder"></view>
       <text class="nav-title">服务项目</text>
-      <view class="nav-placeholder"></view>
     </view>
   </view>
 
   <!-- 左右分栏布局 -->
   <view class="main-content">
-    <!-- 左侧分类导航 -->
+    <!-- 左侧分类导航 - 6个分类 -->
     <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
       <view 
         wx:for="{{categories}}" 
