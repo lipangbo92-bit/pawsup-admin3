@@ -1,0 +1,36 @@
+<!--宠物注册页-->
+<view class="container">
+  <view class="form">
+    <view class="form-item">
+      <text class="label">宠物昵称</text>
+      <input class="input" placeholder="请输入宠物昵称" bindinput="onNameChange"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">宠物类型</text>
+      <view class="type-list">
+        <view 
+          wx:for="{{types}}" 
+          wx:key="key"
+          class="type-item {{type === item.key ? 'active' : ''}}"
+          data-type="{{item.key}}"
+          bindtap="switchType"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="label">品种</text>
+      <input class="input" placeholder="请输入品种" bindinput="onBreedChange"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">年龄</text>
+      <input class="input" type="number" placeholder="请输入年龄" bindinput="onAgeChange"/>
+    </view>
+  </view>
+
+  <button class="save-btn" bindtap="save">保存</button>
+</view>

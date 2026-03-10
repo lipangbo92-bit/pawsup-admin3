@@ -1,0 +1,44 @@
+<!--选择时间2 - 选择时间段-->
+<view class="container">
+  <view class="date-display">{{date}}</view>
+  
+  <view class="section">
+    <view class="section-title">选择时间</view>
+    <view class="time-grid">
+      <view 
+        wx:for="{{times}}" 
+        wx:key="time"
+        class="time-item {{!item.available ? 'disabled' : ''}} {{selectedTime === item.time ? 'selected' : ''}}"
+        data-index="{{index}}"
+        bindtap="selectTime"
+      >
+        {{item.time}}
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">选择技师（可选）</view>
+    <view class="tech-list">
+      <view 
+        wx:for="{{technicians}}" 
+        wx:key="id"
+        class="tech-item {{selectedTech && selectedTech.id === item.id ? 'selected' : ''}}"
+        data-index="{{index}}"
+        bindtap="selectTech"
+      >
+        <view class="tech-avatar">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
+          <text wx:else>👤</text>
+        </view>
+        <text class="tech-name">{{item.name}}</text>
+        <!-- 显示完整职称：如"高级美容师" -->
+        <text class="tech-level">{{item.displayTitle}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="confirm-btn" bindtap="confirm" disabled="{{!selectedTime}}">下一步</button>
+  </view>
+</view>
