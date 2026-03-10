@@ -1,95 +1,54 @@
-// pages/services/services.js - 详细调试版
 Page({
   data: {
-    currentCategory: 0,
-    categories: ['狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
     services: [],
-    allServices: [],
-    debugInfo: '加载中...',
-    rawData: '' // 显示原始数据
+    debugInfo: '初始化...',
+    errorDetail: ''
   },
 
-  onLoad() {
-    this.loadServices();
+  async onLoad() {
+    await this.loadServices();
   },
 
   async loadServices() {
-    this.setData({ debugInfo: '调用API...' });
+    this.setData({ debugInfo: '调用云函数...' });
     
     try {
-      const res = await wx.cloud.callFunction({
+      // 直接调用，不使用 await 看原始返回
+      wx.cloud.callFunction({
         name: 'services-api',
-        data: { action: 'list' }
+        data: { action: 'list' },
+        success: (res) => {
+          console.log('成功:', res);
+          this.setData({ 
+            debugInfo: '调用成功',
+            errorDetail: JSON.stringify(res.result).substring(0, 200)
+          });
+          
+          if (res.result && res.result.success && res.result.data) {
+            this.setData({ 
+              services: res.result.data,
+              debugInfo: `获取${res.result.data.length}条数据`
+            });
+          } else {
+            this.setData({ 
+              debugInfo: '返回异常',
+              errorDetail: JSON.stringify(res.result)
+            });
+          }
+        },
+        fail: (err) => {
+          console.error('失败:', err);
+          this.setData({ 
+            debugInfo: '调用失败',
+            errorDetail: JSON.stringify(err)
+          });
+        }
       });
-      
-      console.log('完整返回:', res);
-      
-      if (!res.result) {
-        this.setData({ debugInfo: 'result为空', rawData: JSON.stringify(res) });
-        return;
-      }
-      
-      if (!res.result.success) {
-        this.setData({ debugInfo: 'success=false', rawData: res.result.error || '未知错误' });
-        return;
-      }
-      
-      const data = res.result.data || [];
-      
-      if (data.length === 0) {
-        this.setData({ debugInfo: 'data为空数组', rawData: '返回数据为空' });
-        return;
-      }
-      
-      // 显示第一条数据的原始信息
-      const firstItem = data[0];
-      const rawInfo = `共${data.length}条, 第一条: ${firstItem.name}, 分类: ${firstItem.category}`;
-      
-      const services = data.map(item => ({
-        id: item._id,
-        name: item.name,
-        desc: item.desc || item.description || '',
-        price: item.price,
-        unit: item.unit || '起',
-        category: item.category || '',
-        image: item.image || ''
-      }));
-      
+    } catch (e) {
       this.setData({ 
-        allServices: services,
-        debugInfo: rawInfo,
-        rawData: JSON.stringify(services.slice(0, 2)) // 显示前2条
+        debugInfo: '异常',
+        errorDetail: e.message
       });
-      
-      // 不过滤，先显示所有数据
-      this.setData({ services: services });
-      
-    } catch (err) {
-      console.error('错误:', err);
-      this.setData({ debugInfo: '异常:' + err.message });
     }
-  },
-
-  switchCategory(e) {
-    const index = parseInt(e.currentTarget.dataset.index);
-    const category = this.data.categories[index];
-    
-    // 过滤
-    const filtered = this.data.allServices.filter(s => s.category === category);
-    
-    this.setData({ 
-      currentCategory: index, 
-      services: filtered,
-      debugInfo: `分类:${category}, 找到${filtered.length}条`
-    });
-  },
-
-  bookService(e) {
-    const serviceId = e.currentTarget.dataset.service;
-    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${serviceId}` });
-  },
-
-  onPullDownRefresh() {
-    this.loadServices().finally(() => wx.stopPullDownRefresh());
   }
 });
