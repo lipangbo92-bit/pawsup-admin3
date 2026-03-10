@@ -1775,3 +1775,80 @@ body {
     color: #6B7280;
     font-weight: 600;
 }
+
+/* ========== 服务图片上传 ========== */
+.service-image-upload {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #f9f9f9;
+}
+
+.service-image-upload:hover {
+    border-color: #F97316;
+    background: #fff7ed;
+}
+
+.service-image-upload input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.service-image-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+}
+
+.service-image-preview span:first-child {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.service-image-preview .upload-hint {
+    font-size: 14px;
+}
+
+.service-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+/* 服务卡片中的图片 */
+.service-card .service-image-wrapper {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f0f0f0;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.service-card .service-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

@@ -1,7 +1,8 @@
-// Services Management Module
+// Services Management Module - 支持图片上传
 const API_BASE = '/api';
 let currentService = null;
 let servicesList = [];
+let serviceImageBase64 = ''; // 临时存储服务图片
 
 document.addEventListener('DOMContentLoaded', function() {
     loadServices();
@@ -30,27 +31,12 @@ async function loadServices() {
             _id: s._id || s.id,
             name: s.name || s.title || '未命名服务',
             description: s.description || s.desc || '',
-            category: s.category || 'bath',
+            category: s.category || '狗狗洗护',
             price: s.price || 0,
-            duration: s.duration || 60  // 默认60分钟
+            duration: s.duration || 60,
+            image: s.image || s.imageUrl || ''
         }));
 
-        if (servicesList.length === 0) {
-            const defaultServices = [
-                { name: '洗护套餐', category: 'bath', price: 99, duration: 60, description: '基础洗护服务' },
-                { name: '美容造型', category: 'grooming', price: 168, duration: 90, description: '专业美容修剪' },
-                { name: '驱虫保健', category: 'medical', price: 80, duration: 30, description: '体内外驱虫' }
-            ];
-            for (const service of defaultServices) {
-                await apiCall('services', { action: 'add', data: service });
-            }
-            const reloadResult = await apiCall('services', { action: 'list' });
-            servicesList = (reloadResult.data || []).map(s => ({
-                ...s, _id: s._id || s.id, name: s.name || '未命名',
-                description: s.description || '', category: s.category || 'bath',
-                price: s.price || 0, duration: s.duration || 60
-            }));
-        }
         renderServicesGrid(servicesList);
     } catch (error) {
         console.error('Load services error:', error);
@@ -70,20 +56,18 @@ function renderServicesGrid(services) {
         return;
     }
     
-    const categoryMap = {
-        'bath': '洗护美容', 'grooming': '美容造型', 'spa': 'SPA护理',
-        'medical': '医疗护理', 'boarding': '寄养服务', 'other': '其他服务'
-    };
-    
     container.innerHTML = services.map(service => `
         <div class="service-card">
-            <div class="service-info">
+            <div class="service-image" style="width:100px;height:100px;border-radius:12px;overflow:hidden;background:#f0f0f0;margin-right:16px;">
+                ${service.image ? `<img src="${service.image}" style="width:100%;height:100%;object-fit:cover;" alt="${service.name}">` : '<span style="font-size:48px;display:flex;align-items:center;justify-content:center;height:100%;">🛁</span>'}
+            </div>
+            <div class="service-info" style="flex:1;">
                 <h4>${service.name}</h4>
-                <span class="service-category">${categoryMap[service.category] || service.category}</span>
-                <p class="service-desc">${service.description || '暂无描述'}</p>
+                <span class="service-category" style="background:#f0f0f0;padding:4px 12px;border-radius:12px;font-size:12px;color:#666;">${service.category}</span>
+                <p class="service-desc" style="color:#999;font-size:14px;margin:8px 0;">${service.description || '暂无描述'}</p>
                 <div class="service-meta">
-                    <span class="service-price">¥${(service.price || 0).toFixed(2)}</span>
-                    <span class="service-duration">⏱ ${service.duration || 60}分钟</span>
+                    <span class="service-price" style="color:#F97316;font-weight:bold;font-size:18px;">¥${(service.price || 0).toFixed(2)}</span>
+                    <span class="service-duration" style="color:#999;font-size:14px;margin-left:12px;">⏱ ${service.duration || 60}分钟</span>
                 </div>
             </div>
             <div class="service-actions">
@@ -94,17 +78,40 @@ function renderServicesGrid(services) {
     `).join('');
 }
 
+// 预览服务图片
+function previewServiceImage(input) {
+    if (!input.files || input.files.length === 0) return;
+    
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小超过5MB限制');
+        input.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        serviceImageBase64 = e.target.result;
+        const preview = document.getElementById('serviceImagePreview');
+        preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" alt="预览">`;
+    };
+    reader.readAsDataURL(file);
+}
+
 function openServiceModal() {
     currentService = null;
+    serviceImageBase64 = '';
     document.getElementById('serviceModalTitle').textContent = '添加服务';
     document.getElementById('serviceForm').reset();
     document.getElementById('serviceId').value = '';
+    document.getElementById('serviceImagePreview').innerHTML = '<span>🖼️</span><span class="upload-hint">点击上传服务图片</span>';
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
 function closeServiceModal() {
     document.getElementById('serviceModal').style.display = 'none';
     currentService = null;
+    serviceImageBase64 = '';
 }
 
 function editService(serviceId) {
@@ -118,6 +125,15 @@ function editService(serviceId) {
     document.getElementById('serviceDuration').value = currentService.duration || 60;
     document.getElementById('serviceCategory').value = currentService.category || '';
     document.getElementById('serviceDesc').value = currentService.description || '';
+    
+    // 显示已有图片
+    if (currentService.image) {
+        serviceImageBase64 = currentService.image;
+        document.getElementById('serviceImagePreview').innerHTML = `<img src="${currentService.image}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" alt="预览">`;
+    } else {
+        serviceImageBase64 = '';
+        document.getElementById('serviceImagePreview').innerHTML = '<span>🖼️</span><span class="upload-hint">点击上传服务图片</span>';
+    }
     
     document.getElementById('serviceModal').style.display = 'flex';
 }
@@ -136,6 +152,11 @@ async function saveService() {
     
     try {
         const serviceData = { name, price, duration, category, description };
+        
+        // 如果有新图片，添加到数据
+        if (serviceImageBase64) {
+            serviceData.image = serviceImageBase64;
+        }
         
         if (currentService) {
             await apiCall('services', { action: 'update', id: currentService._id, data: serviceData });
