@@ -1,4 +1,4 @@
-// 首页 - 详细调试版
+// 首页 - 修复数据加载
 Page({
   data: {
     technicians: [],
@@ -7,91 +7,58 @@ Page({
   },
 
   onLoad() {
-    console.log('=== onLoad ===');
-    this.setData({ debugMsg: '页面加载中...' });
     this.loadData();
   },
 
   async loadData() {
-    console.log('=== loadData ===');
-    this.setData({ debugMsg: '开始加载数据...' });
+    this.setData({ debugMsg: '加载中...' });
     
     try {
-      // 先加载美容师
-      console.log('开始加载美容师...');
-      this.setData({ debugMsg: '加载美容师...' });
-      const techsRes = await this.loadTechnicians();
-      console.log('美容师加载完成:', techsRes);
-      
-      // 再加载服务
-      console.log('开始加载服务...');
-      this.setData({ debugMsg: '加载服务...' });
-      const servicesRes = await this.loadServices();
-      console.log('服务加载完成:', servicesRes);
-      
-      console.log('设置数据:', { services: servicesRes.length, techs: techsRes.length });
-      
-      this.setData({
-        services: servicesRes,
-        technicians: techsRes,
-        debugMsg: `服务:${servicesRes.length} 美容师:${techsRes.length}`
-      });
-      
-      console.log('数据设置完成');
-    } catch (err) {
-      console.error('加载数据失败:', err);
-      this.setData({ debugMsg: '错误:' + err.message });
-    }
-  },
-
-  async loadServices() {
-    try {
-      const res = await wx.cloud.callFunction({
-        name: 'services-api',
-        data: { action: 'list' }
-      });
-      
-      console.log('services-api 返回:', res);
-      
-      if (res.result && res.result.success) {
-        return res.result.data || [];
-      }
-      return [];
-    } catch (err) {
-      console.error('加载服务失败:', err);
-      return [];
-    }
-  },
-
-  async loadTechnicians() {
-    try {
-      console.log('调用 technicians-api...');
+      // 加载美容师
       const res = await wx.cloud.callFunction({
         name: 'technicians-api',
         data: { action: 'list' }
       });
       
-      console.log('technicians-api 原始返回:', res);
-      console.log('res.result:', res.result);
+      console.log('API返回:', res);
       
-      if (!res.result) {
-        console.error('res.result 为空');
-        return [];
+      if (res.result && res.result.success) {
+        // 直接使用返回的数据
+        const rawData = res.result.data;
+        console.log('原始数据:', rawData);
+        console.log('数据类型:', typeof rawData);
+        console.log('是否是数组:', Array.isArray(rawData));
+        console.log('数据长度:', rawData ? rawData.length : 0);
+        
+        if (rawData && rawData.length > 0) {
+          // 转换数据格式
+          const techs = rawData.map((item, idx) => {
+            console.log(`处理第${idx}条:`, item);
+            return {
+              name: item.name || '未命名',
+              level: item.level || '中级',
+              position: item.position || '美容师',
+              rating: item.rating || 5,
+              orders: item.orders || 0,
+              avatar: item.avatarUrl || item.avatar || ''
+            };
+          });
+          
+          console.log('转换后:', techs);
+          
+          this.setData({
+            technicians: techs,
+            debugMsg: `美容师:${techs.length}人`
+          });
+        } else {
+          this.setData({ debugMsg: '数据为空' });
+        }
+      } else {
+        this.setData({ debugMsg: 'API失败' });
       }
-      
-      if (!res.result.success) {
-        console.error('API 返回失败:', res.result.error);
-        return [];
-      }
-      
-      const data = res.result.data || [];
-      console.log('API 返回数据条数:', data.length);
-      console.log('第一条数据:', data[0]);
-      
-      return data;
     } catch (err) {
-      console.error('加载美容师失败:', err);
-      return [];
+      console.error('错误:', err);
+      this.setData({ debugMsg: '错误:' + err.message });
     }
   },
 
