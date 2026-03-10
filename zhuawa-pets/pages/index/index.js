@@ -1,4 +1,4 @@
-// 首页 - 修复头像显示
+// 首页 - 修复快速预约跳转
 const app = getApp();
 
 Page({
@@ -17,8 +17,6 @@ Page({
         this.loadTechnicians(),
         this.loadServices()
       ]);
-      
-      console.log('技师数据:', techsRes);
       
       const technicians = techsRes.length > 0 ? techsRes : this.getLocalTechnicians();
       
@@ -42,13 +40,9 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('API原始数据:', res.result.data);
-      
       if (res.result && res.result.success && res.result.data) {
         return res.result.data.map(item => {
           const avatarUrl = item.avatarUrl || item.avatar || '';
-          console.log('技师:', item.name, '头像:', avatarUrl ? '有' : '无', '长度:', avatarUrl.length);
-          
           return {
             name: item.name,
             level: item.level || '中级',
@@ -61,7 +55,6 @@ Page({
       }
       return [];
     } catch (err) {
-      console.error('加载技师失败:', err);
       return [];
     }
   },
@@ -86,27 +79,31 @@ Page({
     }
   },
 
-  // 快速预约按钮点击 - 跳转到服务页面并选择对应分类
+  // 快速预约按钮点击
   goToService(e) {
     const serviceType = e.currentTarget.dataset.service;
     
-    // 映射快速预约类型到分类索引
-    const categoryMap = {
-      '洗护美容': 0,  // 狗狗洗护
-      '寄养日托': 2,  // 狗狗寄养
-      '上门服务': 6   // 上门服务
-    };
-    
-    const categoryIndex = categoryMap[serviceType] || 0;
-    
-    // 设置全局数据，让服务页面知道要切换的分类
-    app.globalData = app.globalData || {};
-    app.globalData.selectedCategory = categoryIndex;
-    
-    // 跳转到服务页面
-    wx.switchTab({
-      url: '/pages/services/services'
-    });
+    switch(serviceType) {
+      case '洗护美容':
+        // 跳转到服务页面选择具体服务
+        app.globalData = app.globalData || {};
+        app.globalData.selectedCategory = 0; // 狗狗洗护
+        wx.switchTab({ url: '/pages/services/services' });
+        break;
+        
+      case '寄养日托':
+        // 直接跳转到寄养预约页面
+        wx.navigateTo({ url: '/pages/boarding/boarding' });
+        break;
+        
+      case '上门服务':
+        // 直接跳转到上门预约页面
+        wx.navigateTo({ url: '/pages/visiting/visiting' });
+        break;
+        
+      default:
+        wx.switchTab({ url: '/pages/services/services' });
+    }
   },
 
   goToBooking(e) {
@@ -127,8 +124,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadData().finally(() => {
-      wx.stopPullDownRefresh();
-    });
+    this.loadData().finally(() => wx.stopPullDownRefresh());
   }
 });
