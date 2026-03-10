@@ -1,4 +1,4 @@
-// 首页 - 优先使用API数据
+// 首页 - 修复图片加载错误
 Page({
   data: {
     technicians: [],
@@ -11,10 +11,7 @@ Page({
 
   async loadData() {
     try {
-      // 先尝试从API加载美容师
       const techsRes = await this.loadTechnicians();
-      
-      // 如果API失败或为空，使用本地数据
       const technicians = techsRes.length > 0 ? techsRes : this.getLocalTechnicians();
       
       this.setData({
@@ -22,8 +19,6 @@ Page({
         services: this.getLocalServices()
       });
     } catch (err) {
-      console.error('加载失败:', err);
-      // 使用本地数据
       this.setData({
         technicians: this.getLocalTechnicians(),
         services: this.getLocalServices()
@@ -38,21 +33,27 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('API返回:', res);
-      
       if (res.result && res.result.success && res.result.data) {
-        return res.result.data.map(item => ({
-          name: item.name,
-          level: item.level || '中级',
-          position: item.position || '美容师',
-          rating: item.rating || 5,
-          orders: item.orders || 0,
-          avatar: item.avatarUrl || item.avatar || ''
-        }));
+        return res.result.data.map(item => {
+          // 处理头像URL - 如果是base64且太长，清空避免渲染错误
+          let avatar = item.avatarUrl || item.avatar || '';
+          if (avatar && avatar.length > 1000) {
+            console.log('头像数据太长，可能是base64，跳过显示');
+            avatar = ''; // 不显示base64头像，避免渲染错误
+          }
+          
+          return {
+            name: item.name,
+            level: item.level || '中级',
+            position: item.position || '美容师',
+            rating: item.rating || 5,
+            orders: item.orders || 0,
+            avatar: avatar
+          };
+        });
       }
       return [];
     } catch (err) {
-      console.log('API调用失败:', err);
       return [];
     }
   },
