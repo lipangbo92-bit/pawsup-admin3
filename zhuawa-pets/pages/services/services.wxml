@@ -1,5 +1,10 @@
-<!--pages/services/services.wxml-->
+<!--pages/services/services.wxml - 调试版-->
 <view class="container">
+  <!-- 调试信息 -->
+  <view style="background:#ffeb3b;padding:10rpx 20rpx;margin:20rpx;border-radius:8rpx;">
+    <text style="font-size:24rpx;color:#333;">{{debugInfo}}</text>
+  </view>
+
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
     <view class="nav-bg"></view>
@@ -31,7 +36,6 @@
           wx:key="id"
           class="service-card"
         >
-          <!-- 服务图片或图标 -->
           <view class="service-image-wrapper">
             <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
             <view wx:else class="service-icon {{item.iconClass}}">
@@ -57,7 +61,6 @@
           </view>
         </view>
         
-        <!-- 无数据提示 -->
         <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
           暂无该分类服务
         </view>
