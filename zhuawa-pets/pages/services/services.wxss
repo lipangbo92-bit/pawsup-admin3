@@ -60,7 +60,7 @@ page {
 }
 
 .category-item {
-  padding: 32rpx 20rpx;
+  padding: 40rpx 20rpx;
   text-align: center;
   border-left: 4rpx solid transparent;
 }
@@ -102,14 +102,14 @@ page {
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
   /* 完全固定的宽高 */
   width: 490rpx !important;
-  height: 160rpx !important;
+  height: 200rpx !important;
   box-sizing: border-box;
 }
 
 /* 图片/图标区域 - 固定120x120 */
 .service-image-wrapper {
-  width: 120rpx;
-  height: 120rpx;
+  width: 162rpx;
+  height: 162rpx;
   border-radius: 16rpx;
   overflow: hidden;
   margin-right: 20rpx;
@@ -118,14 +118,14 @@ page {
 }
 
 .service-image {
-  width: 120rpx;
-  height: 120rpx;
+  width: 162rpx;
+  height: 162rpx;
   display: block;
 }
 
 .service-icon {
-  width: 120rpx;
-  height: 120rpx;
+  width: 162rpx;
+  height: 162rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,43 +143,43 @@ page {
 /* 服务信息区域 - 固定宽度 */
 .service-info {
   width: 310rpx;
-  height: 120rpx;
+  height: 162rpx;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
 }
 
-/* 服务名称 - 固定78rpx高度，最多两行 */
+/* 服务名称 - 固定97rpx高度，最多两行 */
 .service-name {
   font-size: 28rpx;
   font-weight: 600;
   color: #1F2937;
   line-height: 1.4;
-  height: 78rpx;
+  height: 97rpx;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* 服务描述 - 固定32rpx高度，单行 */
+/* 服务描述 - 固定40rpx高度，单行 */
 .service-desc {
   font-size: 22rpx;
   color: #6B7280;
   line-height: 1.4;
-  height: 32rpx;
+  height: 40rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 底部价格和按钮 - 固定50rpx高度 */
+/* 底部价格和按钮 - 固定62rpx高度 */
 .service-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 50rpx;
+  height: 62rpx;
 }
 
 .price-wrapper {
@@ -218,7 +218,7 @@ page {
 
 .book-icon {
   color: #FFFFFF;
-  font-size: 32rpx;
+  font-size: 40rpx;
   font-weight: 300;
 }
 
