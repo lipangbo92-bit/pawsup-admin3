@@ -1514,3 +1514,49 @@ body {
         font-size: 20px;
     }
 }
+
+/* 美容师等级徽章样式 */
+.level-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #7C4A00;
+}
+
+.badge-silver {
+    background: linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 100%);
+    color: #555;
+}
+
+.badge-bronze {
+    background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+    color: white;
+}
+
+.badge-normal {
+    background: #F3F4F6;
+    color: #6B7280;
+}
+
+.tech-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.tech-title {
+    font-size: 12px;
+    color: #6B7280;
+    background: #F3F4F6;
+    padding: 2px 8px;
+    border-radius: 4px;
+}

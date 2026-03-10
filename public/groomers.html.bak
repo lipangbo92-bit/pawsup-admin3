@@ -77,28 +77,6 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>职称 *</label>
-                            <select id="techTitle" required>
-                                <option value="首席美容师">首席美容师</option>
-                                <option value="高级美容师">高级美容师</option>
-                                <option value="资深美容师">资深美容师</option>
-                                <option value="中级美容师" selected>中级美容师</option>
-                                <option value="初级美容师">初级美容师</option>
-                                <option value="实习美容师">实习美容师</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>等级 *</label>
-                            <select id="techLevel" required>
-                                <option value="gold">🥇 金牌</option>
-                                <option value="silver" selected>🥈 银牌</option>
-                                <option value="bronze">🥉 铜牌</option>
-                                <option value="normal">⭐ 普通</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
                             <label>评级 (1-5星) *</label>
                             <select id="techRating" required>
                                 <option value="">请选择评级</option>
