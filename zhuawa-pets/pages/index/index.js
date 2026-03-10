@@ -1,4 +1,4 @@
-// 首页 - 强制处理
+// 首页 - 测试版
 Page({
   data: {
     technicians: [],
@@ -6,11 +6,21 @@ Page({
   },
 
   onLoad() {
+    // 先显示测试数据
+    this.setData({
+      technicians: [
+        { name: '测试-小美', level: '高级', position: '美容师', rating: 5, orders: 100, avatar: '' },
+        { name: '测试-文子', level: '中级', position: '洗护师', rating: 4, orders: 80, avatar: '' }
+      ],
+      debugMsg: '测试数据'
+    });
+    
+    // 然后再调用API
     this.loadData();
   },
 
   async loadData() {
-    this.setData({ debugMsg: '加载中...' });
+    this.setData({ debugMsg: '调用API...' });
     
     try {
       const res = await wx.cloud.callFunction({
@@ -18,37 +28,49 @@ Page({
         data: { action: 'list' }
       });
       
-      console.log('返回:', res);
+      console.log('API返回:', res);
       
-      let data = [];
-      
-      // 无论如何，尝试从 res.result 提取数据
-      if (res && res.result) {
-        const result = res.result;
-        
-        // 如果 result 是数组
-        if (Array.isArray(result)) {
-          data = result;
-        }
-        // 如果 result 包含 data 数组
-        else if (result.data && Array.isArray(result.data)) {
-          data = result.data;
-        }
-        // 如果 result 是单条记录（有 _id）
-        else if (result._id) {
-          data = [result];
-        }
-      }
-      
-      console.log('提取的数据:', data);
-      console.log('数据条数:', data.length);
-      
-      if (data.length === 0) {
-        this.setData({ debugMsg: '无数据' });
+      if (!res || !res.result) {
+        this.setData({ debugMsg: 'API返回为空' });
         return;
       }
       
-      // 转换
+      // 打印详细结构
+      console.log('res.result类型:', typeof res.result);
+      console.log('res.result:', JSON.stringify(res.result, null, 2));
+      
+      // 尝试提取数据
+      let data = null;
+      
+      if (Array.isArray(res.result)) {
+        data = res.result;
+      } else if (res.result.data && Array.isArray(res.result.data)) {
+        data = res.result.data;
+      } else if (typeof res.result === 'object') {
+        // 可能是单条记录，也可能是其他格式
+        // 尝试找到数组
+        for (let key in res.result) {
+          if (Array.isArray(res.result[key])) {
+            data = res.result[key];
+            console.log('找到数组在 key:', key);
+            break;
+          }
+        }
+        
+        // 如果没找到数组，且是单条记录
+        if (!data && res.result._id) {
+          data = [res.result];
+        }
+      }
+      
+      if (!data || data.length === 0) {
+        console.log('无法提取有效数据');
+        this.setData({ debugMsg: 'API无数据,显示测试数据' });
+        return;
+      }
+      
+      console.log('提取到数据:', data.length, '条');
+      
       const techs = data.map(item => ({
         name: item.name || '未命名',
         level: item.level || '中级',
@@ -58,16 +80,14 @@ Page({
         avatar: item.avatarUrl || item.avatar || ''
       }));
       
-      console.log('转换后:', techs);
-      
       this.setData({
         technicians: techs,
-        debugMsg: `成功:${techs.length}人`
+        debugMsg: `API成功:${techs.length}人`
       });
       
     } catch (err) {
       console.error('错误:', err);
-      this.setData({ debugMsg: '错误:' + err.message });
+      this.setData({ debugMsg: 'API错误,显示测试数据' });
     }
   }
 });
