@@ -52,20 +52,29 @@ module.exports = async (req, res) => {
 
 // 获取房型列表
 async function getRoomsList() {
-  const result = await db.collection('boarding_rooms').get();
-  const rooms = (result.data || []).map(room => ({
-    id: room._id,
-    name: room.name,
-    petType: room.petType,
-    price: room.price,
-    roomCount: room.roomCount,
-    area: room.area,
-    facilities: room.facilities || [],
-    images: room.images || [],
-    description: room.description,
-    status: room.status
-  }));
-  return { success: true, data: rooms };
+  try {
+    const result = await db.collection('boarding_rooms').get();
+    const rooms = (result.data || []).map(room => ({
+      id: room._id,
+      name: room.name,
+      petType: room.petType,
+      price: room.price,
+      roomCount: room.roomCount,
+      area: room.area,
+      facilities: room.facilities || [],
+      images: room.images || [],
+      description: room.description,
+      status: room.status
+    }));
+    return { success: true, data: rooms };
+  } catch (error) {
+    // 如果集合不存在，返回空数组
+    if (error.code === 'DATABASE_COLLECTION_NOT_EXIST') {
+      console.log('集合 boarding_rooms 不存在，返回空数组');
+      return { success: true, data: [] };
+    }
+    throw error;
+  }
 }
 
 // 获取房型详情
