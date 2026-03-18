@@ -292,3 +292,27 @@
     </button>
   </view>
 </view>
+
+<!-- 底部 TabBar -->
+<view class="tab-bar">
+  <view class="tab-item {{activeTab === 'home' ? 'active' : ''}}" bindtap="switchTab" data-page="home">
+    <image wx:if="{{activeTab === 'home'}}" class="tab-icon" src="/images/home-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/home.png" mode="aspectFit"/>
+    <text class="tab-text">首页</text>
+  </view>
+  <view class="tab-item {{activeTab === 'service' ? 'active' : ''}}" bindtap="switchTab" data-page="service">
+    <image wx:if="{{activeTab === 'service'}}" class="tab-icon" src="/images/service-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/service.png" mode="aspectFit"/>
+    <text class="tab-text">服务</text>
+  </view>
+  <view class="tab-item {{activeTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-page="orders">
+    <image wx:if="{{activeTab === 'orders'}}" class="tab-icon" src="/images/order-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/order.png" mode="aspectFit"/>
+    <text class="tab-text">订单</text>
+  </view>
+  <view class="tab-item {{activeTab === 'profile' ? 'active' : ''}}" bindtap="switchTab" data-page="profile">
+    <image wx:if="{{activeTab === 'profile'}}" class="tab-icon" src="/images/profile-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/profile.png" mode="aspectFit"/>
+    <text class="tab-text">我的</text>
+  </view>
+</view>

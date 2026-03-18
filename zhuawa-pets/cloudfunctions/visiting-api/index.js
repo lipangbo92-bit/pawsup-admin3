@@ -39,12 +39,28 @@ exports.main = async (event, context) => {
 
 // 获取上门服务项目
 async function getServices(category) {
+  console.log('getServices called, category:', category);
+
+  // 先尝试查询 category 为 '上门服务' 的数据
   let query = db.collection('services').where({
-    category: '上门服务',
-    status: 'active'
+    category: '上门服务'
   });
 
-  const result = await query.get();
+  let result = await query.get();
+  console.log('Query result count:', result.data.length);
+
+  // 如果没有数据，尝试查询 category 包含 '上门' 的数据
+  if (result.data.length === 0) {
+    console.log('No exact match, trying fuzzy search...');
+    const allServices = await db.collection('services').get();
+    console.log('All services count:', allServices.data.length);
+
+    // 过滤出 category 包含 '上门' 的服务
+    result.data = allServices.data.filter(s =>
+      s.category && s.category.includes('上门')
+    );
+    console.log('Filtered services count:', result.data.length);
+  }
 
   return {
     success: true,

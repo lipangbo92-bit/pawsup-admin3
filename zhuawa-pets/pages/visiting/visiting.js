@@ -6,6 +6,9 @@ Page({
     // 当前步骤
     currentStep: 1,
 
+    // 当前选中的Tab
+    activeTab: 'service',
+
     // URL参数
     serviceId: null,
     petId: null,
@@ -409,6 +412,23 @@ Page({
         title: '创建订单失败',
         icon: 'none'
       });
+    }
+  },
+
+  // TabBar 切换
+  switchTab(e) {
+    const page = e.currentTarget.dataset.page;
+
+    const pageMap = {
+      'home': '/pages/index/index',
+      'service': '/pages/services/services',
+      'orders': '/pages/orders/orders',
+      'profile': '/pages/profile/profile'
+    };
+
+    const url = pageMap[page];
+    if (url) {
+      wx.switchTab({ url });
     }
   },
 
