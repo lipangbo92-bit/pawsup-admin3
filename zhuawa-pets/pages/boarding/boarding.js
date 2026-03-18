@@ -20,7 +20,8 @@ Page({
     checkoutDate: '',
     nightCount: 0,
 
-    // 宠物数量
+    // 宠物信息
+    selectedPet: null,
     petCount: 1,
 
     // 价格计算
@@ -37,6 +38,16 @@ Page({
     this.setData({
       today: today
     });
+    
+    // 接收宠物信息（从首页寄养入口进入）
+    if (options.petId) {
+      this.setData({
+        selectedPet: {
+          _id: options.petId,
+          type: options.petType || 'dog'
+        }
+      });
+    }
   },
 
   // 返回按钮

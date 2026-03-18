@@ -39,7 +39,7 @@ page {
 }
 
 .nav-title {
-  font-size: 28rpx;
+  font-size: 36rpx;
   font-weight: 600;
   color: #FFFFFF;
 }
@@ -231,4 +231,150 @@ page {
 
 .empty-text {
   font-size: 28rpx;
+}
+
+/* ========== 服务详情弹窗 ========== */
+.detail-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.detail-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 1001;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+  position: relative;
+}
+
+.detail-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.detail-close {
+  position: absolute;
+  right: 32rpx;
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+}
+
+.detail-content {
+  flex: 1;
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.detail-image-wrapper {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  background: #F3F4F6;
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+}
+
+.detail-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-icon-text {
+  font-size: 100rpx;
+}
+
+.detail-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 16rpx;
+}
+
+.detail-desc {
+  font-size: 28rpx;
+  color: #6B7280;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 32rpx;
+}
+
+.detail-info {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 24rpx;
+  background: #F9FAFB;
+  border-radius: 16rpx;
+}
+
+.detail-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail-info-label {
+  font-size: 24rpx;
+  color: #9CA3AF;
+  margin-bottom: 8rpx;
+}
+
+.detail-info-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.detail-footer {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  border-top: 2rpx solid #F3F4F6;
+}
+
+.detail-book-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 44rpx;
+  border: none;
+}
+
+.detail-book-btn::after {
+  border: none;
 }

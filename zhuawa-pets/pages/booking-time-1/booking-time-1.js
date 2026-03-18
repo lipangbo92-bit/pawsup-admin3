@@ -1,105 +1,134 @@
 // pages/booking-time-1/booking-time-1.js
+// 服务驱动路径：选服务 → 选时间 → 选美容师
 Page({
   data: {
     currentStep: 2,
     selectedService: null,
+    selectedPet: null,
     selectedDateIndex: 0,
     selectedDateStr: '',
     selectedTime: '',
     dateList: [],
-    timeSections: [
-      {
-        period: '上午',
-        times: [
-          { time: '09:00', selected: false, disabled: false },
-          { time: '09:30', selected: false, disabled: false },
-          { time: '10:00', selected: false, disabled: false },
-          { time: '10:30', selected: false, disabled: false },
-          { time: '11:00', selected: false, disabled: true, status: '已约' },
-          { time: '11:30', selected: false, disabled: false },
-        ]
-      },
-      {
-        period: '下午',
-        times: [
-          { time: '13:00', selected: false, disabled: false },
-          { time: '13:30', selected: false, disabled: true, status: '已约' },
-          { time: '14:00', selected: false, disabled: false },
-          { time: '14:30', selected: false, disabled: false },
-          { time: '15:00', selected: false, disabled: false },
-          { time: '15:30', selected: false, disabled: false },
-          { time: '16:00', selected: false, disabled: false },
-          { time: '16:30', selected: false, disabled: true, status: '已满' },
-        ]
-      },
-      {
-        period: '晚上',
-        times: [
-          { time: '18:00', selected: false, disabled: false },
-          { time: '18:30', selected: false, disabled: false },
-          { time: '19:00', selected: false, disabled: false },
-          { time: '19:30', selected: false, disabled: false },
-          { time: '20:00', selected: false, disabled: false },
-        ]
-      }
-    ],
-    // 技师选择弹窗相关数据
+    timeSections: [],
+    technicians: [],
+    
+    // 技师选择弹窗
     showTechnicianModal: false,
     selectedTechnician: null,
-    technicians: [
-      { id: 1, name: '小美', avatar: '👩', rating: 4.9, specialty: '洗澡' },
-      { id: 2, name: '小李', avatar: '👨', rating: 4.8, specialty: '美容' },
-      { id: 3, name: '小王', avatar: '🧑', rating: 4.7, specialty: '洗澡' },
-      { id: 4, name: '小张', avatar: '👱', rating: 4.6, specialty: '美发' }
-    ]
+    loadingTechnicians: false,
+    loadingTimeSlots: false
   },
 
   onLoad(options) {
-    // 生成日期列表
-    this.generateDateList();
+    console.log('booking-time-1 onLoad options:', options);
     
-    // 从上个页面接收选中的服务
-    if (options.service) {
+    // 路径3：从URL参数加载服务信息
+    if (options.mode === 'path3' && options.serviceId) {
+      this.loadServiceById(options.serviceId);
+    } else if (options.service) {
+      // 解析服务信息（JSON字符串格式）
       try {
         const service = JSON.parse(decodeURIComponent(options.service));
         this.setData({ selectedService: service });
       } catch (e) {
-        // 使用默认数据
-        this.setData({
-          selectedService: {
-            id: 1,
-            name: '宠物洗澡',
-            price: 68,
-            icon: '🛁'
-          }
-        });
+        this.setDefaultService();
       }
     } else {
-      // 默认数据
-      this.setData({
-        selectedService: {
-          id: 1,
-          name: '宠物洗澡',
-          price: 68,
-          icon: '🛁'
+      this.setDefaultService();
+    }
+    
+    // 解析宠物信息
+    if (options.petId) {
+      this.setData({ 
+        selectedPet: {
+          _id: options.petId,
+          type: options.petType || 'dog'
         }
       });
     }
+    
+    this.generateDateList();
+    this.loadTechnicians();
+    
+    // 加载默认日期的时段（不指定美容师，显示所有时段）
+    const today = new Date();
+    this.loadTimeSlots(today.toISOString().split('T')[0]);
   },
 
-  // 返回上一页
-  goBack() {
-    wx.navigateBack({
-      delta: 1,
-      fail: () => {
-        wx.switchTab({
-          url: '/pages/index/index'
-        });
+  // 根据ID加载服务信息（路径3）
+  async loadServiceById(serviceId) {
+    try {
+      const { result } = await wx.cloud.callFunction({
+        name: 'services-api',
+        data: { action: 'list' }
+      });
+      
+      if (result && result.success && result.data) {
+        const service = result.data.find(s => s._id === serviceId || s.id === serviceId);
+        if (service) {
+          this.setData({
+            selectedService: {
+              id: service._id || service.id,
+              name: service.name,
+              price: service.price,
+              icon: '🛁',
+              duration: service.duration || 60
+            }
+          });
+        } else {
+          this.setDefaultService();
+        }
+      }
+    } catch (err) {
+      console.error('加载服务失败:', err);
+      this.setDefaultService();
+    }
+  },
+
+  setDefaultService() {
+    this.setData({
+      selectedService: {
+        id: 1,
+        name: '宠物洗澡',
+        price: 68,
+        icon: '🛁',
+        duration: 60
       }
     });
   },
 
-  // 生成日期列表
+  loadTechnicians() {
+    wx.cloud.callFunction({
+      name: 'technicians-api',
+      data: { action: 'list' }
+    }).then(res => {
+      if (res.result.success) {
+        this.setData({
+          technicians: res.result.data.map(t => {
+            // 处理头像字段
+            let avatar = t.avatar || '';
+            // 如果avatar是URL但格式不正确，使用空字符串（显示默认头像）
+            if (avatar && (avatar.includes('cdn.cn/vant') || avatar.length < 10)) {
+              avatar = '';
+            }
+            return {
+              id: t._id,
+              name: t.name,
+              avatar: avatar,
+              position: t.position || '美容师',
+              level: t.level || '中级',
+              rating: t.rating || 5,
+              orders: t.orders || 0,
+              specialty: t.skills ? t.skills[0] : '洗护'
+            };
+          })
+        });
+      }
+    }).catch(err => {
+      console.error('加载美容师失败:', err);
+    });
+  },
+
   generateDateList() {
     const dateList = [];
     const today = new Date();
@@ -122,7 +151,7 @@ Page({
         day: `${month}/${day}`,
         week: weekText,
         fullDate: date.toISOString().split('T')[0],
-        available: Math.random() > 0.2 // 80% 概率可预约
+        available: true
       });
     }
     
@@ -132,18 +161,70 @@ Page({
     });
   },
 
-  // 选择日期
+  // 加载时段 - 路径1不指定美容师，显示所有时段
+  loadTimeSlots(date) {
+    this.setData({ loadingTimeSlots: true });
+    
+    // 先显示基础时段
+    const baseSlots = this.generateBaseTimeSlots();
+    this.setData({ timeSections: baseSlots });
+    
+    // 查询该日期所有美容师的预约情况，统计每个时段的可约数量
+    wx.cloud.callFunction({
+      name: 'availability-api',
+      data: {
+        action: 'getAllSlotsAvailability',
+        date: date
+      }
+    }).then(res => {
+      this.setData({ loadingTimeSlots: false });
+      
+      if (res.result && res.result.success && res.result.data.timeSections) {
+        // 使用返回的时段数据（包含可约数量）
+        this.setData({ timeSections: res.result.data.timeSections });
+      }
+    }).catch(err => {
+      console.error('加载时段失败:', err);
+      this.setData({ loadingTimeSlots: false });
+      // 保持基础时段显示
+    });
+  },
+
+  generateBaseTimeSlots() {
+    const slots = [];
+    const periods = [
+      { name: '上午', start: 9, end: 12 },
+      { name: '下午', start: 13, end: 17 },
+      { name: '晚上', start: 18, end: 21 }
+    ];
+    
+    periods.forEach(period => {
+      const times = [];
+      for (let h = period.start; h < period.end; h++) {
+        times.push({ 
+          time: `${h.toString().padStart(2, '0')}:00`, 
+          selected: false, 
+          disabled: false, 
+          status: '可约',
+          availableCount: 3 // 默认可约美容师数量
+        });
+        times.push({ 
+          time: `${h.toString().padStart(2, '0')}:30`, 
+          selected: false, 
+          disabled: false, 
+          status: '可约',
+          availableCount: 3
+        });
+      }
+      slots.push({ period: period.name, times });
+    });
+    
+    return slots;
+  },
+
   onDateSelect(e) {
     const index = e.currentTarget.dataset.index;
     const dateItem = this.data.dateList[index];
-    
-    if (!dateItem.available) {
-      wx.showToast({
-        title: '该日期已约满',
-        icon: 'none'
-      });
-      return;
-    }
     
     this.setData({
       selectedDateIndex: index,
@@ -151,27 +232,21 @@ Page({
       selectedTime: ''
     });
     
-    // 重置时间选择
     this.resetTimeSelection();
+    this.loadTimeSlots(dateItem.fullDate);
   },
 
-  // 选择时间
   onTimeSelect(e) {
     const { period, index } = e.currentTarget.dataset;
     const timeSections = this.data.timeSections;
     
-    // 找到对应的时间段
     const section = timeSections.find(s => s.period === period);
     if (!section || section.times[index].disabled) return;
     
-    // 重置所有选择
     timeSections.forEach(s => {
-      s.times.forEach(t => {
-        t.selected = false;
-      });
+      s.times.forEach(t => { t.selected = false; });
     });
     
-    // 设置当前选中
     section.times[index].selected = true;
     
     this.setData({
@@ -180,79 +255,100 @@ Page({
     });
   },
 
-  // 重置时间选择
   resetTimeSelection() {
-    const timeSections = this.data.timeSections;
-    timeSections.forEach(s => {
-      s.times.forEach(t => {
-        t.selected = false;
-      });
-    });
-    this.setData({ timeSections });
+    // 重新加载时段，保持可用性标记
+    const dateItem = this.data.dateList[this.data.selectedDateIndex];
+    this.loadTimeSlots(dateItem.fullDate);
   },
 
-  // 显示技师选择弹窗
+  goBack() {
+    wx.navigateBack({
+      delta: 1,
+      fail: () => {
+        wx.switchTab({ url: '/pages/index/index' });
+      }
+    });
+  },
+
   showTechnicianModal() {
-    this.setData({
-      showTechnicianModal: true
+    if (!this.data.selectedTime) {
+      wx.showToast({ title: '请先选择时间', icon: 'none' });
+      return;
+    }
+    
+    const selectedDate = this.data.dateList[this.data.selectedDateIndex];
+    this.setData({ loadingTechnicians: true });
+    
+    // 查询该时段可预约的美容师
+    wx.cloud.callFunction({
+      name: 'availability-api',
+      data: {
+        action: 'getAvailableTechnicians',
+        date: selectedDate.fullDate,
+        time: this.data.selectedTime,
+        technicians: this.data.technicians,
+        duration: this.data.selectedService?.duration || 60
+      }
+    }).then(res => {
+      this.setData({ loadingTechnicians: false });
+      
+      if (res.result && res.result.success) {
+        const availableTechs = res.result.data;
+        if (availableTechs.length === 0) {
+          wx.showToast({ title: '该时段暂无可用美容师', icon: 'none' });
+        }
+        this.setData({
+          technicians: availableTechs.length > 0 ? availableTechs : this.data.technicians,
+          showTechnicianModal: true
+        });
+      } else {
+        this.setData({ showTechnicianModal: true });
+      }
+    }).catch(err => {
+      console.error('获取可用美容师失败:', err);
+      this.setData({ loadingTechnicians: false, showTechnicianModal: true });
     });
   },
 
-  // 关闭技师选择弹窗
   closeTechnicianModal() {
-    this.setData({
-      showTechnicianModal: false
-    });
+    this.setData({ showTechnicianModal: false });
   },
 
-  // 选择技师
   onTechnicianSelect(e) {
     const id = e.currentTarget.dataset.id;
     const technician = this.data.technicians.find(t => t.id === id);
     
     if (technician) {
-      this.setData({
-        selectedTechnician: technician
-      });
+      this.setData({ selectedTechnician: technician });
     }
   },
 
-  // 点击底部确认按钮 - 显示技师选择弹窗
   onConfirm() {
     if (!this.data.selectedTime) {
-      wx.showToast({
-        title: '请选择预约时间',
-        icon: 'none'
-      });
+      wx.showToast({ title: '请选择预约时间', icon: 'none' });
       return;
     }
     
-    // 显示技师选择弹窗
     this.showTechnicianModal();
   },
 
-  // 弹窗中的下一步按钮 - 跳转到确认页面
   onNextStep() {
     if (!this.data.selectedTechnician) {
-      wx.showToast({
-        title: '请选择技师',
-        icon: 'none'
-      });
+      wx.showToast({ title: '请选择技师', icon: 'none' });
       return;
     }
     
     const selectedDate = this.data.dateList[this.data.selectedDateIndex];
     const bookingInfo = {
       service: this.data.selectedService,
+      pet: this.data.selectedPet,
       date: selectedDate,
       time: this.data.selectedTime,
       technician: this.data.selectedTechnician
     };
     
-    // 关闭弹窗
     this.closeTechnicianModal();
     
-    // 跳转到确认页面
     wx.navigateTo({
       url: `/pages/booking-confirm/booking-confirm?info=${encodeURIComponent(JSON.stringify(bookingInfo))}`
     });

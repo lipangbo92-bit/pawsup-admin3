@@ -59,6 +59,13 @@ exports.main = async (event, context) => {
           message: '删除成功'
         };
         
+      case 'get':
+        const getResult = await db.collection('technicians').doc(event.id).get();
+        return {
+          success: true,
+          data: getResult.data
+        };
+        
       default:
         return {
           success: false,

@@ -1,0 +1,410 @@
+/* 宠物选择弹窗 - 最终优化版 */
+
+/* 遮罩层 */
+.pet-selector-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* 弹窗 */
+.pet-selector-popup {
+  width: 100%;
+  max-height: 85vh;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* 头部 */
+.selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+  position: relative;
+}
+
+.selector-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.selector-close {
+  position: absolute;
+  right: 32rpx;
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+  padding: 10rpx;
+}
+
+/* 宠物列表 */
+.pet-list {
+  flex: 1;
+  padding: 24rpx 0;
+  max-height: 50vh;
+}
+
+.pet-card {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: #F9FAFB;
+  border-radius: 16rpx;
+  margin-bottom: 16rpx;
+  margin-left: 32rpx;
+  margin-right: 32rpx;
+  border: 4rpx solid transparent;
+}
+
+.pet-card.selected {
+  background: #FFF7ED;
+  border-color: #F97316;
+}
+
+.pet-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #E5E7EB;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-avatar image {
+  width: 100%;
+  height: 100%;
+}
+
+.pet-emoji {
+  font-size: 36rpx;
+}
+
+.pet-info {
+  flex: 1;
+  margin-left: 20rpx;
+}
+
+.pet-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+}
+
+.pet-meta {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.check-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #F97316;
+  color: #FFFFFF;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 添加宠物按钮 */
+.add-pet-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  background: #FFFFFF;
+  border: 4rpx dashed #E5E7EB;
+  border-radius: 16rpx;
+  margin: 0 32rpx 24rpx;
+}
+
+.add-icon {
+  font-size: 36rpx;
+  color: #F97316;
+  margin-right: 12rpx;
+}
+
+.add-text {
+  font-size: 28rpx;
+  color: #F97316;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx;
+}
+
+.empty-icon {
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #9CA3AF;
+}
+
+/* 底部 */
+.selector-footer {
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  border-top: 2rpx solid #F3F4F6;
+  background: #FFFFFF;
+}
+
+.confirm-btn {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  border: none;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.confirm-btn.disabled {
+  background: #E5E7EB;
+  color: #9CA3AF;
+}
+
+.confirm-btn.active {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+.confirm-btn::after {
+  border: none;
+}
+
+/* 添加表单 - 优化版 */
+.add-form {
+  flex: 1;
+  padding: 24rpx 0;
+  max-height: 55vh;
+  box-sizing: border-box;
+}
+
+/* 表单行左右边距 */
+.form-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+  margin-left: 32rpx;
+  margin-right: 32rpx;
+  width: auto;
+}
+
+.form-row.three-col {
+  gap: 16rpx;
+}
+
+
+
+/* 头像上传 */
+.avatar-upload {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: #F3F4F6;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 4rpx dashed #D1D5DB;
+  margin-left: 32rpx;
+}
+
+.avatar-upload image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-icon {
+  font-size: 40rpx;
+}
+
+/* 名称输入 */
+.name-input-wrapper {
+  flex: 1;
+  margin-left: 20rpx;
+  margin-right: 32rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 半宽字段 - flex:1 等宽 */
+.half-field {
+  flex: 1;
+  background: #F9FAFB;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  min-height: 90rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 三分之一字段 - flex:1 等宽 */
+.third-field {
+  flex: 1;
+  background: #F9FAFB;
+  border-radius: 12rpx;
+  padding: 16rpx 12rpx;
+  text-align: center;
+  min-height: 90rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* 备注字段 */
+.form-field {
+  background: #F9FAFB;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 20rpx;
+  margin-left: 32rpx;
+  margin-right: 32rpx;
+}
+
+/* 标签 */
+.form-label {
+  font-size: 24rpx;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.form-label.required::after {
+  content: '*';
+  color: #EF4444;
+  margin-left: 4rpx;
+}
+
+/* 输入框 */
+.form-input {
+  height: 48rpx;
+  font-size: 30rpx;
+  color: #1F2937;
+}
+
+.form-input.small {
+  text-align: center;
+  height: 40rpx;
+  font-size: 28rpx;
+}
+
+/* 选择器字段 */
+.picker-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48rpx;
+  font-size: 30rpx;
+}
+
+.picker-field .placeholder {
+  color: #9CA3AF;
+}
+
+.picker-field .selected {
+  color: #1F2937;
+  font-weight: 500;
+}
+
+.picker-field.small {
+  height: 40rpx;
+  font-size: 28rpx;
+  justify-content: center;
+}
+
+.arrow {
+  font-size: 20rpx;
+  color: #9CA3AF;
+  margin-left: 8rpx;
+}
+
+/* 选择器弹窗 */
+.picker-popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  max-height: 50vh;
+  z-index: 1002;
+  box-shadow: 0 -8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+  position: relative;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.picker-close {
+  position: absolute;
+  right: 32rpx;
+  font-size: 44rpx;
+  color: #9CA3AF;
+  line-height: 1;
+  padding: 10rpx;
+}
+
+.picker-body {
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 16rpx 0;
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  font-size: 28rpx;
+  color: #1F2937;
+}
+
+.picker-option.active {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
+.picker-option .check {
+  font-size: 28rpx;
+  font-weight: bold;
+}

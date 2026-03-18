@@ -1,0 +1,168 @@
+<!-- 宠物选择弹窗 -->
+<view class="pet-selector-mask" wx:if="{{visible}}" bindtap="onMaskTap">
+  <view class="pet-selector-popup" catchtap="onPopupTap">
+    
+    <!-- 模式1：选择宠物列表 -->
+    <block wx:if="{{mode === 'list'}}">
+      <!-- 标题栏 -->
+      <view class="selector-header">
+        <text class="selector-title">选择宠物</text>
+        <text class="selector-close" bindtap="onClose">×</text>
+      </view>
+      
+      <!-- 宠物列表 -->
+      <scroll-view class="pet-list" scroll-y wx:if="{{pets.length > 0}}">
+        <view 
+          wx:for="{{pets}}" 
+          wx:key="_id"
+          class="pet-card {{selectedPet && selectedPet._id === item._id ? 'selected' : ''}}"
+          data-index="{{index}}"
+          bindtap="onSelectPet"
+        >
+          <view class="pet-avatar">
+            <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
+            <text wx:else class="pet-emoji">{{item.type === 'cat' ? '🐱' : '🐶'}}</text>
+          </view>
+          <view class="pet-info">
+            <text class="pet-name">{{item.name}}</text>
+            <text class="pet-meta">{{item.breed}} · {{item.age}}岁 · {{item.gender === 'male' ? '公' : '母'}}</text>
+          </view>
+          <view class="check-icon" wx:if="{{selectedPet && selectedPet._id === item._id}}">✓</view>
+        </view>
+      </scroll-view>
+      
+      <!-- 空状态 -->
+      <view class="empty-state" wx:elif="{{!loading && pets.length === 0}}">
+        <text class="empty-icon">🐾</text>
+        <text class="empty-text">还没有添加宠物</text>
+      </view>
+      
+      <!-- 添加新宠物按钮 -->
+      <view class="add-pet-card" bindtap="onShowAddForm">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加新宠物</text>
+      </view>
+      
+      <!-- 底部按钮 -->
+      <view class="selector-footer">
+        <button 
+          class="confirm-btn {{selectedPet ? 'active' : 'disabled'}}" 
+          bindtap="onConfirm"
+          disabled="{{!selectedPet}}"
+        >下一步</button>
+      </view>
+    </block>
+    
+    <!-- 模式2：添加宠物表单 -->
+    <block wx:if="{{mode === 'add'}}">
+      <!-- 标题栏 -->
+      <view class="selector-header">
+        <text class="selector-title">添加宠物</text>
+        <text class="selector-close" bindtap="onCloseAddForm">×</text>
+      </view>
+      
+      <!-- 紧凑表单 -->
+      <scroll-view class="add-form" scroll-y>
+        <!-- 头像和名称 -->
+        <view class="form-row">
+          <view class="avatar-upload" bindtap="onChooseAvatar">
+            <image wx:if="{{newPet.avatar}}" src="{{newPet.avatar}}" mode="aspectFill"/>
+            <text wx:else class="upload-icon">📷</text>
+          </view>
+          <view class="name-input-wrapper">
+            <text class="form-label required">宠物名称</text>
+            <input class="form-input" placeholder="请输入" value="{{newPet.name}}" bindinput="onNewPetNameInput"/>
+          </view>
+        </view>
+        
+        <!-- 类型和品种 -->
+        <view class="form-row">
+          <view class="half-field" bindtap="onShowTypePicker">
+            <text class="form-label required">类型</text>
+            <view class="picker-field">
+              <text class="{{newPet.type ? 'selected' : 'placeholder'}}">{{newPet.type ? typeLabel : '请选择'}}</text>
+              <text class="arrow">▼</text>
+            </view>
+          </view>
+          <view class="half-field" bindtap="onShowBreedPicker">
+            <text class="form-label required">品种</text>
+            <view class="picker-field">
+              <text class="{{newPet.breed ? 'selected' : 'placeholder'}}">{{newPet.breed || '请选择'}}</text>
+              <text class="arrow">▼</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 年龄、体重、性别 -->
+        <view class="form-row three-col">
+          <view class="third-field">
+            <text class="form-label required">年龄</text>
+            <input class="form-input small" type="digit" placeholder="几岁" value="{{newPet.age}}" bindinput="onNewPetAgeInput"/>
+          </view>
+          <view class="third-field">
+            <text class="form-label required">体重</text>
+            <input class="form-input small" placeholder="kg" value="{{newPet.weight}}" bindinput="onNewPetWeightInput"/>
+          </view>
+          <view class="third-field">
+            <text class="form-label required">性别</text>
+            <picker mode="selector" range="{{['弟弟', '妹妹']}}" bindchange="onNewPetGenderChange">
+              <view class="picker-field small">{{newPet.gender === 'male' ? '弟弟' : newPet.gender === 'female' ? '妹妹' : '选择'}}</view>
+            </picker>
+          </view>
+        </view>
+        
+        <!-- 备注 -->
+        <view class="form-field">
+          <text class="form-label">备注（选填）</text>
+          <input class="form-input" placeholder="如：胆小、过敏等" value="{{newPet.notes}}" bindinput="onNewPetNotesInput"/>
+        </view>
+      </scroll-view>
+      
+      <!-- 底部保存按钮 -->
+      <view class="selector-footer">
+        <button class="confirm-btn active" bindtap="onSaveNewPet">保存</button>
+      </view>
+    </block>
+    
+    <!-- 类型选择器 -->
+    <view class="picker-popup" wx:if="{{showTypePicker}}">
+      <view class="picker-header">
+        <text>选择类型</text>
+        <text class="picker-close" bindtap="onCloseTypePicker">×</text>
+      </view>
+      <view class="picker-body">
+        <view 
+          wx:for="{{typeOptions}}" 
+          wx:key="value"
+          class="picker-option {{newPet.type === item.value ? 'active' : ''}}"
+          data-type="{{item.value}}"
+          bindtap="onSelectType"
+        >
+          <text>{{item.label}}</text>
+          <text wx:if="{{newPet.type === item.value}}">✓</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 品种选择器 -->
+    <view class="picker-popup" wx:if="{{showBreedPicker}}">
+      <view class="picker-header">
+        <text>选择品种</text>
+        <text class="picker-close" bindtap="onCloseBreedPicker">×</text>
+      </view>
+      <view class="picker-body">
+        <view 
+          wx:for="{{breedOptions}}" 
+          wx:key="*this"
+          class="picker-option {{newPet.breed === item ? 'active' : ''}}"
+          data-breed="{{item}}"
+          bindtap="onSelectBreed"
+        >
+          <text>{{item}}</text>
+          <text wx:if="{{newPet.breed === item}}">✓</text>
+        </view>
+      </view>
+    </view>
+    
+  </view>
+</view>

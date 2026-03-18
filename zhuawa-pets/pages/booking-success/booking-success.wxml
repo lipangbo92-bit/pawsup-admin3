@@ -40,11 +40,8 @@
         <text class="info-value">{{orderInfo.service.name}}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">服务技师</text>
-        <view class="info-value-with-icon">
-          <text class="technician-avatar">{{orderInfo.technician.avatar}}</text>
-          <text class="info-value">{{orderInfo.technician.name}}</text>
-        </view>
+        <text class="info-label">美容师</text>
+        <text class="info-value">{{orderInfo.technician.name}}</text>
       </view>
       <view class="info-row">
         <text class="info-label">预约时间</text>

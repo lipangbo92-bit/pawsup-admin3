@@ -2,6 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/services/services",
+    "pages/service-select/service-select",
+    "pages/technician-select/technician-select",
     "pages/booking-time-1/booking-time-1",
     "pages/booking-time-2/booking-time-2",
     "pages/booking-confirm/booking-confirm",
@@ -9,14 +11,17 @@
     "pages/boarding/boarding",
     "pages/visiting/visiting",
     "pages/orders/orders",
-    "pages/profile/profile"
+    "pages/order-detail/order-detail",
+    "pages/profile/profile",
+    "pages/pet-register/pet-register"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F97316",
     "navigationBarTitleText": "PawsUp爪哇宠屋",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#FFF7ED"
+    "backgroundColor": "#FFF7ED",
+    "enablePullDownRefresh": true
   },
   "tabBar": {
     "color": "#999999",

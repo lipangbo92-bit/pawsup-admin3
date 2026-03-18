@@ -131,4 +131,12 @@
       <view class="modal-book-btn" bindtap="bookFromModal">立即预约</view>
     </view>
   </view>
+
+  <!-- 宠物选择弹窗 -->
+  <pet-selector 
+    visible="{{showPetSelector}}" 
+    bind:confirm="onPetSelected"
+    bind:addPet="onAddPet"
+    bind:close="onPetSelectorClose"
+  />
 </view>

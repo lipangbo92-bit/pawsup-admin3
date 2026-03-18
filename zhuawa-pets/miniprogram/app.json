@@ -2,6 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/services/services",
+    "pages/service-select/service-select",
+    "pages/technician-select/technician-select",
     "pages/pet-select/pet-select",
     "pages/pet-register/pet-register",
     "pages/pet-info/pet-info",
@@ -15,14 +17,15 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#EC4899",
-    "navigationBarTitleText": "爪哇宠物店",
+    "navigationBarBackgroundColor": "#F97316",
+    "navigationBarTitleText": "PawsUp爪哇宠屋",
     "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFF7ED",
     "enablePullDownRefresh": true
   },
   "tabBar": {
     "color": "#6B7280",
-    "selectedColor": "#EC4899",
+    "selectedColor": "#F97316",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [

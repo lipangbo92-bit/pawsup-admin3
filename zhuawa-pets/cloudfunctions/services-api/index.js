@@ -24,6 +24,9 @@ exports.main = async (event, context) => {
       case 'delete':
         await db.collection('services').doc(body.id).remove();
         return { success: true };
+      case 'get':
+        const getResult = await db.collection('services').doc(body.id).get();
+        return { success: true, data: getResult.data };
       default:
         return { success: false, error: 'Unknown action' };
     }

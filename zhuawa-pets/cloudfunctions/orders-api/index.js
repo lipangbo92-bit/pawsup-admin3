@@ -100,27 +100,54 @@ exports.main = async (event, context) => {
     
     // POST /orders - Create order
     if (httpMethod === 'POST' && !resourceId) {
-      const orderData = JSON.parse(body || '{}')
-      
-      // Generate order number if not provided
-      if (!orderData.orderNo) {
-        orderData.orderNo = `ORD${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-      }
-      
-      orderData.createdAt = db.serverDate()
-      orderData.updatedAt = db.serverDate()
-      
-      const res = await db.collection('orders').add({
-        data: orderData
-      })
-      
-      return {
-        statusCode: 201,
-        headers: getCorsHeaders(),
-        body: JSON.stringify({
-          success: true,
-          data: { _id: res._id, ...orderData }
+      try {
+        console.log('Creating order, body:', body)
+        const orderData = JSON.parse(body || '{}')
+        
+        // Validate required fields
+        if (!orderData.serviceId || !orderData.technicianId || !orderData.appointmentDate || !orderData.appointmentTime) {
+          return {
+            statusCode: 400,
+            headers: getCorsHeaders(),
+            body: JSON.stringify({
+              success: false,
+              error: 'Missing required fields'
+            })
+          }
+        }
+        
+        // Generate order number if not provided
+        if (!orderData.orderNo) {
+          orderData.orderNo = `ORD${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+        }
+        
+        orderData.createdAt = db.serverDate()
+        orderData.updatedAt = db.serverDate()
+        
+        console.log('Adding order to database:', orderData)
+        const res = await db.collection('orders').add({
+          data: orderData
         })
+        
+        console.log('Order created:', res._id)
+        return {
+          statusCode: 201,
+          headers: getCorsHeaders(),
+          body: JSON.stringify({
+            success: true,
+            data: { _id: res._id, ...orderData }
+          })
+        }
+      } catch (err) {
+        console.error('Create order error:', err)
+        return {
+          statusCode: 500,
+          headers: getCorsHeaders(),
+          body: JSON.stringify({
+            success: false,
+            error: err.message || '创建订单失败'
+          })
+        }
       }
     }
     

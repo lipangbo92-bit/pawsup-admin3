@@ -1,0 +1,9 @@
+{
+  "name": "pets-api",
+  "version": "1.0.0",
+  "description": "宠物数据API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,0 +1,128 @@
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="custom-nav">
+    <view class="nav-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="nav-title">选择美容师</text>
+    <view class="nav-placeholder"></view>
+  </view>
+  
+  <!-- 已选信息 -->
+  <view class="info-bar">
+    <text class="info-text">{{appointmentDate}} {{appointmentTime}}</text>
+    <text class="info-subtext">选择一位美容师为您服务</text>
+  </view>
+  
+  <!-- 美容师列表 -->
+  <scroll-view class="technician-list" scroll-y>
+    <view 
+      wx:for="{{technicians}}" 
+      wx:key="_id"
+      class="technician-card {{item.isAvailable ? '' : 'disabled'}}"
+      data-index="{{index}}"
+      bindtap="showDetail"
+    >
+      <view class="card-content">
+        <view class="avatar-wrapper">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" class="avatar"/>
+          <text wx:else class="avatar-placeholder">{{item.name ? item.name[0] : '美'}}</text>
+          <view class="level-badge">{{item.level}}</view>
+        </view>
+        
+        <view class="info-wrapper">
+          <view class="name-row">
+            <text class="name">{{item.name}}</text>
+            <text class="position">{{item.position}}</text>
+          </view>
+          
+          <view class="skills" wx:if="{{item.skills && item.skills.length > 0}}">
+            <text wx:for="{{item.skills}}" wx:for-item="skill" wx:key="*this" class="skill-tag">{{skill}}</text>
+          </view>
+          
+          <view class="stats">
+            <text class="stat-item">⭐ {{item.rating || 5}}分</text>
+            <text class="stat-item">📋 {{item.orders || 0}}单</text>
+          </view>
+        </view>
+        
+        <view class="action-wrapper">
+          <view class="select-btn" wx:if="{{item.isAvailable}}">
+            <text>选择</text>
+          </view>
+          <view class="unavailable-text" wx:else>
+            <text>已约满</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 系统分配选项 -->
+    <view class="auto-assign-card" bindtap="selectAuto">
+      <view class="auto-icon">🎲</view>
+      <view class="auto-info">
+        <text class="auto-title">系统自动分配</text>
+        <text class="auto-desc">为您匹配最优美容师</text>
+      </view>
+      <view class="auto-btn">
+        <text>选择</text>
+      </view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view wx:if="{{technicians.length === 0}}" class="empty-state">
+      <text class="empty-icon">✂️</text>
+      <text class="empty-text">该时段暂无可约美容师</text>
+    </view>
+  </scroll-view>
+  
+  <!-- 美容师详情弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="modal-content" wx:if="{{showModal}}">
+    <view class="modal-header">
+      <text class="modal-title">美容师详情</text>
+      <text class="modal-close" bindtap="closeModal">×</text>
+    </view>
+    <view class="modal-body" wx:if="{{selectedTechnician}}">
+      <view class="modal-avatar-wrapper">
+        <image wx:if="{{selectedTechnician.avatar}}" src="{{selectedTechnician.avatar}}" mode="aspectFill" class="modal-avatar"/>
+        <text wx:else class="modal-avatar-placeholder">{{selectedTechnician.name ? selectedTechnician.name[0] : '美'}}</text>
+      </view>
+      
+      <view class="modal-info">
+        <text class="modal-name">{{selectedTechnician.name}}</text>
+        <view class="modal-tags">
+          <text class="modal-tag">{{selectedTechnician.position}}</text>
+          <text class="modal-tag tag-level">{{selectedTechnician.level}}</text>
+        </view>
+        <view class="modal-stats">
+          <text>⭐ {{selectedTechnician.rating || 5}}分</text>
+          <text>📋 {{selectedTechnician.orders || 0}}单</text>
+        </view>
+      </view>
+      
+      <view class="modal-section" wx:if="{{selectedTechnician.intro}}">
+        <text class="section-title">个人简介</text>
+        <text class="section-content">{{selectedTechnician.intro}}</text>
+      </view>
+      
+      <view class="modal-section" wx:if="{{selectedTechnician.works && selectedTechnician.works.length > 0}}">
+        <text class="section-title">作品展示</text>
+        <scroll-view scroll-x class="works-scroll">
+          <view class="works-list">
+            <image wx:for="{{selectedTechnician.works}}" wx:key="*this" src="{{item}}" mode="aspectFill" class="work-image"/>
+          </view>
+        </scroll-view>
+      </view>
+      
+      <view class="modal-section" wx:if="{{selectedTechnician.skills && selectedTechnician.skills.length > 0}}">
+        <text class="section-title">擅长技能</text>
+        <view class="skills-list">
+          <text wx:for="{{selectedTechnician.skills}}" wx:for-item="skill" wx:key="*this" class="skill-item">{{skill}}</text>
+        </view>
+      </view>
+      
+      <button class="modal-select-btn" bindtap="confirmSelect">选择此美容师</button>
+    </view>
+  </view>
+</view>

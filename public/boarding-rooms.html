@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>房型管理 - PawsUp 爪哇宠屋</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .room-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .room-type-badge.dog {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        .room-type-badge.cat {
+            background: #FCE7F3;
+            color: #9D174D;
+        }
+        .facilities-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .facility-tag {
+            background: #F3F4F6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #6B7280;
+        }
+        .room-image-preview {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 8px;
+        }
+        .image-upload-area {
+            border: 2px dashed #D1D5DB;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .image-upload-area:hover {
+            border-color: #F97316;
+            background: #FFF7ED;
+        }
+        .facility-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .facility-input-row input {
+            flex: 1;
+        }
+        .facility-input-row button {
+            padding: 8px 12px;
+            background: #FEE2E2;
+            color: #EF4444;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #F97316;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #6B7280;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>🏠 房型管理</h2>
+                    <button class="btn-primary" onclick="openModal()">+ 添加房型</button>
+                </div>
+                
+                <!-- 统计卡片 -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="number" id="totalRooms">0</div>
+                        <div class="label">总房型数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="dogRooms">0</div>
+                        <div class="label">狗狗房型</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="catRooms">0</div>
+                        <div class="label">猫咪房型</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="totalRoomCount">0</div>
+                        <div class="label">总房间数</div>
+                    </div>
+                </div>
+                
+                <!-- 分类筛选 -->
+                <div class="category-tabs">
+                    <button class="category-tab active" data-type="all">全部房型</button>
+                    <button class="category-tab" data-type="dog">🐕 狗狗房型</button>
+                    <button class="category-tab" data-type="cat">🐈 猫咪房型</button>
+                </div>
+                
+                <!-- 房型列表 -->
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>房型信息</th>
+                                <th>适用宠物</th>
+                                <th>价格/晚</th>
+                                <th>房间数量</th>
+                                <th>面积</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomsTableBody">
+                            <!-- 动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑房型模态框 -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加房型</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="roomId">
+                
+                <div class="form-group">
+                    <label>房型名称 *</label>
+                    <input type="text" id="roomName" placeholder="例如：豪华标准间">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>适用宠物类型 *</label>
+                        <select id="petType">
+                            <option value="dog">🐕 狗狗</option>
+                            <option value="cat">🐈 猫咪</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>价格/晚 (¥) *</label>
+                        <input type="number" id="roomPrice" placeholder="168" min="0">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>房间数量 *</label>
+                        <input type="number" id="roomCount" placeholder="5" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>房间面积</label>
+                        <input type="text" id="roomArea" placeholder="例如：8平米">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>房型图片</label>
+                    <div class="image-upload-area" onclick="document.getElementById('roomImage').click()">
+                        <div id="imagePreviewArea">
+                            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                            <div>点击上传房型图片</div>
+                        </div>
+                    </div>
+                    <input type="file" id="roomImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <input type="hidden" id="roomImageUrl">
+                </div>
+                
+                <div class="form-group">
+                    <label>设施标签</label>
+                    <div id="facilitiesContainer">
+                        <!-- 动态添加 -->
+                    </div>
+                    <button type="button" class="btn-secondary" onclick="addFacilityInput()" style="margin-top: 8px;">+ 添加设施</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>房型描述</label>
+                    <textarea id="roomDescription" rows="3" placeholder="请输入房型详情描述..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="roomStatus">
+                        <option value="active">✅ 可预订</option>
+                        <option value="maintenance">🔧 维护中</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-save" onclick="saveRoom()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="text-align: center; color: #666;">
+                    确定要删除房型 <strong id="deleteRoomName"></strong> 吗？<br>
+                    <span style="color: #EF4444; font-size: 12px;">此操作不可撤销。</span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">取消</button>
+                <button class="btn-delete" onclick="confirmDelete()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/boarding-rooms.js"></script>
+</body>
+</html>
