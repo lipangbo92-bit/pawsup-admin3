@@ -241,8 +241,11 @@ Page({
   // 返回上一页
   goBack() {
     if (this.data.currentStep > 1) {
+      // 确保 selectedPet 不为 null
+      const selectedPet = this.data.selectedPet || { id: '', name: '', type: '', breed: '', avatar: '' };
       this.setData({
-        currentStep: this.data.currentStep - 1
+        currentStep: this.data.currentStep - 1,
+        selectedPet: selectedPet
       });
       this.updateCanProceed();
     } else {
@@ -351,8 +354,11 @@ Page({
     if (!this.data.canProceed) return;
 
     if (this.data.currentStep < 4) {
+      // 确保 selectedPet 不为 null
+      const selectedPet = this.data.selectedPet || { id: '', name: '', type: '', breed: '', avatar: '' };
       this.setData({
-        currentStep: this.data.currentStep + 1
+        currentStep: this.data.currentStep + 1,
+        selectedPet: selectedPet
       });
       this.updateCanProceed();
     } else {
