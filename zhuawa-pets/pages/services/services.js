@@ -130,28 +130,80 @@ Page({
 
   switchCategory(e) {
     const index = parseInt(e.currentTarget.dataset.index);
-    const category = this.data.categories[index];
-    
-    // 如果是寄养分类，直接跳转到 boarding 页面
-    if (category === '狗狗寄养' || category === '猫猫寄养') {
-      const petType = category === '狗狗寄养' ? 'dog' : 'cat';
-      wx.navigateTo({
-        url: `/pages/boarding/boarding?petType=${petType}`
-      });
-      return;
-    }
-    
     this.filterServices(index);
   },
 
-  filterServices(index) {
+  async filterServices(index) {
     const category = this.data.categories[index];
+    
+    // 如果是寄养分类，从 boarding-api 获取房型数据
+    if (category === '狗狗寄养' || category === '猫猫寄养') {
+      const petType = category === '狗狗寄养' ? 'dog' : 'cat';
+      await this.loadBoardingRooms(petType, index);
+      return;
+    }
+    
+    // 其他分类，使用服务数据
     const filtered = this.data.allServices.filter(s => s.category === category);
     
     this.setData({ 
       currentCategory: index, 
-      services: filtered
+      services: filtered,
+      isBoardingMode: false
     });
+  },
+
+  // 加载房型数据（用于寄养分类）
+  async loadBoardingRooms(petType, categoryIndex) {
+    wx.showLoading({ title: '加载房型...' });
+    
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'boarding-api',
+        data: {
+          action: 'getRooms',
+          petType: petType
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        // 将房型数据转换为服务卡片格式
+        const rooms = res.result.data.map(room => ({
+          id: room.id,
+          name: room.name,
+          desc: room.description || (room.petType === 'dog' ? '狗狗专属房型' : '猫咪专属房型'),
+          price: room.price,
+          unit: '/晚',
+          category: petType === 'dog' ? '狗狗寄养' : '猫咪寄养',
+          image: room.images && room.images[0] ? room.images[0] : '',
+          duration: 0,
+          iconText: room.petType === 'dog' ? '🐕' : '🐈',
+          iconClass: room.petType === 'dog' ? 'icon-orange' : 'icon-teal',
+          // 保留原始房型数据
+          roomData: room
+        }));
+
+        this.setData({
+          currentCategory: categoryIndex,
+          services: rooms,
+          isBoardingMode: true
+        });
+      } else {
+        wx.showToast({
+          title: res.result.error || '加载房型失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('加载房型失败:', error);
+      wx.showToast({
+        title: '加载房型失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 显示服务详情弹窗
@@ -191,14 +243,23 @@ Page({
   // 执行预约跳转
   doBookService(serviceId) {
     const service = this.data.services.find(s => s.id === serviceId);
-    
+
     if (!service) {
       wx.showToast({ title: '服务信息错误', icon: 'none' });
       return;
     }
-    
+
+    // 如果是寄养模式，直接跳转到 boarding 页面
+    if (this.data.isBoardingMode && service.roomData) {
+      const room = service.roomData;
+      wx.navigateTo({
+        url: `/pages/boarding/boarding?roomId=${room.id}&petType=${room.petType}`
+      });
+      return;
+    }
+
     // 保存当前选择的服务
-    this.setData({ 
+    this.setData({
       selectedServiceForBook: service,
       showPetSelector: true,
       bookingMode: 'path3'
@@ -208,13 +269,22 @@ Page({
   // 宠物选择回调
   onPetSelected(e) {
     const { pet } = e.detail;
-    const { selectedServiceForBook, bookingMode } = this.data;
-    
-    this.setData({ 
+    const { selectedServiceForBook, bookingMode, isBoardingMode } = this.data;
+
+    this.setData({
       showPetSelector: false,
-      selectedPet: pet 
+      selectedPet: pet
     });
-    
+
+    // 寄养模式：跳转到 boarding 页面
+    if (isBoardingMode && selectedServiceForBook && selectedServiceForBook.roomData) {
+      const room = selectedServiceForBook.roomData;
+      wx.navigateTo({
+        url: `/pages/boarding/boarding?roomId=${room.id}&petId=${pet._id}&petType=${pet.type}`
+      });
+      return;
+    }
+
     if (bookingMode === 'path3' && selectedServiceForBook) {
       // 路径3：已选宠物和服务，跳转到 booking-time-1
       const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${selectedServiceForBook.id}`;
