@@ -10,17 +10,47 @@ let facilities = [];
 // 初始化
 async function init() {
     try {
+        console.log('开始初始化...');
+        
+        // 检查 cloud SDK 是否加载
+        if (typeof cloud === 'undefined') {
+            throw new Error('Cloud SDK 未加载');
+        }
+        
         cloud.init({ env: CLOUD_ENV_ID });
+        console.log('cloud.init 完成');
+        
         db = cloud.database();
+        console.log('数据库实例创建成功');
         
         const auth = cloud.auth();
+        console.log('获取 auth 实例');
+        
         await auth.anonymousAuthProvider().signIn();
+        console.log('匿名登录成功');
         
         await loadRooms();
         setupEventListeners();
+        console.log('初始化完成');
     } catch (error) {
         console.error('初始化失败:', error);
-        showError('云服务初始化失败，请刷新重试');
+        console.error('错误详情:', JSON.stringify(error, null, 2));
+        showError('云服务初始化失败: ' + (error.message || '请刷新重试'));
+        
+        // 显示重试按钮
+        const tbody = document.getElementById('roomsTableBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                        <div>初始化失败</div>
+                        <div style="font-size: 14px; margin-top: 8px; color: #666;">${error.message || '请检查网络连接'}</div>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #F97316; color: white; border: none; border-radius: 8px; cursor: pointer;">刷新重试</button>
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -229,6 +259,13 @@ async function handleImageUpload(event) {
 // 保存房型
 async function saveRoom() {
     console.log('saveRoom 函数被调用');
+    
+    // 检查数据库是否已初始化
+    if (!db) {
+        alert('数据库未初始化，请刷新页面重试');
+        console.error('db 为 null，初始化可能失败');
+        return;
+    }
     
     const id = document.getElementById('roomId').value;
     const name = document.getElementById('roomName').value.trim();
