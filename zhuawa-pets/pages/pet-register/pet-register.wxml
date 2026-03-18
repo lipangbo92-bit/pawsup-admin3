@@ -51,8 +51,8 @@
       </view>
       <view class="third-item">
         <text class="label-small">性别</text>
-        <picker mode="selector" range="{{['公', '母']}}" bindchange="onGenderChange">
-          <view class="picker-small">{{gender === 'male' ? '公' : '母'}}</view>
+        <picker mode="selector" range="{{['弟弟', '妹妹']}}" bindchange="onGenderChange">
+          <view class="picker-small">{{gender === 'male' ? '弟弟' : '妹妹'}}</view>
         </picker>
       </view>
     </view>

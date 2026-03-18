@@ -25,7 +25,7 @@
           </view>
           <view class="pet-info">
             <text class="pet-name">{{item.name}}</text>
-            <text class="pet-meta">{{item.breed}} · {{item.age}}岁 · {{item.gender === 'male' ? '公' : '母'}}</text>
+            <text class="pet-meta">{{item.breed}} · {{item.age}}岁 · {{item.gender === 'male' ? '弟弟' : '妹妹'}}</text>
           </view>
           <view class="check-icon" wx:if="{{selectedPet && selectedPet._id === item._id}}">✓</view>
         </view>
