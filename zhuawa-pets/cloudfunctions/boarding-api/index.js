@@ -14,6 +14,8 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'getRooms':
         return await getRooms(event.petType);
+      case 'getRoom':
+        return await getRoom(event.id);
       case 'checkRoomAvailability':
         return await checkRoomAvailability(event.roomId, event.checkinDate, event.checkoutDate);
       case 'createOrder':
@@ -65,6 +67,37 @@ async function getRooms(petType) {
       images: room.images || [],
       description: room.description
     }))
+  };
+}
+
+// 获取单个房型详情
+async function getRoom(id) {
+  if (!id) {
+    return { success: false, error: 'Missing id parameter' };
+  }
+
+  const result = await db.collection('boarding_rooms').doc(id).get();
+
+  if (!result.data) {
+    return { success: false, error: 'Room not found' };
+  }
+
+  const room = result.data;
+  return {
+    success: true,
+    data: {
+      id: room._id,
+      name: room.name,
+      petType: room.petType,
+      price: room.price,
+      roomCount: room.roomCount,
+      availableCount: room.roomCount,
+      area: room.area,
+      facilities: room.facilities || [],
+      images: room.images || [],
+      description: room.description,
+      status: room.status
+    }
   };
 }
 
