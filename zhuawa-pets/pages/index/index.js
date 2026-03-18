@@ -264,20 +264,10 @@ Page({
         url: `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet.id || pet._id}&petType=${pet.type}&serviceId=${selectedServiceId}`
       });
     } else if (bookingMode === 'boarding') {
-      // 寄养日托：根据宠物类型跳转到对应分类
-      // dog -> 狗狗寄养 (index 2), cat -> 猫咪寄养 (index 5)
-      let boardingCategoryIndex = 2; // 默认狗狗寄养
-      if (pet.type === 'cat') {
-        boardingCategoryIndex = 5; // 猫咪寄养
-      }
-      // 将宠物信息和分类存入全局数据
-      const app = getApp();
-      app.globalData.selectedPet = pet;
-      app.globalData.selectedCategory = boardingCategoryIndex;
-      app.globalData.bookingMode = 'boarding';
-      console.log('switchTab to services (boarding), pet:', pet, 'category:', boardingCategoryIndex);
-      wx.switchTab({
-        url: '/pages/services/services'
+      // 寄养日托：直接跳转到 boarding 页面
+      console.log('navigateTo boarding, pet:', pet);
+      wx.navigateTo({
+        url: `/pages/boarding/boarding?petId=${pet.id || pet._id}&petType=${pet.type}`
       });
     }
   },

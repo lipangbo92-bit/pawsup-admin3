@@ -130,6 +130,17 @@ Page({
 
   switchCategory(e) {
     const index = parseInt(e.currentTarget.dataset.index);
+    const category = this.data.categories[index];
+    
+    // 如果是寄养分类，直接跳转到 boarding 页面
+    if (category === '狗狗寄养' || category === '猫猫寄养') {
+      const petType = category === '狗狗寄养' ? 'dog' : 'cat';
+      wx.navigateTo({
+        url: `/pages/boarding/boarding?petType=${petType}`
+      });
+      return;
+    }
+    
     this.filterServices(index);
   },
 
