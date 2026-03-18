@@ -143,14 +143,72 @@ Page({
       return;
     }
     
+    // 如果是上门服务分类，从 visiting-api 获取服务数据
+    if (category === '上门服务') {
+      await this.loadVisitingServices(index);
+      return;
+    }
+
     // 其他分类，使用服务数据
     const filtered = this.data.allServices.filter(s => s.category === category);
-    
-    this.setData({ 
-      currentCategory: index, 
+
+    this.setData({
+      currentCategory: index,
       services: filtered,
-      isBoardingMode: false
+      isBoardingMode: false,
+      isVisitingMode: false
     });
+  },
+
+  // 加载上门服务数据
+  async loadVisitingServices(categoryIndex) {
+    wx.showLoading({ title: '加载服务...' });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'visiting-api',
+        data: {
+          action: 'getServices'
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result && res.result.success) {
+        const services = res.result.data.map(service => ({
+          id: service.id,
+          name: service.name,
+          desc: service.desc,
+          price: service.price,
+          unit: '/次',
+          category: '上门服务',
+          image: '',
+          duration: service.duration || 60,
+          iconText: service.icon || '🚗',
+          iconClass: 'icon-green',
+          serviceData: service
+        }));
+
+        this.setData({
+          currentCategory: categoryIndex,
+          services: services,
+          isBoardingMode: false,
+          isVisitingMode: true
+        });
+      } else {
+        wx.showToast({
+          title: res.result.error || '加载服务失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('加载服务失败:', error);
+      wx.showToast({
+        title: '加载服务失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 加载房型数据（用于寄养分类）
@@ -269,6 +327,15 @@ Page({
       return;
     }
 
+    // 如果是上门服务模式，先选择宠物，再跳转到 visiting 页面
+    if (this.data.isVisitingMode && service.serviceData) {
+      this.setData({
+        showPetSelector: true,
+        bookingMode: 'visiting'
+      });
+      return;
+    }
+
     // 路径3：显示宠物选择器
     this.setData({
       showPetSelector: true,
@@ -287,6 +354,15 @@ Page({
       return;
     }
 
+    // 上门服务模式
+    if (this.data.isVisitingMode && service.serviceData) {
+      const svc = service.serviceData;
+      wx.navigateTo({
+        url: `/pages/visiting/visiting?serviceId=${svc.id}&petId=${pet._id}&petType=${pet.type}`
+      });
+      return;
+    }
+
     // 路径1/2/3：跳转到 booking-time-1
     const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${service.id}`;
     wx.navigateTo({ url });
@@ -295,12 +371,21 @@ Page({
   // 宠物选择回调
   onPetSelected(e) {
     const { pet } = e.detail;
-    const { selectedServiceForBook } = this.data;
+    const { selectedServiceForBook, bookingMode } = this.data;
 
     this.setData({
       showPetSelector: false,
       selectedPet: pet
     });
+
+    // 上门服务模式
+    if (bookingMode === 'visiting' && selectedServiceForBook && selectedServiceForBook.serviceData) {
+      const svc = selectedServiceForBook.serviceData;
+      wx.navigateTo({
+        url: `/pages/visiting/visiting?serviceId=${svc.id}&petId=${pet._id}&petType=${pet.type}`
+      });
+      return;
+    }
 
     if (selectedServiceForBook) {
       this.navigateToNextStep(selectedServiceForBook, pet);

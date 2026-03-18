@@ -196,7 +196,11 @@ Page({
         bookingMode: 'boarding'
       });
     } else if (serviceType === '上门服务') {
-      wx.navigateTo({ url: '/pages/visiting/visiting' });
+      // 上门服务：先选择宠物，再跳转到 visiting 页面
+      this.setData({
+        showPetSelector: true,
+        bookingMode: 'visiting'
+      });
     }
   },
 
@@ -268,6 +272,12 @@ Page({
       console.log('navigateTo boarding, pet:', pet);
       wx.navigateTo({
         url: `/pages/boarding/boarding?petId=${pet.id || pet._id}&petType=${pet.type}`
+      });
+    } else if (bookingMode === 'visiting') {
+      // 上门服务：直接跳转到 visiting 页面
+      console.log('navigateTo visiting, pet:', pet);
+      wx.navigateTo({
+        url: `/pages/visiting/visiting?petId=${pet.id || pet._id}&petType=${pet.type}`
       });
     }
   },
