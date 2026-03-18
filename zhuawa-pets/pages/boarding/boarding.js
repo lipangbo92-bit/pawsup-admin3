@@ -51,7 +51,7 @@ Page({
     this.setData({ today });
 
     // 保存URL参数
-    const { petId, petType } = options;
+    const { petId, petType, roomId } = options;
     this.setData({ petId, petType });
 
     // 如果有petId，加载宠物信息
@@ -59,8 +59,45 @@ Page({
       this.loadPetInfo(petId);
     }
 
-    // 加载房型列表
-    this.loadRooms(petType);
+    // 如果传入了roomId，直接加载该房型并跳转到步骤2
+    if (roomId) {
+      this.loadRoomAndSkipToStep2(roomId);
+    } else {
+      // 否则加载房型列表
+      this.loadRooms(petType);
+    }
+  },
+
+  // 加载指定房型并跳转到步骤2
+  async loadRoomAndSkipToStep2(roomId) {
+    this.setData({ loadingRooms: true });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'boarding-api',
+        data: {
+          action: 'getRoom',
+          id: roomId
+        }
+      });
+
+      if (res.result.success && res.result.data) {
+        const room = res.result.data;
+        this.setData({
+          selectedRoom: room,
+          currentStep: 2,
+          pageTitle: '选择日期',
+          loadingRooms: false
+        });
+      } else {
+        // 如果获取失败，回退到加载房型列表
+        this.loadRooms(this.data.petType);
+      }
+    } catch (error) {
+      console.error('加载房型失败:', error);
+      // 如果获取失败，回退到加载房型列表
+      this.loadRooms(this.data.petType);
+    }
   },
 
   // 加载宠物信息
