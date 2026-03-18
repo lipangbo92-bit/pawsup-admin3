@@ -807,6 +807,78 @@
   border: none;
 }
 
+/* ========== 已选宠物信息 ========== */
+.selected-pet-info {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+}
+
+.selected-pet-info .pet-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  overflow: hidden;
+}
+
+.selected-pet-info .pet-avatar image {
+  width: 100%;
+  height: 100%;
+}
+
+.selected-pet-info .pet-emoji {
+  font-size: 48rpx;
+}
+
+.selected-pet-info .pet-detail {
+  flex: 1;
+}
+
+.selected-pet-info .pet-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.selected-pet-info .pet-breed {
+  font-size: 26rpx;
+  color: #6B7280;
+}
+
+/* ========== 备注区域 ========== */
+.remark-section-full {
+  position: relative;
+}
+
+.remark-textarea-full {
+  width: 100%;
+  height: 300rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  font-size: 28rpx;
+  color: #1F2937;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.remark-count {
+  position: absolute;
+  bottom: 16rpx;
+  right: 24rpx;
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
 /* ========== 底部 TabBar ========== */
 .tab-bar {
   position: fixed;

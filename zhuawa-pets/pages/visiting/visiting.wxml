@@ -154,32 +154,20 @@
 
   <!-- 步骤4：填写服务需求 -->
   <view class="step-content" wx:if="{{currentStep === 4}}">
-    <view class="section-card">
+    <!-- 已选宠物信息展示 -->
+    <view class="section-card" wx:if="{{selectedPet}}">
       <view class="card-title">
         <text class="title-icon">🐱</text>
-        <text>宠物信息</text>
+        <text>已选宠物</text>
       </view>
-      <view class="form-list">
-        <view class="form-item">
-          <text class="form-label">宠物类型</text>
-          <view class="pet-type-list">
-            <view class="pet-type-item {{serviceNeeds.petType === item.type ? 'selected' : ''}}" 
-                  wx:for="{{petTypes}}" 
-                  wx:key="type"
-                  bindtap="selectPetType"
-                  data-type="{{item.type}}">
-              <text class="pet-icon">{{item.icon}}</text>
-              <text class="pet-name">{{item.name}}</text>
-            </view>
-          </view>
+      <view class="selected-pet-info">
+        <view class="pet-avatar">
+          <image wx:if="{{selectedPet.avatar}}" src="{{selectedPet.avatar}}" mode="aspectFill"/>
+          <text wx:else class="pet-emoji">{{selectedPet.type === 'cat' ? '🐱' : '🐶'}}</text>
         </view>
-        <view class="form-item">
-          <text class="form-label">宠物数量</text>
-          <view class="counter-wrapper">
-            <view class="counter-btn {{serviceNeeds.petCount <= 1 ? 'disabled' : ''}}" bindtap="changePetCount" data-delta="-1">-</view>
-            <text class="counter-value">{{serviceNeeds.petCount}}只</text>
-            <view class="counter-btn" bindtap="changePetCount" data-delta="1">+</view>
-          </view>
+        <view class="pet-detail">
+          <text class="pet-name">{{selectedPet.name}}</text>
+          <text class="pet-breed">{{selectedPet.breed}}</text>
         </view>
       </view>
     </view>
@@ -187,23 +175,11 @@
     <view class="section-card">
       <view class="card-title">
         <text class="title-icon">📝</text>
-        <text>服务需求</text>
+        <text>服务需求备注</text>
       </view>
-      <view class="checkbox-list">
-        <view class="checkbox-item {{item.checked ? 'checked' : ''}}" 
-              wx:for="{{serviceOptions}}" 
-              wx:key="value"
-              bindtap="toggleServiceOption"
-              data-index="{{index}}">
-          <view class="checkbox-box">
-            <text class="checkbox-icon" wx:if="{{item.checked}}">✓</text>
-          </view>
-          <text class="checkbox-text">{{item.label}}</text>
-        </view>
-      </view>
-      <view class="remark-section">
-        <text class="remark-label">其他需求备注</text>
-        <textarea class="remark-textarea" placeholder="请输入其他特殊需求，如宠物性格、注意事项等" value="{{serviceNeeds.remark}}" bindinput="onRemarkInput"/>
+      <view class="remark-section-full">
+        <textarea class="remark-textarea-full" placeholder="请填写您的服务需求，如：&#10;- 宠物性格和习惯&#10;- 喂食量和时间&#10;- 特殊注意事项&#10;- 钥匙存放位置等" value="{{remark}}" bindinput="onRemarkInput" maxlength="500"/>
+        <text class="remark-count">{{remark.length}}/500</text>
       </view>
     </view>
   </view>
@@ -242,22 +218,16 @@
             <text class="value-text">{{addressInfo.address}}</text>
           </view>
         </view>
-        <view class="info-row">
+        <view class="info-row" wx:if="{{selectedPet}}">
           <text class="info-label">宠物信息</text>
           <view class="info-value">
-            <text class="value-text">{{petTypeName}} x {{serviceNeeds.petCount}}只</text>
+            <text class="value-text">{{selectedPet.name}} ({{selectedPet.breed}})</text>
           </view>
         </view>
-        <view class="info-row" wx:if="{{selectedOptionsText}}">
+        <view class="info-row last-row" wx:if="{{remark}}">
           <text class="info-label">服务需求</text>
           <view class="info-value">
-            <text class="value-text">{{selectedOptionsText}}</text>
-          </view>
-        </view>
-        <view class="info-row last-row" wx:if="{{serviceNeeds.remark}}">
-          <text class="info-label">备注</text>
-          <view class="info-value">
-            <text class="value-text">{{serviceNeeds.remark}}</text>
+            <text class="value-text">{{remark}}</text>
           </view>
         </view>
       </view>

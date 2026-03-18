@@ -348,7 +348,7 @@ Page({
 
   // 提交订单
   async submitOrder() {
-    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, serviceOptions, remark, totalPrice } = this.data;
+    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, remark, totalPrice } = this.data;
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo');
@@ -374,7 +374,7 @@ Page({
       contactPhone: addressInfo.contactPhone,
       serviceDate: selectedDateStr,
       serviceTime: selectedTime,
-      serviceOptions: serviceOptions.filter(item => item.checked).map(item => item.label),
+      serviceOptions: [],
       remark: remark,
       totalPrice: totalPrice
     };
