@@ -190,8 +190,25 @@ function renderFacilities() {
 
 // 处理图片上传
 async function handleImageUpload(event) {
+    console.log('handleImageUpload 被调用', event);
+    
+    // 检查 event 和 files 是否存在
+    if (!event || !event.target || !event.target.files || event.target.files.length === 0) {
+        console.log('没有文件被选择');
+        return;
+    }
+    
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        console.log('文件对象为空');
+        return;
+    }
+    
+    // 验证文件类型
+    if (!file.type || !file.type.startsWith('image/')) {
+        alert('请选择图片文件');
+        return;
+    }
     
     // 转换为 base64
     const reader = new FileReader();
@@ -201,6 +218,10 @@ async function handleImageUpload(event) {
         document.getElementById('imagePreviewArea').innerHTML = `
             <img src="${base64}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">
         `;
+    };
+    reader.onerror = (e) => {
+        console.error('FileReader 错误:', e);
+        alert('图片读取失败');
     };
     reader.readAsDataURL(file);
 }
