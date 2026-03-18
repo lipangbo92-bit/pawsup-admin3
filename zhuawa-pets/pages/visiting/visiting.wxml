@@ -163,11 +163,11 @@
       <view class="selected-pet-info">
         <view class="pet-avatar">
           <image wx:if="{{selectedPet.avatar}}" src="{{selectedPet.avatar}}" mode="aspectFill"/>
-          <text wx:else class="pet-emoji">{{selectedPet.type === 'cat' ? '🐱' : '🐶'}}</text>
+          <text wx:else class="pet-emoji">{{selectedPet && selectedPet.type === 'cat' ? '🐱' : '🐶'}}</text>
         </view>
         <view class="pet-detail">
           <text class="pet-name">{{selectedPet.name}}</text>
-          <text class="pet-breed" wx:if="{{selectedPet.breed}}">{{selectedPet.breed}}</text>
+          <text class="pet-breed" wx:if="{{selectedPet && selectedPet.breed}}">{{selectedPet.breed}}</text>
         </view>
       </view>
     </view>
@@ -221,7 +221,7 @@
         <view class="info-row" wx:if="{{selectedPet.name}}">
           <text class="info-label">宠物信息</text>
           <view class="info-value">
-            <text class="value-text">{{selectedPet.name}}<text wx:if="{{selectedPet.breed}}"> ({{selectedPet.breed}})</text></text>
+            <text class="value-text">{{selectedPet.name}}<text wx:if="{{selectedPet && selectedPet.breed}}"> ({{selectedPet.breed}})</text></text>
           </view>
         </view>
         <view class="info-row last-row" wx:if="{{remark}}">
