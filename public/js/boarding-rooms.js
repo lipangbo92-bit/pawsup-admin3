@@ -1,79 +1,40 @@
-// 房型管理页面 JavaScript
+// 房型管理页面 JavaScript - 使用 API 方式
 
-const CLOUD_ENV_ID = 'cloud1-4gy1jyan842d73ab';
-let db = null;
+const API_BASE = '/api';
 let rooms = [];
 let currentFilter = 'all';
 let deleteTargetId = null;
 let facilities = [];
 
-// 等待 Cloud SDK 加载完成
-function waitForCloudSDK(maxRetries = 10, interval = 500) {
-    return new Promise((resolve, reject) => {
-        let retries = 0;
-        
-        const checkSDK = () => {
-            retries++;
-            console.log(`检查 Cloud SDK (尝试 ${retries}/${maxRetries})...`);
-            
-            if (typeof cloud !== 'undefined') {
-                console.log('Cloud SDK 已加载');
-                resolve();
-            } else if (retries >= maxRetries) {
-                reject(new Error('Cloud SDK 加载超时，请检查网络连接'));
-            } else {
-                setTimeout(checkSDK, interval);
-            }
-        };
-        
-        checkSDK();
-    });
+// API 调用封装
+async function apiCall(endpoint, data) {
+    try {
+        const response = await fetch(`${API_BASE}/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (err) {
+        console.error('API call error:', err);
+        throw err;
+    }
 }
 
 // 初始化
-async function init() {
-    try {
-        console.log('开始初始化...');
-        
-        // 等待 Cloud SDK 加载
-        await waitForCloudSDK();
-        
-        cloud.init({ env: CLOUD_ENV_ID });
-        console.log('cloud.init 完成');
-        
-        db = cloud.database();
-        console.log('数据库实例创建成功');
-        
-        const auth = cloud.auth();
-        console.log('获取 auth 实例');
-        
-        await auth.anonymousAuthProvider().signIn();
-        console.log('匿名登录成功');
-        
-        await loadRooms();
-        setupEventListeners();
-        console.log('初始化完成');
-    } catch (error) {
-        console.error('初始化失败:', error);
-        console.error('错误详情:', JSON.stringify(error, null, 2));
-        showError('云服务初始化失败: ' + (error.message || '请刷新重试'));
-        
-        // 显示重试按钮
-        const tbody = document.getElementById('roomsTableBody');
-        if (tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                        <div>初始化失败</div>
-                        <div style="font-size: 14px; margin-top: 8px; color: #666;">${error.message || '请检查网络连接'}</div>
-                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #F97316; color: white; border: none; border-radius: 8px; cursor: pointer;">刷新重试</button>
-                    </td>
-                </tr>
-            `;
-        }
-    }
-}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('房型管理页面加载完成');
+    loadRooms();
+    setupEventListeners();
+});
 
 // 设置事件监听
 function setupEventListeners() {
@@ -92,13 +53,20 @@ function setupEventListeners() {
 async function loadRooms() {
     showLoading(true);
     try {
-        const result = await db.collection('boarding_rooms').get();
-        rooms = result.data || [];
-        updateStats();
-        renderRooms();
+        const result = await apiCall('boarding-rooms', {
+            action: 'list'
+        });
+        
+        if (result.success) {
+            rooms = result.data || [];
+            updateStats();
+            renderRooms();
+        } else {
+            showError(result.error || '加载房型数据失败');
+        }
     } catch (error) {
         console.error('加载房型失败:', error);
-        showError('加载房型数据失败');
+        showError('加载房型数据失败: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -169,8 +137,8 @@ function renderRooms() {
             </td>
             <td>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn-edit" onclick="editRoom('${room._id}')">编辑</button>
-                    <button class="btn-delete" onclick="deleteRoom('${room._id}')">删除</button>
+                    <button class="btn-edit" onclick="editRoom('${room.id}')">编辑</button>
+                    <button class="btn-delete" onclick="deleteRoom('${room.id}')">删除</button>
                 </div>
             </td>
         </tr>
@@ -281,13 +249,6 @@ async function handleImageUpload(event) {
 async function saveRoom() {
     console.log('saveRoom 函数被调用');
     
-    // 检查数据库是否已初始化
-    if (!db) {
-        alert('数据库未初始化，请刷新页面重试');
-        console.error('db 为 null，初始化可能失败');
-        return;
-    }
-    
     const id = document.getElementById('roomId').value;
     const name = document.getElementById('roomName').value.trim();
     const petType = document.getElementById('petType').value;
@@ -312,16 +273,6 @@ async function saveRoom() {
         return;
     }
     
-    // 获取当前用户信息
-    let userId = 'anonymous';
-    try {
-        const auth = cloud.auth();
-        const userInfo = auth.currentUser;
-        userId = userInfo ? userInfo.uid : 'anonymous';
-    } catch (e) {
-        console.log('获取用户信息失败:', e);
-    }
-    
     const roomData = {
         name,
         petType,
@@ -331,37 +282,46 @@ async function saveRoom() {
         description,
         status,
         facilities: facilities.filter(f => f.trim()),
-        images: imageUrl ? [imageUrl] : [],
-        userId: userId
+        images: imageUrl ? [imageUrl] : []
     };
     
     try {
         console.log('保存房型数据:', roomData);
         
+        let result;
         if (id) {
             // 更新
-            const result = await db.collection('boarding_rooms').doc(id).update({ data: roomData });
-            console.log('更新结果:', result);
+            result = await apiCall('boarding-rooms', {
+                action: 'update',
+                id: id,
+                data: roomData
+            });
         } else {
             // 新增
-            roomData.createTime = db.serverDate();
-            const result = await db.collection('boarding_rooms').add({ data: roomData });
-            console.log('新增结果:', result);
+            result = await apiCall('boarding-rooms', {
+                action: 'add',
+                data: roomData
+            });
         }
         
-        closeModal();
-        await loadRooms();
-        showSuccess(id ? '房型更新成功' : '房型添加成功');
+        console.log('保存结果:', result);
+        
+        if (result.success) {
+            closeModal();
+            await loadRooms();
+            showSuccess(id ? '房型更新成功' : '房型添加成功');
+        } else {
+            alert('保存失败: ' + (result.error || '未知错误'));
+        }
     } catch (error) {
         console.error('保存房型失败:', error);
-        console.error('错误详情:', JSON.stringify(error, null, 2));
-        alert('保存失败: ' + (error.message || JSON.stringify(error)));
+        alert('保存失败: ' + error.message);
     }
 }
 
 // 编辑房型
 async function editRoom(id) {
-    const room = rooms.find(r => r._id === id);
+    const room = rooms.find(r => r.id === id);
     if (!room) return;
     
     document.getElementById('roomId').value = id;
@@ -397,7 +357,7 @@ async function editRoom(id) {
 
 // 删除房型
 function deleteRoom(id) {
-    const room = rooms.find(r => r._id === id);
+    const room = rooms.find(r => r.id === id);
     if (!room) return;
     
     deleteTargetId = id;
@@ -416,10 +376,18 @@ async function confirmDelete() {
     if (!deleteTargetId) return;
     
     try {
-        await db.collection('boarding_rooms').doc(deleteTargetId).remove();
-        closeDeleteModal();
-        await loadRooms();
-        showSuccess('房型删除成功');
+        const result = await apiCall('boarding-rooms', {
+            action: 'delete',
+            id: deleteTargetId
+        });
+        
+        if (result.success) {
+            closeDeleteModal();
+            await loadRooms();
+            showSuccess('房型删除成功');
+        } else {
+            alert('删除失败: ' + (result.error || '未知错误'));
+        }
     } catch (error) {
         console.error('删除房型失败:', error);
         alert('删除失败: ' + error.message);
@@ -433,12 +401,23 @@ function showLoading(show) {
 
 // 显示错误
 function showError(message) {
-    alert(message);
+    const tbody = document.getElementById('roomsTableBody');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: #EF4444;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                    <div>加载失败</div>
+                    <div style="font-size: 14px; margin-top: 8px; color: #666;">${message}</div>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #F97316; color: white; border: none; border-radius: 8px; cursor: pointer;">刷新重试</button>
+                </td>
+            </tr>
+        `;
+    }
 }
 
 // 显示成功
 function showSuccess(message) {
-    // 可以添加 toast 提示
     alert(message);
 }
 
@@ -447,6 +426,3 @@ function logout() {
     localStorage.removeItem('adminToken');
     window.location.href = 'index.html';
 }
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', init);
