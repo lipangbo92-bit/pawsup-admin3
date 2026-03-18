@@ -249,48 +249,61 @@ Page({
       return;
     }
 
+    // 保存当前选择的服务
+    this.setData({
+      selectedServiceForBook: service
+    });
+
+    // 如果已经有选择的宠物（路径1/2），直接跳转
+    if (this.data.selectedPet) {
+      this.navigateToNextStep(service, this.data.selectedPet);
+      return;
+    }
+
     // 如果是寄养模式，先选择宠物，再跳转到 boarding 页面
     if (this.data.isBoardingMode && service.roomData) {
-      // 保存房型信息，等待选择宠物后跳转
       this.setData({
-        selectedServiceForBook: service,
         showPetSelector: true,
         bookingMode: 'boarding'
       });
       return;
     }
 
-    // 保存当前选择的服务
+    // 路径3：显示宠物选择器
     this.setData({
-      selectedServiceForBook: service,
       showPetSelector: true,
       bookingMode: 'path3'
     });
   },
 
-  // 宠物选择回调
-  onPetSelected(e) {
-    const { pet } = e.detail;
-    const { selectedServiceForBook, bookingMode } = this.data;
-
-    this.setData({
-      showPetSelector: false,
-      selectedPet: pet
-    });
-
-    // 寄养模式（从服务页面进入）：跳转到 boarding 页面，带上 roomId
-    if (bookingMode === 'boarding' && selectedServiceForBook && selectedServiceForBook.roomData) {
-      const room = selectedServiceForBook.roomData;
+  // 跳转到下一步
+  navigateToNextStep(service, pet) {
+    // 寄养模式
+    if (this.data.isBoardingMode && service.roomData) {
+      const room = service.roomData;
       wx.navigateTo({
         url: `/pages/boarding/boarding?roomId=${room.id}&petId=${pet._id}&petType=${pet.type}`
       });
       return;
     }
 
-    if (bookingMode === 'path3' && selectedServiceForBook) {
-      // 路径3：已选宠物和服务，跳转到 booking-time-1
-      const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${selectedServiceForBook.id}`;
-      wx.navigateTo({ url });
+    // 路径1/2/3：跳转到 booking-time-1
+    const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${service.id}`;
+    wx.navigateTo({ url });
+  },
+
+  // 宠物选择回调
+  onPetSelected(e) {
+    const { pet } = e.detail;
+    const { selectedServiceForBook } = this.data;
+
+    this.setData({
+      showPetSelector: false,
+      selectedPet: pet
+    });
+
+    if (selectedServiceForBook) {
+      this.navigateToNextStep(selectedServiceForBook, pet);
     }
   },
 
