@@ -20,7 +20,13 @@ Page({
     loadingServices: false,
 
     // 宠物信息
-    selectedPet: null,
+    selectedPet: {
+      id: '',
+      name: '',
+      type: '',
+      breed: '',
+      avatar: ''
+    },
 
     // 日期列表
     dateList: [],
@@ -157,6 +163,7 @@ Page({
 
   // 加载宠物信息
   async loadPetInfo(petId) {
+    console.log('loadPetInfo called with petId:', petId);
     try {
       const res = await wx.cloud.callFunction({
         name: 'pets-api',
@@ -166,17 +173,22 @@ Page({
         }
       });
 
-      if (res.result.success) {
+      console.log('loadPetInfo response:', res);
+
+      if (res.result && res.result.success) {
         const pet = res.result.data;
+        console.log('Pet loaded:', pet);
         this.setData({
           selectedPet: {
             id: pet._id,
             name: pet.name,
             type: pet.type,
-            breed: pet.breed,
+            breed: pet.breed || '',
             avatar: pet.avatar
           }
         });
+      } else {
+        console.error('Failed to load pet:', res.result);
       }
     } catch (error) {
       console.error('加载宠物信息失败:', error);
