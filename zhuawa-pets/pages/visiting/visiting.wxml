@@ -256,7 +256,7 @@
 <!-- 底部按钮栏 -->
 <view class="bottom-bar">
   <view class="btn-group">
-    <button class="prev-btn" wx:if="{{currentStep > 1}}" bindtap="prevStep">上一步</button>
+    <button class="prev-btn" wx:if="{{currentStep > 1}}" bindtap="goBack">上一步</button>
     <button class="next-btn {{canProceed ? 'active' : ''}}" bindtap="nextStep" disabled="{{!canProceed}}">
       {{currentStep === 5 ? '确认支付' : '下一步'}}
     </button>
