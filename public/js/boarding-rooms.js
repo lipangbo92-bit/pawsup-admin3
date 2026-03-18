@@ -231,6 +231,11 @@ async function saveRoom() {
         return;
     }
     
+    // 获取当前用户信息
+    const auth = cloud.auth();
+    const userInfo = auth.currentUser;
+    const userId = userInfo ? userInfo.uid : 'anonymous';
+    
     const roomData = {
         name,
         petType,
@@ -240,17 +245,22 @@ async function saveRoom() {
         description,
         status,
         facilities: facilities.filter(f => f.trim()),
-        images: imageUrl ? [imageUrl] : []
+        images: imageUrl ? [imageUrl] : [],
+        userId: userId
     };
     
     try {
+        console.log('保存房型数据:', roomData);
+        
         if (id) {
             // 更新
-            await db.collection('boarding_rooms').doc(id).update({ data: roomData });
+            const result = await db.collection('boarding_rooms').doc(id).update({ data: roomData });
+            console.log('更新结果:', result);
         } else {
             // 新增
             roomData.createTime = db.serverDate();
-            await db.collection('boarding_rooms').add({ data: roomData });
+            const result = await db.collection('boarding_rooms').add({ data: roomData });
+            console.log('新增结果:', result);
         }
         
         closeModal();
@@ -258,7 +268,8 @@ async function saveRoom() {
         showSuccess(id ? '房型更新成功' : '房型添加成功');
     } catch (error) {
         console.error('保存房型失败:', error);
-        alert('保存失败: ' + error.message);
+        console.error('错误详情:', JSON.stringify(error, null, 2));
+        alert('保存失败: ' + (error.message || JSON.stringify(error)));
     }
 }
 
