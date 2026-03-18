@@ -249,11 +249,13 @@ Page({
       return;
     }
 
-    // 如果是寄养模式，直接跳转到 boarding 页面
+    // 如果是寄养模式，先选择宠物，再跳转到 boarding 页面
     if (this.data.isBoardingMode && service.roomData) {
-      const room = service.roomData;
-      wx.navigateTo({
-        url: `/pages/boarding/boarding?roomId=${room.id}&petType=${room.petType}`
+      // 保存房型信息，等待选择宠物后跳转
+      this.setData({
+        selectedServiceForBook: service,
+        showPetSelector: true,
+        bookingMode: 'boarding'
       });
       return;
     }
@@ -269,15 +271,15 @@ Page({
   // 宠物选择回调
   onPetSelected(e) {
     const { pet } = e.detail;
-    const { selectedServiceForBook, bookingMode, isBoardingMode } = this.data;
+    const { selectedServiceForBook, bookingMode } = this.data;
 
     this.setData({
       showPetSelector: false,
       selectedPet: pet
     });
 
-    // 寄养模式：跳转到 boarding 页面
-    if (isBoardingMode && selectedServiceForBook && selectedServiceForBook.roomData) {
+    // 寄养模式（从服务页面进入）：跳转到 boarding 页面，带上 roomId
+    if (bookingMode === 'boarding' && selectedServiceForBook && selectedServiceForBook.roomData) {
       const room = selectedServiceForBook.roomData;
       wx.navigateTo({
         url: `/pages/boarding/boarding?roomId=${room.id}&petId=${pet._id}&petType=${pet.type}`
