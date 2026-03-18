@@ -7,7 +7,7 @@
       <view class="nav-back" bindtap="goBack">
         <text class="back-icon">‹</text>
       </view>
-      <text class="nav-title">上门喂养预约</text>
+      <text class="nav-title">上门服务预约</text>
       <view class="nav-placeholder"></view>
     </view>
   </view>
