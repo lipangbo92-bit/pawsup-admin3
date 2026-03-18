@@ -1,0 +1,9 @@
+{
+  "name": "boarding-api",
+  "version": "1.0.0",
+  "description": "小程序端寄养预约 API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
