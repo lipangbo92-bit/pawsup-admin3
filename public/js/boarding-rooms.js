@@ -207,6 +207,8 @@ async function handleImageUpload(event) {
 
 // 保存房型
 async function saveRoom() {
+    console.log('saveRoom 函数被调用');
+    
     const id = document.getElementById('roomId').value;
     const name = document.getElementById('roomName').value.trim();
     const petType = document.getElementById('petType').value;
@@ -232,9 +234,14 @@ async function saveRoom() {
     }
     
     // 获取当前用户信息
-    const auth = cloud.auth();
-    const userInfo = auth.currentUser;
-    const userId = userInfo ? userInfo.uid : 'anonymous';
+    let userId = 'anonymous';
+    try {
+        const auth = cloud.auth();
+        const userInfo = auth.currentUser;
+        userId = userInfo ? userInfo.uid : 'anonymous';
+    } catch (e) {
+        console.log('获取用户信息失败:', e);
+    }
     
     const roomData = {
         name,
