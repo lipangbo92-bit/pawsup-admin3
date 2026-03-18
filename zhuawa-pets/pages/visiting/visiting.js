@@ -69,17 +69,17 @@ Page({
     this.initDateList();
     this.initTimeList();
 
-    // 如果有 serviceId，直接加载该服务
+    // 如果有 petId，先加载宠物信息
+    if (petId) {
+      this.loadPetInfo(petId);
+    }
+
+    // 如果有 serviceId，加载该服务
     if (serviceId) {
       this.loadServiceDetail(serviceId);
     } else {
       // 否则加载服务列表
       this.loadServices();
-    }
-
-    // 如果有 petId，加载宠物信息
-    if (petId) {
-      this.loadPetInfo(petId);
     }
   },
 
@@ -133,10 +133,12 @@ Page({
       if (res.result && res.result.success) {
         const service = res.result.data.find(s => s.id === serviceId);
         if (service) {
+          // 根据是否有 petId 决定跳转到哪一步
+          const nextStep = this.data.petId ? 2 : 1;
           this.setData({
             selectedService: service,
             totalPrice: service.price,
-            currentStep: 2, // 直接跳转到日期选择
+            currentStep: nextStep,
             loadingServices: false
           });
           this.updateCanProceed();

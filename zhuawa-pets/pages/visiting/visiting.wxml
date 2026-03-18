@@ -155,7 +155,7 @@
   <!-- 步骤4：填写服务需求 -->
   <view class="step-content" wx:if="{{currentStep === 4}}">
     <!-- 已选宠物信息展示 -->
-    <view class="section-card" wx:if="{{selectedPet}}">
+    <view class="section-card" wx:if="{{selectedPet && selectedPet.name}}">
       <view class="card-title">
         <text class="title-icon">🐱</text>
         <text>已选宠物</text>
@@ -166,8 +166,8 @@
           <text wx:else class="pet-emoji">{{selectedPet.type === 'cat' ? '🐱' : '🐶'}}</text>
         </view>
         <view class="pet-detail">
-          <text class="pet-name">{{selectedPet.name}}</text>
-          <text class="pet-breed">{{selectedPet.breed}}</text>
+          <text class="pet-name">{{selectedPet.name || '未知'}}</text>
+          <text class="pet-breed">{{selectedPet.breed || ''}}</text>
         </view>
       </view>
     </view>
@@ -218,10 +218,10 @@
             <text class="value-text">{{addressInfo.address}}</text>
           </view>
         </view>
-        <view class="info-row" wx:if="{{selectedPet}}">
+        <view class="info-row" wx:if="{{selectedPet && selectedPet.name}}">
           <text class="info-label">宠物信息</text>
           <view class="info-value">
-            <text class="value-text">{{selectedPet.name}} ({{selectedPet.breed}})</text>
+            <text class="value-text">{{selectedPet.name}}{{selectedPet.breed ? ' (' + selectedPet.breed + ')' : ''}}</text>
           </view>
         </view>
         <view class="info-row last-row" wx:if="{{remark}}">
