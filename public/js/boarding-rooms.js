@@ -7,15 +7,36 @@ let currentFilter = 'all';
 let deleteTargetId = null;
 let facilities = [];
 
+// 等待 Cloud SDK 加载完成
+function waitForCloudSDK(maxRetries = 10, interval = 500) {
+    return new Promise((resolve, reject) => {
+        let retries = 0;
+        
+        const checkSDK = () => {
+            retries++;
+            console.log(`检查 Cloud SDK (尝试 ${retries}/${maxRetries})...`);
+            
+            if (typeof cloud !== 'undefined') {
+                console.log('Cloud SDK 已加载');
+                resolve();
+            } else if (retries >= maxRetries) {
+                reject(new Error('Cloud SDK 加载超时，请检查网络连接'));
+            } else {
+                setTimeout(checkSDK, interval);
+            }
+        };
+        
+        checkSDK();
+    });
+}
+
 // 初始化
 async function init() {
     try {
         console.log('开始初始化...');
         
-        // 检查 cloud SDK 是否加载
-        if (typeof cloud === 'undefined') {
-            throw new Error('Cloud SDK 未加载');
-        }
+        // 等待 Cloud SDK 加载
+        await waitForCloudSDK();
         
         cloud.init({ env: CLOUD_ENV_ID });
         console.log('cloud.init 完成');
