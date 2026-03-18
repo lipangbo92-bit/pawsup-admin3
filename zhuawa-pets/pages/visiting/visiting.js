@@ -368,7 +368,7 @@ Page({
 
   // 提交订单
   async submitOrder() {
-    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, remark, totalPrice } = this.data;
+    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, serviceOptions, remark, totalPrice } = this.data;
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo');
@@ -380,23 +380,26 @@ Page({
       return;
     }
 
-    // 构建订单数据
+    // 构建订单数据（使用统一 orders-api）
     const orderData = {
       userId: userInfo.openid,
-      serviceId: selectedService.id,
-      serviceName: selectedService.name,
-      servicePrice: selectedService.price,
+      orderType: 'visiting',
+      customerName: addressInfo.contactName,
+      customerPhone: addressInfo.contactPhone,
       petId: selectedPet ? selectedPet.id : '',
       petName: selectedPet ? selectedPet.name : '',
       petType: selectedPet ? selectedPet.type : '',
+      petBreed: selectedPet ? selectedPet.breed : '',
+      serviceId: selectedService.id,
+      serviceName: selectedService.name,
+      servicePrice: selectedService.price,
       address: addressInfo.address,
-      contactName: addressInfo.contactName,
-      contactPhone: addressInfo.contactPhone,
       serviceDate: selectedDateStr,
       serviceTime: selectedTime,
-      serviceOptions: [],
+      serviceOptions: serviceOptions.filter(item => item.checked).map(item => item.label),
       remark: remark,
-      totalPrice: totalPrice
+      totalPrice: totalPrice,
+      finalPrice: totalPrice
     };
 
     console.log('提交订单:', orderData);
@@ -404,8 +407,9 @@ Page({
     wx.showLoading({ title: '提交中...' });
 
     try {
+      // 使用统一 orders-api 创建订单
       const res = await wx.cloud.callFunction({
-        name: 'visiting-api',
+        name: 'orders-api',
         data: {
           action: 'createOrder',
           data: orderData

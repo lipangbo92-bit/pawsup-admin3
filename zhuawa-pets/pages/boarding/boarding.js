@@ -363,16 +363,27 @@ Page({
       return;
     }
 
-    // 构建订单数据
+    // 构建订单数据（使用统一 orders-api）
     const orderData = {
       userId: userInfo.openid,
+      orderType: 'boarding',
+      customerName: userInfo.nickName || '',
+      customerPhone: userInfo.phone || '',
       petId: petId || '',
+      petName: selectedPet ? selectedPet.name : '',
+      petType: selectedPet ? selectedPet.type : '',
+      petBreed: selectedPet ? selectedPet.breed : '',
+      serviceId: selectedRoom.id,
+      serviceName: selectedRoom.name,
+      servicePrice: selectedRoom.price,
       roomId: selectedRoom.id,
+      roomName: selectedRoom.name,
       checkinDate,
       checkoutDate,
       nightCount,
       petCount,
       totalPrice,
+      finalPrice: totalPrice,
       remark
     };
 
@@ -381,9 +392,9 @@ Page({
     wx.showLoading({ title: '提交中...' });
 
     try {
-      // 创建订单
+      // 使用统一 orders-api 创建订单
       const res = await wx.cloud.callFunction({
-        name: 'boarding-api',
+        name: 'orders-api',
         data: {
           action: 'createOrder',
           data: orderData
