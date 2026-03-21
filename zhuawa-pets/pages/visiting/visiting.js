@@ -45,7 +45,7 @@ Page({
     },
 
     // 服务选项
-    serviceOptions: [
+    serviceItems: [
       { value: 'feeding', label: '喂食换水', checked: true },
       { value: 'litter', label: '清理猫砂/厕所', checked: true },
       { value: 'play', label: '陪玩互动', checked: false },
@@ -310,10 +310,10 @@ Page({
   // 切换服务选项
   toggleServiceOption(e) {
     const index = e.currentTarget.dataset.index;
-    const key = `serviceOptions[${index}].checked`;
+    const key = `serviceItems[${index}].checked`;
 
     this.setData({
-      [key]: !this.data.serviceOptions[index].checked
+      [key]: !this.data.serviceItems[index].checked
     });
   },
 
@@ -368,7 +368,7 @@ Page({
 
   // 提交订单
   async submitOrder() {
-    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, serviceOptions, remark, totalPrice } = this.data;
+    const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, serviceItems, remark, totalPrice } = this.data;
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo');
@@ -396,7 +396,7 @@ Page({
       address: addressInfo.address,
       serviceDate: selectedDateStr,
       serviceTime: selectedTime,
-      serviceOptions: serviceOptions.filter(item => item.checked).map(item => item.label),
+      serviceItems: serviceItems.filter(item => item.checked).map(item => item.label),
       remark: remark,
       totalPrice: totalPrice,
       finalPrice: totalPrice

@@ -50,8 +50,8 @@ Page({
     const today = this.formatDate(new Date());
     this.setData({ today });
 
-    // 保存URL参数
-    const { petId, petType, roomId } = options;
+    // 保存URL参数（支持 roomId 和 roomTypeId 两种参数名）
+    const { petId, petType, roomId, roomTypeId } = options;
     this.setData({ petId, petType });
 
     // 如果有petId，加载宠物信息
@@ -59,44 +59,45 @@ Page({
       this.loadPetInfo(petId);
     }
 
-    // 如果传入了roomId，直接加载该房型并跳转到步骤2
-    if (roomId) {
-      this.loadRoomAndSkipToStep2(roomId);
+    // 如果传入了roomTypeId，直接加载该房型并跳转到步骤2
+    const targetRoomTypeId = roomTypeId || roomId;
+    if (targetRoomTypeId) {
+      this.loadRoomAndSkipToStep2(targetRoomTypeId);
     } else {
       // 否则加载房型列表
-      this.loadRooms(petType);
+      this.loadRoomTypes(petType);
     }
   },
 
   // 加载指定房型并跳转到步骤2
-  async loadRoomAndSkipToStep2(roomId) {
+  async loadRoomAndSkipToStep2(roomTypeId) {
     this.setData({ loadingRooms: true });
 
     try {
       const res = await wx.cloud.callFunction({
         name: 'boarding-api',
         data: {
-          action: 'getRoom',
-          id: roomId
+          action: 'getRoomType',
+          id: roomTypeId
         }
       });
 
       if (res.result.success && res.result.data) {
-        const room = res.result.data;
+        const roomType = res.result.data;
         this.setData({
-          selectedRoom: room,
+          selectedRoom: roomType,
           currentStep: 2,
           pageTitle: '选择日期',
           loadingRooms: false
         });
       } else {
         // 如果获取失败，回退到加载房型列表
-        this.loadRooms(this.data.petType);
+        this.loadRoomTypes(this.data.petType);
       }
     } catch (error) {
       console.error('加载房型失败:', error);
       // 如果获取失败，回退到加载房型列表
-      this.loadRooms(this.data.petType);
+      this.loadRoomTypes(this.data.petType);
     }
   },
 
@@ -130,14 +131,14 @@ Page({
   },
 
   // 加载房型列表
-  async loadRooms(petType) {
+  async loadRoomTypes(petType) {
     this.setData({ loadingRooms: true });
 
     try {
       const res = await wx.cloud.callFunction({
         name: 'boarding-api',
         data: {
-          action: 'getRooms',
+          action: 'getRoomTypes',
           petType: petType || null
         }
       });
@@ -266,8 +267,8 @@ Page({
       const res = await wx.cloud.callFunction({
         name: 'boarding-api',
         data: {
-          action: 'checkRoomAvailability',
-          roomId: selectedRoom.id,
+          action: 'checkAvailability',
+          roomTypeId: selectedRoom.id,
           checkinDate: checkinDate,
           checkoutDate: checkoutDate
         }
@@ -363,7 +364,7 @@ Page({
       return;
     }
 
-    // 构建订单数据（使用统一 orders-api）
+    // 构建订单数据（使用统一 orders-api，符合数据字典）
     const orderData = {
       userId: userInfo.openid,
       orderType: 'boarding',
@@ -373,11 +374,14 @@ Page({
       petName: selectedPet ? selectedPet.name : '',
       petType: selectedPet ? selectedPet.type : '',
       petBreed: selectedPet ? selectedPet.breed : '',
+      petWeight: selectedPet ? selectedPet.weight : null,
       serviceId: selectedRoom.id,
       serviceName: selectedRoom.name,
       servicePrice: selectedRoom.price,
-      roomId: selectedRoom.id,
-      roomName: selectedRoom.name,
+      roomTypeId: selectedRoom.id,
+      roomTypeName: selectedRoom.name,
+      roomId: '',  // 待商家分配
+      roomNumber: '',
       checkinDate,
       checkoutDate,
       nightCount,

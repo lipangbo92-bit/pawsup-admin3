@@ -86,11 +86,15 @@ async function createOrder(data) {
     
     ...(data.orderType === 'visiting' && {
       address: data.address || '',
+      latitude: data.latitude || null,
+      longitude: data.longitude || null,
       serviceDate: data.serviceDate || '',
       serviceTime: data.serviceTime || '',
-      serviceOptions: data.serviceOptions || [],
+      serviceItems: data.serviceItems || [],
       contactName: data.contactName || '',
-      contactPhone: data.contactPhone || ''
+      contactPhone: data.contactPhone || '',
+      petLocation: data.petLocation || '',
+      specialNotes: data.specialNotes || ''
     }),
     
     ...(data.orderType === 'service' && {

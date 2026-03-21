@@ -1,4 +1,6 @@
 // Vercel API Route: /api/boarding-rooms
+// 房型管理 API - 适配新数据字典（boarding_room_types + boarding_rooms）
+
 const cloudbase = require('@cloudbase/node-sdk');
 
 const app = cloudbase.init({
@@ -26,19 +28,19 @@ module.exports = async (req, res) => {
     let result;
     switch (action) {
       case 'list':
-        result = await getRoomsList();
+        result = await getRoomTypes();
         break;
       case 'get':
-        result = await getRoomDetail(id);
+        result = await getRoomTypeDetail(id);
         break;
       case 'add':
-        result = await addRoom(data);
+        result = await addRoomType(data);
         break;
       case 'update':
-        result = await updateRoom(id, data);
+        result = await updateRoomType(id, data);
         break;
       case 'delete':
-        result = await deleteRoom(id);
+        result = await deleteRoomType(id);
         break;
       default:
         result = { success: false, error: 'Unknown action: ' + action };
@@ -50,27 +52,45 @@ module.exports = async (req, res) => {
   }
 };
 
-// 获取房型列表
-async function getRoomsList() {
+// 获取房型列表（从 boarding_room_types 查询，并统计房间数量）
+async function getRoomTypes() {
   try {
-    const result = await db.collection('boarding_rooms').get();
-    const rooms = (result.data || []).map(room => ({
-      id: room._id,
-      name: room.name,
-      petType: room.petType,
-      price: room.price,
-      roomCount: room.roomCount,
-      area: room.area,
-      facilities: room.facilities || [],
-      images: room.images || [],
-      description: room.description,
-      status: room.status
-    }));
-    return { success: true, data: rooms };
+    const roomTypesResult = await db.collection('boarding_room_types').get();
+    const roomTypes = roomTypesResult.data || [];
+    
+    // 为每个房型统计房间数量
+    const roomTypesWithCount = await Promise.all(
+      roomTypes.map(async (roomType) => {
+        const roomsResult = await db.collection('boarding_rooms')
+          .where({ roomTypeId: roomType._id })
+          .get();
+        
+        return {
+          id: roomType._id,
+          _id: roomType._id,
+          name: roomType.name,
+          petType: roomType.petType,
+          price: roomType.price,
+          area: roomType.area,
+          facilities: roomType.facilities || [],
+          images: roomType.images || [],
+          description: roomType.description,
+          status: roomType.status,
+          sortOrder: roomType.sortOrder || 0,
+          // 统计房间数量（兼容前端字段）
+          roomCount: roomsResult.data.length,
+          totalRooms: roomsResult.data.length,
+          createTime: roomType.createTime,
+          updateTime: roomType.updateTime
+        };
+      })
+    );
+    
+    return { success: true, data: roomTypesWithCount };
   } catch (error) {
     // 如果集合不存在，返回空数组
     if (error.code === 'DATABASE_COLLECTION_NOT_EXIST') {
-      console.log('集合 boarding_rooms 不存在，返回空数组');
+      console.log('集合 boarding_room_types 不存在，返回空数组');
       return { success: true, data: [] };
     }
     throw error;
@@ -78,84 +98,178 @@ async function getRoomsList() {
 }
 
 // 获取房型详情
-async function getRoomDetail(id) {
+async function getRoomTypeDetail(id) {
   if (!id) {
     return { success: false, error: 'Missing id parameter' };
   }
   
-  const result = await db.collection('boarding_rooms').doc(id).get();
+  const roomTypeResult = await db.collection('boarding_room_types').doc(id).get();
   
-  if (!result.data) {
-    return { success: false, error: 'Room not found' };
+  if (!roomTypeResult.data) {
+    return { success: false, error: 'Room type not found' };
   }
   
-  const room = result.data;
+  const roomType = roomTypeResult.data;
+  
+  // 获取关联的房间
+  const roomsResult = await db.collection('boarding_rooms')
+    .where({ roomTypeId: id })
+    .get();
+  
   return {
     success: true,
     data: {
-      id: room._id,
-      name: room.name,
-      petType: room.petType,
-      price: room.price,
-      roomCount: room.roomCount,
-      area: room.area,
-      facilities: room.facilities || [],
-      images: room.images || [],
-      description: room.description,
-      status: room.status
+      id: roomType._id,
+      _id: roomType._id,
+      name: roomType.name,
+      petType: roomType.petType,
+      price: roomType.price,
+      area: roomType.area,
+      facilities: roomType.facilities || [],
+      images: roomType.images || [],
+      description: roomType.description,
+      status: roomType.status,
+      sortOrder: roomType.sortOrder || 0,
+      roomCount: roomsResult.data.length,
+      totalRooms: roomsResult.data.length,
+      rooms: roomsResult.data.map(r => ({
+        id: r._id,
+        roomNumber: r.roomNumber,
+        status: r.status
+      })),
+      createTime: roomType.createTime,
+      updateTime: roomType.updateTime
     }
   };
 }
 
-// 添加房型
-async function addRoom(data) {
+// 添加房型（创建 roomType + 对应 rooms）
+async function addRoomType(data) {
   // 验证必填字段
   if (!data.name || !data.petType || !data.price) {
-    return { success: false, error: 'Missing required fields' };
+    return { success: false, error: 'Missing required fields: name, petType, price' };
   }
   
-  const roomData = {
+  // 1. 创建房型定义
+  const roomTypeData = {
     name: data.name,
     petType: data.petType,
     price: parseFloat(data.price),
-    roomCount: parseInt(data.roomCount) || 1,
     area: data.area || '',
     facilities: data.facilities || [],
     images: data.images || [],
     description: data.description || '',
     status: data.status || 'active',
-    createTime: new Date()
-  };
-  
-  const result = await db.collection('boarding_rooms').add(roomData);
-  return { success: true, id: result.id };
-}
-
-// 更新房型
-async function updateRoom(id, data) {
-  if (!id) {
-    return { success: false, error: 'Missing id parameter' };
-  }
-  
-  const updateData = {
-    ...data,
+    sortOrder: data.sortOrder || 0,
+    createTime: new Date(),
     updateTime: new Date()
   };
   
-  // 转换数字类型
-  if (updateData.price) updateData.price = parseFloat(updateData.price);
-  if (updateData.roomCount) updateData.roomCount = parseInt(updateData.roomCount);
+  const roomTypeResult = await db.collection('boarding_room_types').add(roomTypeData);
+  const roomTypeId = roomTypeResult.id;
   
-  await db.collection('boarding_rooms').doc(id).update(updateData);
+  // 2. 创建对应的具体房间
+  const roomCountNum = parseInt(data.roomCount) || 1;
+  for (let i = 1; i <= roomCountNum; i++) {
+    await db.collection('boarding_rooms').add({
+      roomTypeId: roomTypeId,
+      roomNumber: `${i.toString().padStart(3, '0')}`,
+      status: 'available',
+      createTime: new Date(),
+      updateTime: new Date()
+    });
+  }
+  
+  return { success: true, id: roomTypeId };
+}
+
+// 更新房型
+async function updateRoomType(id, data) {
+  if (!id) {
+    return { success: false, error: 'Missing room type id' };
+  }
+  
+  // 1. 更新房型定义
+  const updateData = {
+    updateTime: new Date()
+  };
+  
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.petType !== undefined) updateData.petType = data.petType;
+  if (data.price !== undefined) updateData.price = parseFloat(data.price);
+  if (data.area !== undefined) updateData.area = data.area;
+  if (data.facilities !== undefined) updateData.facilities = data.facilities;
+  if (data.images !== undefined) updateData.images = data.images;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.status !== undefined) updateData.status = data.status;
+  if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
+  
+  await db.collection('boarding_room_types').doc(id).update(updateData);
+  
+  // 2. 如果需要调整房间数量
+  if (data.roomCount !== undefined) {
+    const currentRooms = await db.collection('boarding_rooms')
+      .where({ roomTypeId: id })
+      .get();
+    
+    const currentCount = currentRooms.data.length;
+    const targetCount = parseInt(data.roomCount);
+    
+    if (targetCount > currentCount) {
+      // 添加房间
+      for (let i = currentCount + 1; i <= targetCount; i++) {
+        await db.collection('boarding_rooms').add({
+          roomTypeId: id,
+          roomNumber: `${i.toString().padStart(3, '0')}`,
+          status: 'available',
+          createTime: new Date(),
+          updateTime: new Date()
+        });
+      }
+    } else if (targetCount < currentCount) {
+      // 删除多余的房间（只删除空闲的）
+      const roomsToDelete = currentRooms.data
+        .filter(r => r.status === 'available')
+        .slice(0, currentCount - targetCount);
+      
+      for (const room of roomsToDelete) {
+        await db.collection('boarding_rooms').doc(room._id).remove();
+      }
+    }
+  }
+  
   return { success: true };
 }
 
-// 删除房型
-async function deleteRoom(id) {
+// 删除房型（同时删除关联的房间）
+async function deleteRoomType(id) {
   if (!id) {
-    return { success: false, error: 'Missing id parameter' };
+    return { success: false, error: 'Missing room type id' };
   }
   
-  await db.collection('boarding_rooms').doc(id).remove();
+  // 1. 检查是否有 occupied 的房间
+  const occupiedRooms = await db.collection('boarding_rooms')
+    .where({ 
+      roomTypeId: id,
+      status: 'occupied'
+    })
+    .get();
+  
+  if (occupiedRooms.data.length > 0) {
+    return { success: false, error: '该房型下有入住中的房间，无法删除' };
+  }
+  
+  // 2. 删除所有关联的房间
+  const rooms = await db.collection('boarding_rooms')
+    .where({ roomTypeId: id })
+    .get();
+  
+  for (const room of rooms.data) {
+    await db.collection('boarding_rooms').doc(room._id).remove();
+  }
+  
+  // 3. 删除房型定义
+  await db.collection('boarding_room_types').doc(id).remove();
+  
   return { success: true };
 }

@@ -36,8 +36,8 @@
             <text class="position">{{item.position}}</text>
           </view>
           
-          <view class="skills" wx:if="{{item.skills && item.skills.length > 0}}">
-            <text wx:for="{{item.skills}}" wx:for-item="skill" wx:key="*this" class="skill-tag">{{skill}}</text>
+          <view class="specialty" wx:if="{{item.specialty && item.specialty.length > 0}}">
+            <text wx:for="{{item.specialty}}" wx:for-item="s" wx:key="*this" class="skill-tag">{{s}}</text>
           </view>
           
           <view class="stats">
@@ -115,10 +115,10 @@
         </scroll-view>
       </view>
       
-      <view class="modal-section" wx:if="{{selectedTechnician.skills && selectedTechnician.skills.length > 0}}">
+      <view class="modal-section" wx:if="{{selectedTechnician.specialty && selectedTechnician.specialty.length > 0}}">
         <text class="section-title">擅长技能</text>
-        <view class="skills-list">
-          <text wx:for="{{selectedTechnician.skills}}" wx:for-item="skill" wx:key="*this" class="skill-item">{{skill}}</text>
+        <view class="specialty-list">
+          <text wx:for="{{selectedTechnician.specialty}}" wx:for-item="s" wx:key="*this" class="skill-item">{{s}}</text>
         </view>
       </view>
       

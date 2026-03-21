@@ -110,7 +110,7 @@ Page({
         const tech = res.result.data.find(t => t._id === technicianId || t.id === technicianId);
         console.log('found technician:', tech);
         if (tech) {
-          const avatar = tech.avatarUrl || tech.avatar || '👤';
+          const avatar = tech.avatar || '👤';
           return {
             id: tech._id || tech.id,
             name: tech.name,

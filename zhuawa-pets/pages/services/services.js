@@ -347,9 +347,9 @@ Page({
   navigateToNextStep(service, pet) {
     // 寄养模式
     if (this.data.isBoardingMode && service.roomData) {
-      const room = service.roomData;
+      const roomType = service.roomData;
       wx.navigateTo({
-        url: `/pages/boarding/boarding?roomId=${room.id}&petId=${pet._id}&petType=${pet.type}`
+        url: `/pages/boarding/boarding?roomTypeId=${roomType.id}&petId=${pet._id}&petType=${pet.type}`
       });
       return;
     }

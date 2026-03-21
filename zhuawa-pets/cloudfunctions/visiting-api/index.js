@@ -104,7 +104,7 @@ async function createOrder(data) {
     contactPhone: data.contactPhone,
     serviceDate: data.serviceDate,
     serviceTime: data.serviceTime,
-    serviceOptions: data.serviceOptions || [],
+    serviceItems: data.serviceItems || [],
     remark: data.remark || '',
     totalPrice: data.totalPrice,
     status: 'pending', // pending, confirmed, completed, cancelled
@@ -112,7 +112,9 @@ async function createOrder(data) {
     createTime: db.serverDate()
   };
 
-  const result = await db.collection('visiting_orders').add({
+  // 使用统一 orders 集合
+  orderData.orderType = 'visiting';
+  const result = await db.collection('orders').add({
     data: orderData
   });
 
@@ -129,8 +131,11 @@ async function getOrders(userId) {
     return { success: false, error: 'Missing userId' };
   }
 
-  const result = await db.collection('visiting_orders')
-    .where({ userId: userId })
+  const result = await db.collection('orders')
+    .where({ 
+      userId: userId,
+      orderType: 'visiting'
+    })
     .orderBy('createTime', 'desc')
     .get();
 
@@ -155,7 +160,7 @@ async function getOrderDetail(orderId) {
     return { success: false, error: 'Missing orderId' };
   }
 
-  const result = await db.collection('visiting_orders').doc(orderId).get();
+  const result = await db.collection('orders').doc(orderId).get();
 
   if (!result.data) {
     return { success: false, error: 'Order not found' };
@@ -173,10 +178,11 @@ async function cancelOrder(orderId) {
     return { success: false, error: 'Missing orderId' };
   }
 
-  await db.collection('visiting_orders').doc(orderId).update({
+  await db.collection('orders').doc(orderId).update({
     data: {
       status: 'cancelled',
-      cancelTime: db.serverDate()
+      cancelTime: db.serverDate(),
+      updateTime: db.serverDate()
     }
   });
 

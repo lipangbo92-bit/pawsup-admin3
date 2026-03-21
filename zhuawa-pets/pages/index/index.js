@@ -65,7 +65,6 @@ Page({
 
       if (res.result && res.result.success && res.result.data) {
         return res.result.data.map(item => {
-          const avatarUrl = item.avatarUrl || item.avatar || '';
           return {
             id: item._id,
             name: item.name,
@@ -73,8 +72,8 @@ Page({
             position: item.position || '美容师',
             rating: item.rating || 5,
             orders: item.orders || 0,
-            avatar: avatarUrl,
-            intro: item.specialty || item.intro || item.introduction || '专业宠物美容师'
+            avatar: item.avatar || '',
+            intro: item.introduction || '专业宠物美容师'
           };
         });
       }

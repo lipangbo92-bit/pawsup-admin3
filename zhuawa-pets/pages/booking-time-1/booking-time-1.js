@@ -119,7 +119,7 @@ Page({
               level: t.level || '中级',
               rating: t.rating || 5,
               orders: t.orders || 0,
-              specialty: t.skills ? t.skills[0] : '洗护'
+              specialty: t.specialty ? t.specialty[0] : '洗护'
             };
           })
         });

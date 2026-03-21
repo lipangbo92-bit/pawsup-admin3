@@ -45,8 +45,8 @@ Page({
         return res.result.data.map(item => ({
           _id: item._id, name: item.name, level: item.level || '中级',
           position: item.position || '美容师', rating: item.rating || 5,
-          orders: item.orders || 0, avatar: item.avatarUrl || item.avatar || '',
-          intro: item.intro || item.introduction || '专业宠物美容师'
+          orders: item.orders || 0, avatar: item.avatar || '',
+          intro: item.introduction || '专业宠物美容师'
         }))
       }
       return this.getLocalTechnicians()

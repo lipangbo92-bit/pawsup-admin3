@@ -35,13 +35,13 @@ Page({
         const technicians = result.data.map(item => ({
           _id: item._id,
           name: item.name,
-          avatar: item.avatarUrl || item.avatar || '',
+          avatar: item.avatar || '',
           position: item.position || '美容师',
           level: item.level || '中级',
           rating: item.rating || 5,
           orders: item.orders || 0,
-          intro: item.intro || item.introduction || '',
-          skills: item.skills || [],
+          intro: item.introduction || '',
+          specialty: item.specialty || [],
           works: item.works || []
         }))
         
@@ -72,8 +72,8 @@ Page({
       // 降级到本地数据
       this.setData({
         technicians: [
-          { _id: '1', name: '小美', position: '美容师', level: '高级', rating: 4.9, orders: 128, isAvailable: true, skills: ['洗澡', '造型'] },
-          { _id: '2', name: '文子', position: '洗护师', level: '中级', rating: 4.8, orders: 86, isAvailable: false, skills: ['洗澡'] }
+          { _id: '1', name: '小美', position: '美容师', level: '高级', rating: 4.9, orders: 128, isAvailable: true, specialty: ['洗澡', '造型'] },
+          { _id: '2', name: '文子', position: '洗护师', level: '中级', rating: 4.8, orders: 86, isAvailable: false, specialty: ['洗澡'] }
         ]
       })
     }

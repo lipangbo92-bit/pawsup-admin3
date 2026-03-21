@@ -1,4 +1,4 @@
-// 云函数：boarding-api - 小程序端寄养预约 API
+// 云函数：boarding-api - 小程序端寄养预约 API（新版，适配数据字典）
 const cloud = require('wx-server-sdk');
 
 cloud.init({
@@ -6,18 +6,19 @@ cloud.init({
 });
 
 const db = cloud.database();
+const _ = db.command;
 
 exports.main = async (event, context) => {
   const { action } = event;
 
   try {
     switch (action) {
-      case 'getRooms':
-        return await getRooms(event.petType);
-      case 'getRoom':
-        return await getRoom(event.id);
-      case 'checkRoomAvailability':
-        return await checkRoomAvailability(event.roomId, event.checkinDate, event.checkoutDate);
+      case 'getRoomTypes':
+        return await getRoomTypes(event.petType);
+      case 'getRoomType':
+        return await getRoomType(event.id);
+      case 'checkAvailability':
+        return await checkAvailability(event.roomTypeId, event.checkinDate, event.checkoutDate);
       case 'createOrder':
         return await createOrder(event.data);
       case 'getOrders':
@@ -41,9 +42,9 @@ exports.main = async (event, context) => {
   }
 };
 
-// 获取房型列表（小程序端）
-async function getRooms(petType) {
-  let query = db.collection('boarding_rooms').where({
+// 获取房型列表（从 boarding_room_types 查询）
+async function getRoomTypes(petType) {
+  let query = db.collection('boarding_room_types').where({
     status: 'active'
   });
 
@@ -51,77 +52,107 @@ async function getRooms(petType) {
     query = query.where({ petType: petType });
   }
 
-  const result = await query.get();
+  const result = await query.orderBy('sortOrder', 'asc').get();
+
+  // 为每个房型统计房间数量
+  const roomTypesWithCount = await Promise.all(
+    result.data.map(async (roomType) => {
+      // 获取该房型下所有房间
+      const rooms = await db.collection('boarding_rooms')
+        .where({ 
+          roomTypeId: roomType._id,
+          status: 'available'
+        })
+        .get();
+      
+      const totalRooms = rooms.data.length;
+
+      return {
+        id: roomType._id,
+        name: roomType.name,
+        petType: roomType.petType,
+        price: roomType.price,
+        area: roomType.area,
+        facilities: roomType.facilities || [],
+        images: roomType.images || [],
+        description: roomType.description,
+        totalRooms: totalRooms,
+        availableRooms: totalRooms // 默认可用等于总数，实际需根据日期计算
+      };
+    })
+  );
 
   return {
     success: true,
-    data: result.data.map(room => ({
-      id: room._id,
-      name: room.name,
-      petType: room.petType,
-      price: room.price,
-      roomCount: room.roomCount,
-      availableCount: room.roomCount, // 默认可用数量等于总数量
-      area: room.area,
-      facilities: room.facilities || [],
-      images: room.images || [],
-      description: room.description
-    }))
+    data: roomTypesWithCount
   };
 }
 
 // 获取单个房型详情
-async function getRoom(id) {
+async function getRoomType(id) {
   if (!id) {
     return { success: false, error: 'Missing id parameter' };
   }
 
-  const result = await db.collection('boarding_rooms').doc(id).get();
+  const result = await db.collection('boarding_room_types').doc(id).get();
 
   if (!result.data) {
-    return { success: false, error: 'Room not found' };
+    return { success: false, error: 'Room type not found' };
   }
 
-  const room = result.data;
+  const roomType = result.data;
+  
+  // 获取该房型下所有房间
+  const rooms = await db.collection('boarding_rooms')
+    .where({ roomTypeId: roomType._id })
+    .get();
+
   return {
     success: true,
     data: {
-      id: room._id,
-      name: room.name,
-      petType: room.petType,
-      price: room.price,
-      roomCount: room.roomCount,
-      availableCount: room.roomCount,
-      area: room.area,
-      facilities: room.facilities || [],
-      images: room.images || [],
-      description: room.description,
-      status: room.status
+      id: roomType._id,
+      name: roomType.name,
+      petType: roomType.petType,
+      price: roomType.price,
+      area: roomType.area,
+      facilities: roomType.facilities || [],
+      images: roomType.images || [],
+      description: roomType.description,
+      totalRooms: rooms.data.length,
+      rooms: rooms.data.map(r => ({
+        id: r._id,
+        roomNumber: r.roomNumber,
+        status: r.status
+      }))
     }
   };
 }
 
 // 检查房型可用性（指定日期范围内）
-async function checkRoomAvailability(roomId, checkinDate, checkoutDate) {
-  if (!roomId || !checkinDate || !checkoutDate) {
+async function checkAvailability(roomTypeId, checkinDate, checkoutDate) {
+  if (!roomTypeId || !checkinDate || !checkoutDate) {
     return { success: false, error: 'Missing required parameters' };
   }
 
-  // 获取房型信息
-  const roomResult = await db.collection('boarding_rooms').doc(roomId).get();
-  if (!roomResult.data) {
-    return { success: false, error: 'Room not found' };
+  // 获取该房型下所有房间
+  const roomsResult = await db.collection('boarding_rooms')
+    .where({ roomTypeId: roomTypeId })
+    .get();
+  
+  const roomIds = roomsResult.data.map(r => r._id);
+  const totalRooms = roomIds.length;
+
+  if (totalRooms === 0) {
+    return { success: true, data: { roomTypeId, totalRooms: 0, minAvailable: 0, isAvailable: false } };
   }
 
-  const room = roomResult.data;
-  const totalRooms = room.roomCount;
-
-  // 查询该日期范围内的订单
-  const ordersResult = await db.collection('boarding_orders').where({
-    roomId: roomId,
-    status: db.command.nin(['cancelled']),
-    checkinDate: db.command.lt(checkoutDate),
-    checkoutDate: db.command.gt(checkinDate)
+  // 查询该日期范围内的订单（使用统一 orders 集合）
+  const ordersResult = await db.collection('orders').where({
+    orderType: 'boarding',
+    roomTypeId: roomTypeId,
+    status: _.nin(['cancelled']),
+    checkinDate: _.lt(checkoutDate),
+    checkoutDate: _.gt(checkinDate)
   }).get();
 
   // 计算每天已占用房间数
@@ -157,7 +188,7 @@ async function checkRoomAvailability(roomId, checkinDate, checkoutDate) {
   return {
     success: true,
     data: {
-      roomId: roomId,
+      roomTypeId: roomTypeId,
       totalRooms: totalRooms,
       minAvailable: minAvailable,
       isAvailable: minAvailable > 0
@@ -165,10 +196,10 @@ async function checkRoomAvailability(roomId, checkinDate, checkoutDate) {
   };
 }
 
-// 创建寄养订单
+// 创建寄养订单（使用统一 orders 集合）
 async function createOrder(data) {
   // 验证必填字段
-  const requiredFields = ['userId', 'petId', 'roomId', 'checkinDate', 'checkoutDate', 'nightCount', 'petCount', 'totalPrice'];
+  const requiredFields = ['userId', 'petId', 'roomTypeId', 'checkinDate', 'checkoutDate', 'nightCount', 'petCount', 'totalPrice'];
   for (const field of requiredFields) {
     if (!data[field]) {
       return { success: false, error: `Missing required field: ${field}` };
@@ -176,11 +207,11 @@ async function createOrder(data) {
   }
   
   // 获取房型信息
-  const roomResult = await db.collection('boarding_rooms').doc(data.roomId).get();
-  if (!roomResult.data) {
-    return { success: false, error: 'Room not found' };
+  const roomTypeResult = await db.collection('boarding_room_types').doc(data.roomTypeId).get();
+  if (!roomTypeResult.data) {
+    return { success: false, error: 'Room type not found' };
   }
-  const room = roomResult.data;
+  const roomType = roomTypeResult.data;
   
   // 获取宠物信息
   const petResult = await db.collection('pets').doc(data.petId).get();
@@ -190,44 +221,65 @@ async function createOrder(data) {
   const pet = petResult.data;
   
   // 检查房态可用性
-  const availability = await checkRoomAvailability(data.roomId, data.checkinDate, data.checkoutDate);
-  if (!availability.isAvailable || availability.minAvailable < data.petCount) {
+  const availability = await checkAvailability(data.roomTypeId, data.checkinDate, data.checkoutDate);
+  if (!availability.data.isAvailable || availability.data.minAvailable < data.petCount) {
     return { success: false, error: 'Room not available for selected dates' };
   }
   
   // 生成订单号
   const orderNo = generateOrderNo();
   
-  // 创建订单
+  // 创建订单（使用统一 orders 集合，符合数据字典）
   const orderData = {
+    // 基础字段
     orderNo: orderNo,
+    orderType: 'boarding',
+    
+    // 用户信息
     userId: data.userId,
+    customerName: data.customerName || '',
+    customerPhone: data.customerPhone || '',
+    
+    // 宠物信息（扁平化）
     petId: data.petId,
-    petSnapshot: {
-      name: pet.name,
-      type: pet.type,
-      breed: pet.breed,
-      weight: pet.weight,
-      avatar: pet.avatar || ''
-    },
-    roomId: data.roomId,
-    roomSnapshot: {
-      name: room.name,
-      price: room.price,
-      description: room.description
-    },
+    petName: pet.name,
+    petType: pet.type,
+    petBreed: pet.breed,
+    petWeight: pet.weight,
+    
+    // 服务信息
+    serviceId: data.roomTypeId,  // 房型ID作为服务ID
+    serviceName: roomType.name,
+    servicePrice: roomType.price,
+    
+    // 寄养特有字段
+    roomTypeId: data.roomTypeId,
+    roomTypeName: roomType.name,
+    roomId: '',  // 待商家分配具体房间
+    roomNumber: '',
     checkinDate: data.checkinDate,
     checkoutDate: data.checkoutDate,
     nightCount: data.nightCount,
-    petCount: data.petCount,
+    petCount: data.petCount || 1,
+    
+    // 金额
     totalPrice: data.totalPrice,
+    finalPrice: data.finalPrice || data.totalPrice,
+    discount: data.discount || 0,
+    
+    // 状态
+    status: 'pending',
+    paymentStatus: 'unpaid',
+    
+    // 备注
     remark: data.remark || '',
-    status: 'pending', // pending, confirmed, checked_in, checked_out, cancelled
-    paymentStatus: 'unpaid', // unpaid, paid, refunded
-    createTime: db.serverDate()
+    
+    // 时间戳
+    createTime: db.serverDate(),
+    updateTime: db.serverDate()
   };
   
-  const result = await db.collection('boarding_orders').add({
+  const result = await db.collection('orders').add({
     data: orderData
   });
   
@@ -244,8 +296,11 @@ async function getOrders(userId) {
     return { success: false, error: 'Missing userId' };
   }
   
-  const result = await db.collection('boarding_orders')
-    .where({ userId: userId })
+  const result = await db.collection('orders')
+    .where({ 
+      userId: userId,
+      orderType: 'boarding'
+    })
     .orderBy('createTime', 'desc')
     .get();
   
@@ -254,8 +309,9 @@ async function getOrders(userId) {
     data: result.data.map(order => ({
       id: order._id,
       orderNo: order.orderNo,
-      roomName: order.roomSnapshot.name,
-      petName: order.petSnapshot.name,
+      roomTypeName: order.roomTypeName,
+      roomNumber: order.roomNumber,
+      petName: order.petName,
       checkinDate: order.checkinDate,
       checkoutDate: order.checkoutDate,
       nightCount: order.nightCount,
@@ -274,7 +330,7 @@ async function getOrderDetail(orderId) {
     return { success: false, error: 'Missing orderId' };
   }
   
-  const result = await db.collection('boarding_orders').doc(orderId).get();
+  const result = await db.collection('orders').doc(orderId).get();
   
   if (!result.data) {
     return { success: false, error: 'Order not found' };
@@ -292,69 +348,16 @@ async function cancelOrder(orderId) {
     return { success: false, error: 'Missing orderId' };
   }
   
-  await db.collection('boarding_orders').doc(orderId).update({
+  await db.collection('orders').doc(orderId).update({
     data: {
       status: 'cancelled',
-      cancelTime: db.serverDate()
+      cancelTime: db.serverDate(),
+      updateTime: db.serverDate()
     }
   });
   
   return {
     success: true
-  };
-}
-
-// 检查房态可用性
-async function checkRoomAvailability(roomId, checkinDate, checkoutDate) {
-  const roomResult = await db.collection('boarding_rooms').doc(roomId).get();
-  if (!roomResult.data) {
-    return { isAvailable: false, minAvailable: 0 };
-  }
-  
-  const room = roomResult.data;
-  const totalRooms = room.roomCount;
-  
-  // 查询该日期范围内的订单
-  const ordersResult = await db.collection('boarding_orders').where({
-    roomId: roomId,
-    status: db.command.nin(['cancelled']),
-    checkinDate: db.command.lt(checkoutDate),
-    checkoutDate: db.command.gt(checkinDate)
-  }).get();
-  
-  // 计算每天已占用房间数
-  const occupiedCounts = {};
-  const checkin = new Date(checkinDate);
-  const checkout = new Date(checkoutDate);
-  
-  for (let d = new Date(checkin); d < checkout; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().split('T')[0];
-    occupiedCounts[dateStr] = 0;
-  }
-  
-  ordersResult.data.forEach(order => {
-    const orderCheckin = new Date(order.checkinDate);
-    const orderCheckout = new Date(order.checkoutDate);
-    
-    for (let d = new Date(orderCheckin); d < orderCheckout; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      if (occupiedCounts[dateStr] !== undefined) {
-        occupiedCounts[dateStr] += order.petCount || 1;
-      }
-    }
-  });
-  
-  let minAvailable = totalRooms;
-  for (const occupied of Object.values(occupiedCounts)) {
-    const available = totalRooms - occupied;
-    if (available < minAvailable) {
-      minAvailable = available;
-    }
-  }
-  
-  return {
-    isAvailable: minAvailable > 0,
-    minAvailable: minAvailable
   };
 }
 
