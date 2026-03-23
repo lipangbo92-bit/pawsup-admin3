@@ -42,6 +42,12 @@ module.exports = async (req, res) => {
       case 'delete':
         result = await deleteRoomType(id);
         break;
+      case 'generateRooms':
+        result = await generateRooms(data);
+        break;
+      case 'getRoomStatus':
+        result = await getRoomStatus(data);
+        break;
       default:
         result = { success: false, error: 'Unknown action: ' + action };
     }
@@ -246,30 +252,154 @@ async function deleteRoomType(id) {
   if (!id) {
     return { success: false, error: 'Missing room type id' };
   }
-  
+
   // 1. 检查是否有 occupied 的房间
   const occupiedRooms = await db.collection('boarding_rooms')
-    .where({ 
+    .where({
       roomTypeId: id,
       status: 'occupied'
     })
     .get();
-  
+
   if (occupiedRooms.data.length > 0) {
     return { success: false, error: '该房型下有入住中的房间，无法删除' };
   }
-  
+
   // 2. 删除所有关联的房间
   const rooms = await db.collection('boarding_rooms')
     .where({ roomTypeId: id })
     .get();
-  
+
   for (const room of rooms.data) {
     await db.collection('boarding_rooms').doc(room._id).remove();
   }
-  
+
   // 3. 删除房型定义
   await db.collection('boarding_room_types').doc(id).remove();
-  
+
   return { success: true };
+}
+
+// 批量生成房间
+async function generateRooms(data) {
+  const { typeId, count, prefix = '' } = data || {};
+
+  if (!typeId) {
+    return { success: false, error: 'Missing typeId parameter' };
+  }
+  if (!count || count <= 0 || count > 50) {
+    return { success: false, error: 'Invalid count (1-50)' };
+  }
+
+  // 检查房型是否存在
+  const roomTypeResult = await db.collection('boarding_room_types').doc(typeId).get();
+  if (!roomTypeResult.data) {
+    return { success: false, error: 'Room type not found' };
+  }
+
+  // 获取该房型下现有房间数量
+  const existingRooms = await db.collection('boarding_rooms')
+    .where({ roomTypeId: typeId })
+    .get();
+
+  const existingCount = existingRooms.data.length;
+  const createdRooms = [];
+
+  // 批量创建房间
+  for (let i = 1; i <= count; i++) {
+    const roomNumber = `${prefix}${existingCount + i}`;
+
+    const roomData = {
+      roomTypeId: typeId,
+      roomNumber: roomNumber,
+      status: 'available',
+      createTime: new Date(),
+      updateTime: new Date()
+    };
+
+    const result = await db.collection('boarding_rooms').add(roomData);
+    createdRooms.push({
+      id: result.id,
+      roomNumber: roomNumber
+    });
+  }
+
+  return {
+    success: true,
+    createdCount: createdRooms.length,
+    rooms: createdRooms
+  };
+}
+
+// 获取房间状态
+async function getRoomStatus(data) {
+  const { typeId, date } = data || {};
+
+  if (!typeId) {
+    return { success: false, error: 'Missing typeId parameter' };
+  }
+
+  // 查询该房型下的所有房间
+  const roomsResult = await db.collection('boarding_rooms')
+    .where({ roomTypeId: typeId })
+    .get();
+
+  const rooms = roomsResult.data || [];
+
+  // 如果有日期参数，查询订单信息
+  let orders = [];
+  if (date) {
+    const ordersResult = await db.collection('orders')
+      .where({
+        orderType: 'boarding',
+        roomTypeId: typeId,
+        status: db.command.nin(['cancelled']),
+        checkinDate: db.command.lte(date),
+        checkoutDate: db.command.gte(date)
+      })
+      .get();
+    orders = ordersResult.data || [];
+  }
+
+  // 组装房间状态
+  const roomsWithStatus = rooms.map(room => {
+    // 查找该房间的订单
+    const roomOrder = orders.find(order => order.roomId === room._id);
+
+    let status = room.status; // available, maintenance
+    let petName = null;
+    let checkinDate = null;
+    let checkoutDate = null;
+
+    if (roomOrder && date) {
+      petName = roomOrder.petName;
+      checkinDate = roomOrder.checkinDate;
+      checkoutDate = roomOrder.checkoutDate;
+
+      // 判断状态
+      if (date === roomOrder.checkinDate && date === roomOrder.checkoutDate) {
+        status = 'occupied';
+      } else if (date === roomOrder.checkinDate) {
+        status = 'checkin';
+      } else if (date === roomOrder.checkoutDate) {
+        status = 'checkout';
+      } else {
+        status = 'occupied';
+      }
+    }
+
+    return {
+      id: room._id,
+      roomNumber: room.roomNumber,
+      status: status,
+      petName: petName,
+      checkinDate: checkinDate,
+      checkoutDate: checkoutDate
+    };
+  });
+
+  return {
+    success: true,
+    rooms: roomsWithStatus
+  };
 }
