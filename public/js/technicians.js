@@ -146,7 +146,7 @@ function renderTechniciansGrid(technicians) {
     container.innerHTML = technicians.map(tech => `
         <div class="technician-card">
             <div class="tech-avatar">
-                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
+                ${(tech.avatar || tech.avatarUrl) ? `<img src="${tech.avatar || tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
@@ -155,10 +155,10 @@ function renderTechniciansGrid(technicians) {
                     ${getLevelBadge(tech.level)}
                 </div>
                 <div class="tech-rating">${'⭐'.repeat(tech.rating || 0)}</div>
-                <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
+                <p class="tech-specialty">专业：${tech.specialty || tech.introduction || '暂无'}</p>
                 ${renderWorksPreview(tech.works)}
                 <div class="tech-meta">
-                    <span class="tech-orders">订单数：${tech.orderCount || 0}</span>
+                    <span class="tech-orders">订单数：${tech.orders || tech.orderCount || 0}</span>
                 </div>
             </div>
             <div class="tech-actions">
@@ -196,19 +196,20 @@ function editTechnician(techId) {
     document.getElementById('technicianModalTitle').textContent = '编辑美容师';
     document.getElementById('technicianId').value = currentTechnician._id;
     document.getElementById('techName').value = currentTechnician.name || '';
-    document.getElementById('techSpecialty').value = currentTechnician.specialty || '';
+    document.getElementById('techSpecialty').value = currentTechnician.specialty || currentTechnician.introduction || '';
     document.getElementById('techPosition').value = currentTechnician.position || '美容师';
     document.getElementById('techLevel').value = currentTechnician.level || '中级';
     document.getElementById('techRating').value = currentTechnician.rating || '';
-    document.getElementById('techOrderCount').value = currentTechnician.orderCount || '';
+    document.getElementById('techOrderCount').value = currentTechnician.orders || currentTechnician.orderCount || '';
     
     worksImages = currentTechnician.works || [];
     renderWorksGrid();
     
     document.getElementById('avatarInput').value = '';
     
-    if (currentTechnician.avatarUrl) {
-        document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatarUrl}" alt="头像">`;
+    const avatarUrl = currentTechnician.avatar || currentTechnician.avatarUrl;
+    if (avatarUrl) {
+        document.getElementById('avatarPreview').innerHTML = `<img src="${avatarUrl}" alt="头像">`;
     } else {
         document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     }
@@ -364,13 +365,13 @@ async function saveTechnician() {
         
         const techData = {
             name,
-            specialty,
+            introduction: specialty,  // 统一字段名：小程序用 introduction
             position,
             level,
             rating,
             orders: orderCount,
             works: worksImages,
-            avatarUrl: avatarUrl  // 确保这个字段有值
+            avatar: avatarUrl  // 统一字段名：小程序用 avatar
         };
         
         console.log('保存数据:', techData);
