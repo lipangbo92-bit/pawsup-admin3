@@ -65,10 +65,21 @@ Page({
 
       if (res.result && res.result.success && res.result.data) {
         return res.result.data.map(item => {
+          // 将中文等级转换为英文代码
+          const levelMap = {
+            '初级': 'junior',
+            '中级': 'intermediate',
+            '高级': 'senior',
+            '资深': 'expert',
+            '首席': 'master'
+          };
+          const levelCode = levelMap[item.level] || 'default';
+          
           return {
             id: item._id,
             name: item.name,
             level: item.level || '中级',
+            levelCode: levelCode,
             position: item.position || '美容师',
             rating: item.rating || 5,
             orders: item.orders || 0,

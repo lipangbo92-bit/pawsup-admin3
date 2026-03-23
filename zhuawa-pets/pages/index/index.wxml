@@ -70,7 +70,7 @@
           <view class="technician-name-row">
             <text class="technician-name">{{item.name}}</text>
             <text class="technician-position">{{item.position}}</text>
-            <text class="technician-badge badge-{{item.level}}">{{item.level}}</text>
+            <text class="technician-badge level-{{item.levelCode || 'default'}}">{{item.level}}</text>
           </view>
           <view class="technician-stats">
             <text class="technician-rating">⭐ {{item.rating}}分</text>
