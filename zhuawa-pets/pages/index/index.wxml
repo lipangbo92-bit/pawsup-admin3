@@ -59,7 +59,7 @@
         <!-- 头像 -->
         <view class="technician-avatar">
           <block wx:if="{{item.avatar && item.avatar.length > 10}}">
-            <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+            <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;" binderror="onImageError" data-type="avatar" data-index="{{index}}"/>
           </block>
           <block wx:else>
             <text style="font-size:48rpx;">👤</text>

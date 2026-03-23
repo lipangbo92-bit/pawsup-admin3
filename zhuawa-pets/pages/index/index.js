@@ -169,6 +169,22 @@ Page({
     });
   },
 
+  // 图片加载失败处理
+  onImageError(e) {
+    const type = e.currentTarget.dataset.type;
+    const index = e.currentTarget.dataset.index;
+    console.log(`[onImageError] ${type} 图片加载失败，索引:`, index);
+    
+    if (type === 'avatar') {
+      // 头像加载失败，清空 avatar 显示默认图标
+      const technicians = this.data.technicians;
+      if (technicians[index]) {
+        technicians[index].avatar = '';
+        this.setData({ technicians });
+      }
+    }
+  },
+
   // 从卡片预约美容师
   bookTechnician(e) {
     const index = e.currentTarget.dataset.index;
