@@ -29,14 +29,9 @@ Page({
       console.log('[loadData] 美容师数据:', techsRes);
       console.log('[loadData] 服务数据:', servicesRes);
 
-      // 强制使用云函数返回的数据，不再使用本地后备数据
-      const technicians = techsRes;
+      // 使用云函数数据，如果为空则使用本地默认数据
+      const technicians = techsRes.length > 0 ? techsRes : this.getLocalTechnicians();
       console.log('[loadData] 最终使用的美容师数据:', technicians);
-      
-      // 如果云函数返回空数组，显示提示
-      if (techsRes.length === 0) {
-        console.warn('[loadData] 警告：云函数返回空数组，数据库中可能没有数据');
-      }
 
       this.setData({
         technicians: technicians,
@@ -69,12 +64,17 @@ Page({
 
   async loadTechnicians() {
     try {
+      console.log('[loadTechnicians] 开始调用云函数');
       const res = await wx.cloud.callFunction({
         name: 'technicians-api',
         data: { action: 'list' }
       });
+      console.log('[loadTechnicians] 云函数返回:', res);
 
       if (res.result && res.result.success && res.result.data) {
+        console.log('[loadTechnicians] 获取到数据条数:', res.result.data.length);
+        console.log('[loadTechnicians] 原始数据:', res.result.data);
+        
         return res.result.data.map(item => {
           // 将中文等级转换为英文代码
           const levelMap = {
@@ -93,15 +93,17 @@ Page({
             levelCode: levelCode,
             position: item.position || '美容师',
             rating: item.rating || 5,
-            orders: item.orders || 0,
-            avatar: item.avatar || '',
+            orders: item.orders || item.orderCount || 0,
+            avatar: item.avatar || item.avatarUrl || '',
             intro: item.introduction || item.specialty || '专业宠物美容师',
             works: item.works || [] // 作品照片数组
           };
         });
       }
+      console.log('[loadTechnicians] 云函数返回数据为空或失败:', res.result);
       return [];
     } catch (err) {
+      console.error('[loadTechnicians] 调用失败:', err);
       return [];
     }
   },

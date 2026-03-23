@@ -1,9 +1,9 @@
 // 云函数入口文件 - 修复版
 const cloud = require('wx-server-sdk');
 
-// 初始化云开发环境
+// 初始化云开发环境 - 使用固定环境ID，确保和管理端一致
 cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
+  env: 'cloud1-4gy1jyan842d73ab'
 });
 
 const db = cloud.database();
@@ -17,15 +17,28 @@ exports.main = async (event, context) => {
   try {
     switch (action) {
       case 'list':
-        console.log('执行 list 操作');
-        const listResult = await db.collection('technicians').get();
-        console.log('查询结果:', listResult);
+        console.log('[technicians-api] 执行 list 操作');
+        console.log('[technicians-api] 当前环境:', cloud.DYNAMIC_CURRENT_ENV);
         
-        return {
-          success: true,
-          data: listResult.data,
-          message: '获取成功'
-        };
+        try {
+          const listResult = await db.collection('technicians').get();
+          console.log('[technicians-api] 查询结果:', listResult);
+          console.log('[technicians-api] 数据条数:', listResult.data ? listResult.data.length : 0);
+          
+          return {
+            success: true,
+            data: listResult.data || [],
+            count: listResult.data ? listResult.data.length : 0,
+            message: '获取成功'
+          };
+        } catch (dbError) {
+          console.error('[technicians-api] 数据库查询错误:', dbError);
+          return {
+            success: false,
+            error: dbError.message,
+            message: '数据库查询失败'
+          };
+        }
         
       case 'add':
         const addResult = await db.collection('technicians').add({
