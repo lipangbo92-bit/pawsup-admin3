@@ -70,12 +70,18 @@ function renderServicesGrid(services) {
 }
 
 function previewServiceImage(input) {
-    if (!input.files || input.files.length === 0) return;
+    console.log('[previewServiceImage] 文件选择触发');
+    if (!input.files || input.files.length === 0) {
+        console.log('[previewServiceImage] 没有文件');
+        return;
+    }
     const file = input.files[0];
+    console.log('[previewServiceImage] 选择的文件:', file.name, file.size);
     if (file.size > 5 * 1024 * 1024) { alert('图片超过5MB'); return; }
     const reader = new FileReader();
     reader.onload = function(e) {
         serviceImageBase64 = e.target.result;
+        console.log('[previewServiceImage] 图片已转换为base64, 长度:', serviceImageBase64.length);
         document.getElementById('serviceImagePreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
     };
     reader.readAsDataURL(file);
@@ -129,7 +135,12 @@ async function saveService() {
     const isHot = document.getElementById('serviceIsHot').checked;
     try {
         const data = { name, price, duration, category, description, isHot };
-        if (serviceImageBase64) data.image = serviceImageBase64;
+        console.log('[saveService] serviceImageBase64 长度:', serviceImageBase64 ? serviceImageBase64.length : 0);
+        if (serviceImageBase64) {
+            data.image = serviceImageBase64;
+            console.log('[saveService] 包含图片数据');
+        }
+        console.log('[saveService] 发送的数据:', { ...data, image: data.image ? '...' : undefined });
         if (currentService) {
             await apiCall('services', { action: 'update', id: currentService._id, data });
             alert('更新成功');
