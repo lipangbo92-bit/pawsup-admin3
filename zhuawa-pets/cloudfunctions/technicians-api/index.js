@@ -18,17 +18,44 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'list':
         console.log('[technicians-api] 执行 list 操作');
-        console.log('[technicians-api] 当前环境:', cloud.DYNAMIC_CURRENT_ENV);
         
         try {
           const listResult = await db.collection('technicians').get();
-          console.log('[technicians-api] 查询结果:', listResult);
-          console.log('[technicians-api] 数据条数:', listResult.data ? listResult.data.length : 0);
+          console.log('[technicians-api] 查询结果条数:', listResult.data ? listResult.data.length : 0);
+          
+          // 处理数据，避免返回过大的 base64 图片
+          const processedData = (listResult.data || []).map(item => {
+            // 如果 avatar 是 base64 且过大，截断或替换
+            let avatar = item.avatar || item.avatarUrl || '';
+            if (avatar && avatar.length > 1000) {
+              console.log('[technicians-api] 头像数据过大，长度:', avatar.length);
+              // 保留前100个字符作为标识，或者使用占位符
+              avatar = avatar.substring(0, 100) + '...(truncated)';
+            }
+            
+            // 处理作品图片
+            let works = item.works || [];
+            if (works.length > 0) {
+              works = works.map((work, index) => {
+                if (work && work.length > 1000) {
+                  console.log('[technicians-api] 作品图片过大，索引:', index);
+                  return work.substring(0, 100) + '...(truncated)';
+                }
+                return work;
+              });
+            }
+            
+            return {
+              ...item,
+              avatar,
+              works
+            };
+          });
           
           return {
             success: true,
-            data: listResult.data || [],
-            count: listResult.data ? listResult.data.length : 0,
+            data: processedData,
+            count: processedData.length,
             message: '获取成功'
           };
         } catch (dbError) {
