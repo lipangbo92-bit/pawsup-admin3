@@ -28,9 +28,11 @@ module.exports = async (req, res) => {
     let result;
     switch (action) {
       case 'list':
+      case 'getRoomTypes':
         result = await getRoomTypes();
         break;
       case 'get':
+      case 'getRoomType':
         result = await getRoomTypeDetail(id);
         break;
       case 'add':
