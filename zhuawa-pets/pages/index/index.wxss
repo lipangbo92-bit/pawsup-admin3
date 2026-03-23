@@ -425,6 +425,39 @@
   display: block;
 }
 
+/* 弹窗作品展示 */
+.modal-works {
+  margin-bottom: 30rpx;
+}
+
+.works-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.works-scroll {
+  width: 100%;
+}
+
+.works-list {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  padding-right: 24rpx;
+}
+
+.work-image {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 2rpx solid #F3F4F6;
+}
+
 /* 弹窗预约按钮 */
 .modal-book-btn {
   background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);

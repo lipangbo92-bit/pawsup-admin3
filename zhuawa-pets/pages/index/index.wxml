@@ -128,6 +128,25 @@
         <text class="desc-title">个人简介</text>
         <text class="desc-content">{{selectedTechnician.intro}}</text>
       </view>
+      
+      <!-- 作品展示 -->
+      <view class="modal-works" wx:if="{{selectedTechnician.works && selectedTechnician.works.length > 0}}">
+        <text class="works-title">作品展示</text>
+        <scroll-view class="works-scroll" scroll-x="true">
+          <view class="works-list">
+            <image 
+              wx:for="{{selectedTechnician.works}}" 
+              wx:key="index"
+              src="{{item}}" 
+              mode="aspectFill"
+              class="work-image"
+              bindtap="previewWork"
+              data-url="{{item}}"
+            />
+          </view>
+        </scroll-view>
+      </view>
+      
       <view class="modal-book-btn" bindtap="bookFromModal">立即预约</view>
     </view>
   </view>

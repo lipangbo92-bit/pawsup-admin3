@@ -73,7 +73,8 @@ Page({
             rating: item.rating || 5,
             orders: item.orders || 0,
             avatar: item.avatar || '',
-            intro: item.introduction || '专业宠物美容师'
+            intro: item.introduction || '专业宠物美容师',
+            works: item.works || [] // 作品照片数组
           };
         });
       }
@@ -128,6 +129,16 @@ Page({
   },
 
   preventBubble() { return; },
+
+  // 预览作品图片
+  previewWork(e) {
+    const url = e.currentTarget.dataset.url;
+    const works = this.data.selectedTechnician.works || [];
+    wx.previewImage({
+      current: url,
+      urls: works
+    });
+  },
 
   // 从卡片预约美容师
   bookTechnician(e) {
