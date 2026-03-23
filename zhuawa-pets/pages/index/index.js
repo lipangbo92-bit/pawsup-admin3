@@ -144,13 +144,41 @@ Page({
   },
 
   // 显示美容师详情弹窗
-  showTechnicianDetail(e) {
+  async showTechnicianDetail(e) {
     const index = e.currentTarget.dataset.index;
     const technician = this.data.technicians[index];
+    
+    // 显示弹窗，先显示基本信息
     this.setData({
       showModal: true,
       selectedTechnician: technician
     });
+    
+    // 单独获取美容师详情（包括作品图片）
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'technicians-api',
+        data: { 
+          action: 'get',
+          id: technician.id
+        }
+      });
+      
+      if (res.result && res.result.success && res.result.data) {
+        const detail = res.result.data;
+        // 更新选中的美容师，包含完整的作品图片
+        this.setData({
+          selectedTechnician: {
+            ...technician,
+            works: detail.works || [],
+            avatar: detail.avatar || detail.avatarUrl || technician.avatar,
+            introduction: detail.introduction || detail.specialty || technician.intro
+          }
+        });
+      }
+    } catch (err) {
+      console.error('获取美容师详情失败:', err);
+    }
   },
 
   closeModal() {

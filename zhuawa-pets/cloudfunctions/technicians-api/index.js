@@ -40,26 +40,9 @@ exports.main = async (event, context) => {
               processed.avatar = avatar;
             }
             
-            // 处理作品图片：过滤掉过大的 base64（超过 200KB）
-            if (item.works && item.works.length > 0) {
-              console.log(`[technicians-api] 处理 ${item.works.length} 张作品图片`);
-              processed.works = item.works.filter((work, index) => {
-                if (!work) return false;
-                const workSize = Math.round(work.length / 1024);
-                const isBase64 = work.startsWith('data:');
-                console.log(`[technicians-api] 作品${index + 1}: ${workSize} KB, ${isBase64 ? 'base64' : 'url'}`);
-                
-                // 如果是 base64 且超过 300KB，过滤掉
-                if (work.length > 420000 && isBase64) {
-                  console.log(`[technicians-api] 作品${index + 1} base64 过大(${workSize}KB > 300KB)，过滤`);
-                  return false;
-                }
-                return true;
-              }).slice(0, 6); // 最多返回6张
-              console.log(`[technicians-api] 最终保留 ${processed.works.length} 张作品图片`);
-            } else {
-              processed.works = [];
-            }
+            // 列表接口不返回作品图片，避免超过 1MB 限制
+            // 作品图片在获取详情时单独返回
+            processed.works = [];
             
             return processed;
           });
