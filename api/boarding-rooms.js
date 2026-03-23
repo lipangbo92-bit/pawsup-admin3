@@ -282,7 +282,10 @@ async function deleteRoomType(id) {
 
 // 批量生成房间
 async function generateRooms(data) {
-  const { typeId, count, prefix = '' } = data || {};
+  // 兼容前端直接传参或放在 data 对象中
+  const typeId = data?.typeId || data?.data?.typeId;
+  const count = data?.count || data?.data?.count;
+  const prefix = data?.prefix || data?.data?.prefix || '';
 
   if (!typeId) {
     return { success: false, error: 'Missing typeId parameter' };
@@ -333,7 +336,9 @@ async function generateRooms(data) {
 
 // 获取房间状态
 async function getRoomStatus(data) {
-  const { typeId, date } = data || {};
+  // 兼容前端直接传参或放在 data 对象中
+  const typeId = data?.typeId || data?.data?.typeId;
+  const date = data?.date || data?.data?.date;
 
   if (!typeId) {
     return { success: false, error: 'Missing typeId parameter' };
