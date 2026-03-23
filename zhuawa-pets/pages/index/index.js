@@ -99,7 +99,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'services-api',
-        data: { action: 'list' }
+        data: { action: 'getHotServices' }
       });
 
       if (res.result && res.result.success && res.result.data) {

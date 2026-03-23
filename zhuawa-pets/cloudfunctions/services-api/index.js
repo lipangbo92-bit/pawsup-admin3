@@ -15,6 +15,11 @@ exports.main = async (event, context) => {
         const listResult = await db.collection('services').get();
         console.log('查询结果:', listResult);
         return { success: true, data: listResult.data, count: listResult.data.length };
+      case 'getHotServices':
+        console.log('执行 getHotServices 操作');
+        const hotResult = await db.collection('services').where({ isHot: true }).get();
+        console.log('热门服务查询结果:', hotResult);
+        return { success: true, data: hotResult.data, count: hotResult.data.length };
       case 'add':
         const addResult = await db.collection('services').add({ data: {...body.data, createTime: db.serverDate()} });
         return { success: true, id: addResult._id };

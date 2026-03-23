@@ -32,7 +32,8 @@ async function loadServices() {
             category: s.category || '狗狗洗护',
             price: s.price || 0,
             duration: s.duration || 60,
-            image: s.image || ''
+            image: s.image || '',
+            isHot: s.isHot || false
         }));
         renderServicesGrid(servicesList);
     } catch (error) {
@@ -49,12 +50,12 @@ function renderServicesGrid(services) {
         return;
     }
     container.innerHTML = services.map(s => `
-        <div class="service-card" style="display:flex;padding:16px;background:#fff;border-radius:8px;margin-bottom:12px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <div class="service-card" style="display:flex;padding:16px;background:#fff;border-radius:8px;margin-bottom:12px;box-shadow:0 2px 4px rgba(0,0,0,0.1);${s.isHot ? 'border-left:4px solid #F97316;' : ''}">
             <div style="width:80px;height:80px;border-radius:8px;overflow:hidden;background:#f5f5f5;margin-right:16px;">
                 ${s.image ? `<img src="${s.image}" style="width:100%;height:100%;object-fit:cover;">` : '<span style="font-size:40px;display:flex;align-items:center;justify-content:center;height:100%;">🛁</span>'}
             </div>
             <div style="flex:1;">
-                <h4 style="margin:0 0 4px;">${s.name}</h4>
+                <h4 style="margin:0 0 4px;">${s.name} ${s.isHot ? '<span style="background:linear-gradient(135deg,#F97316,#EA580C);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;margin-left:8px;">🔥 热门</span>' : ''}</h4>
                 <span style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:12px;">${s.category}</span>
                 <p style="color:#999;font-size:13px;margin:8px 0;">${s.description || '暂无描述'}</p>
                 <span style="color:#F97316;font-weight:bold;">¥${s.price}</span>
@@ -105,6 +106,7 @@ function editService(serviceId) {
     document.getElementById('serviceDuration').value = currentService.duration || 60;
     document.getElementById('serviceCategory').value = currentService.category || '';
     document.getElementById('serviceDesc').value = currentService.description || '';
+    document.getElementById('serviceIsHot').checked = currentService.isHot || false;
     if (currentService.image) {
         serviceImageBase64 = currentService.image;
         document.getElementById('serviceImagePreview').innerHTML = `<img src="${currentService.image}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -124,8 +126,9 @@ async function saveService() {
     if (!name) { alert('请输入名称'); return; }
     if (!price || price <= 0) { alert('请输入价格'); return; }
     if (!category) { alert('请选择分类'); return; }
+    const isHot = document.getElementById('serviceIsHot').checked;
     try {
-        const data = { name, price, duration, category, description };
+        const data = { name, price, duration, category, description, isHot };
         if (serviceImageBase64) data.image = serviceImageBase64;
         if (currentService) {
             await apiCall('services', { action: 'update', id: currentService._id, data });
