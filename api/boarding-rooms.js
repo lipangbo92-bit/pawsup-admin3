@@ -43,10 +43,10 @@ module.exports = async (req, res) => {
         result = await deleteRoomType(id);
         break;
       case 'generateRooms':
-        result = await generateRooms(data);
+        result = await generateRooms(req.body);
         break;
       case 'getRoomStatus':
-        result = await getRoomStatus(data);
+        result = await getRoomStatus(req.body);
         break;
       default:
         result = { success: false, error: 'Unknown action: ' + action };
@@ -336,9 +336,13 @@ async function generateRooms(data) {
 
 // 获取房间状态
 async function getRoomStatus(data) {
+  console.log('[getRoomStatus] Received data:', JSON.stringify(data));
+  
   // 兼容前端直接传参或放在 data 对象中
   const typeId = data?.typeId || data?.data?.typeId;
   const date = data?.date || data?.data?.date;
+  
+  console.log('[getRoomStatus] Extracted typeId:', typeId, 'date:', date);
 
   if (!typeId) {
     return { success: false, error: 'Missing typeId parameter' };
