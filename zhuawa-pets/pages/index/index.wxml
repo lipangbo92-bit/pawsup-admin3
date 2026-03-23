@@ -90,7 +90,14 @@
     </view>
     <view class="hot-service-list">
       <view wx:for="{{services}}" wx:key="index" class="hot-service-item" bindtap="goToBooking" data-id="{{item.id}}">
-        <view class="hot-service-icon">🐾</view>
+        <view class="hot-service-icon">
+          <block wx:if="{{item.image}}">
+            <image src="{{item.image}}" mode="aspectFill" style="width:100%;height:100%;border-radius:20rpx;"/>
+          </block>
+          <block wx:else>
+            {{item.icon}}
+          </block>
+        </view>
         <text class="hot-service-name">{{item.name}}</text>
         <text class="hot-service-price">¥{{item.price}}起</text>
       </view>

@@ -124,6 +124,7 @@ Page({
           name: item.name,
           price: item.price,
           icon: this.getServiceIcon(item.category),
+          image: item.image || '',  // 添加图片字段
           duration: item.duration || 60
         }));
       }
