@@ -29,9 +29,12 @@ exports.main = async (event, context) => {
             
             // 处理头像：如果是 base64 过大（超过 100KB），清空
             const avatar = item.avatar || item.avatarUrl || '';
-            if (avatar && avatar.length > 140000 && avatar.startsWith('data:')) {
-              // 140000 字符 ≈ 100KB base64
-              console.log('[technicians-api] 头像 base64 过大，清空:', item._id);
+            const avatarSize = avatar ? Math.round(avatar.length / 1024) : 0;
+            console.log(`[technicians-api] 头像大小: ${avatarSize} KB, 类型: ${avatar.startsWith('data:') ? 'base64' : 'url'}`);
+            
+            if (avatar && avatar.length > 200000 && avatar.startsWith('data:')) {
+              // 200000 字符 ≈ 150KB base64
+              console.log(`[technicians-api] 头像 base64 过大(${avatarSize}KB > 150KB)，清空:`, item._id);
               processed.avatar = '';
             } else {
               processed.avatar = avatar;
@@ -39,15 +42,21 @@ exports.main = async (event, context) => {
             
             // 处理作品图片：过滤掉过大的 base64（超过 200KB）
             if (item.works && item.works.length > 0) {
-              processed.works = item.works.filter(work => {
+              console.log(`[technicians-api] 处理 ${item.works.length} 张作品图片`);
+              processed.works = item.works.filter((work, index) => {
                 if (!work) return false;
-                // 如果是 base64 且超过 200KB，过滤掉
-                if (work.length > 280000 && work.startsWith('data:')) {
-                  console.log('[technicians-api] 作品图片 base64 过大，过滤');
+                const workSize = Math.round(work.length / 1024);
+                const isBase64 = work.startsWith('data:');
+                console.log(`[technicians-api] 作品${index + 1}: ${workSize} KB, ${isBase64 ? 'base64' : 'url'}`);
+                
+                // 如果是 base64 且超过 300KB，过滤掉
+                if (work.length > 420000 && isBase64) {
+                  console.log(`[technicians-api] 作品${index + 1} base64 过大(${workSize}KB > 300KB)，过滤`);
                   return false;
                 }
                 return true;
               }).slice(0, 6); // 最多返回6张
+              console.log(`[technicians-api] 最终保留 ${processed.works.length} 张作品图片`);
             } else {
               processed.works = [];
             }
