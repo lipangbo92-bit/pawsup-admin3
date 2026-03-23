@@ -210,12 +210,38 @@
   border-radius: 8rpx;
 }
 
+/* 默认 - 金色 */
 .technician-badge {
-  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
   color: #FFFFFF;
   font-size: 20rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+}
+
+/* 初级 - 绿色 */
+.badge-初级 {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+}
+
+/* 中级 - 蓝色 */
+.badge-中级 {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+}
+
+/* 高级 - 紫色 */
+.badge-高级 {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%) !important;
+}
+
+/* 资深 - 橙色 */
+.badge-资深 {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+}
+
+/* 首席 - 红色 */
+.badge-首席 {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
 }
 
 /* 第二排：评分和订单数 */
