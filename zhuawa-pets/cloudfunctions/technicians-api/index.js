@@ -23,33 +23,36 @@ exports.main = async (event, context) => {
           const listResult = await db.collection('technicians').get();
           console.log('[technicians-api] 查询结果条数:', listResult.data ? listResult.data.length : 0);
           
-          // 处理数据，避免返回过大的 base64 图片
+          // 处理数据，过滤掉过大的 base64 图片
           const processedData = (listResult.data || []).map(item => {
-            // 如果 avatar 是 base64 且过大，截断或替换
-            let avatar = item.avatar || item.avatarUrl || '';
-            if (avatar && avatar.length > 1000) {
-              console.log('[technicians-api] 头像数据过大，长度:', avatar.length);
-              // 保留前100个字符作为标识，或者使用占位符
-              avatar = avatar.substring(0, 100) + '...(truncated)';
+            const processed = { ...item };
+            
+            // 处理头像：如果是 base64 过大（超过 100KB），清空
+            const avatar = item.avatar || item.avatarUrl || '';
+            if (avatar && avatar.length > 140000 && avatar.startsWith('data:')) {
+              // 140000 字符 ≈ 100KB base64
+              console.log('[technicians-api] 头像 base64 过大，清空:', item._id);
+              processed.avatar = '';
+            } else {
+              processed.avatar = avatar;
             }
             
-            // 处理作品图片
-            let works = item.works || [];
-            if (works.length > 0) {
-              works = works.map((work, index) => {
-                if (work && work.length > 1000) {
-                  console.log('[technicians-api] 作品图片过大，索引:', index);
-                  return work.substring(0, 100) + '...(truncated)';
+            // 处理作品图片：过滤掉过大的 base64（超过 200KB）
+            if (item.works && item.works.length > 0) {
+              processed.works = item.works.filter(work => {
+                if (!work) return false;
+                // 如果是 base64 且超过 200KB，过滤掉
+                if (work.length > 280000 && work.startsWith('data:')) {
+                  console.log('[technicians-api] 作品图片 base64 过大，过滤');
+                  return false;
                 }
-                return work;
-              });
+                return true;
+              }).slice(0, 6); // 最多返回6张
+            } else {
+              processed.works = [];
             }
             
-            return {
-              ...item,
-              avatar,
-              works
-            };
+            return processed;
           });
           
           return {
