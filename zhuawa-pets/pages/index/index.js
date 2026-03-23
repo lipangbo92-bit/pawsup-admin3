@@ -20,12 +20,23 @@ Page({
 
   async loadData() {
     try {
+      console.log('[loadData] 开始加载数据');
       const [techsRes, servicesRes] = await Promise.all([
         this.loadTechnicians(),
         this.loadServices()
       ]);
+      
+      console.log('[loadData] 美容师数据:', techsRes);
+      console.log('[loadData] 服务数据:', servicesRes);
 
-      const technicians = techsRes.length > 0 ? techsRes : this.getLocalTechnicians();
+      // 强制使用云函数返回的数据，不再使用本地后备数据
+      const technicians = techsRes;
+      console.log('[loadData] 最终使用的美容师数据:', technicians);
+      
+      // 如果云函数返回空数组，显示提示
+      if (techsRes.length === 0) {
+        console.warn('[loadData] 警告：云函数返回空数组，数据库中可能没有数据');
+      }
 
       this.setData({
         technicians: technicians,
@@ -84,7 +95,7 @@ Page({
             rating: item.rating || 5,
             orders: item.orders || 0,
             avatar: item.avatar || '',
-            intro: item.introduction || '专业宠物美容师',
+            intro: item.introduction || item.specialty || '专业宠物美容师',
             works: item.works || [] // 作品照片数组
           };
         });
@@ -97,12 +108,15 @@ Page({
 
   async loadServices() {
     try {
+      console.log('[loadServices] 开始加载热门服务');
       const res = await wx.cloud.callFunction({
         name: 'services-api',
         data: { action: 'getHotServices' }
       });
+      console.log('[loadServices] 云函数返回:', res);
 
       if (res.result && res.result.success && res.result.data) {
+        console.log('[loadServices] 获取到热门服务数量:', res.result.data.length);
         return res.result.data.map(item => ({
           id: item._id,
           name: item.name,
@@ -111,8 +125,10 @@ Page({
           duration: item.duration || 60
         }));
       }
+      console.log('[loadServices] 没有获取到热门服务数据:', res.result);
       return [];
     } catch (err) {
+      console.error('[loadServices] 加载失败:', err);
       return [];
     }
   },

@@ -146,7 +146,7 @@ function renderTechniciansGrid(technicians) {
     container.innerHTML = technicians.map(tech => `
         <div class="technician-card">
             <div class="tech-avatar">
-                ${(tech.avatar || tech.avatarUrl) ? `<img src="${tech.avatar || tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
+                ${tech.avatar ? `<img src="${tech.avatar}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
@@ -155,10 +155,10 @@ function renderTechniciansGrid(technicians) {
                     ${getLevelBadge(tech.level)}
                 </div>
                 <div class="tech-rating">${'⭐'.repeat(tech.rating || 0)}</div>
-                <p class="tech-specialty">专业：${tech.specialty || tech.introduction || '暂无'}</p>
+                <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
                 ${renderWorksPreview(tech.works)}
                 <div class="tech-meta">
-                    <span class="tech-orders">订单数：${tech.orders || tech.orderCount || 0}</span>
+                    <span class="tech-orders">订单数：${tech.orders || 0}</span>
                 </div>
             </div>
             <div class="tech-actions">
@@ -196,20 +196,19 @@ function editTechnician(techId) {
     document.getElementById('technicianModalTitle').textContent = '编辑美容师';
     document.getElementById('technicianId').value = currentTechnician._id;
     document.getElementById('techName').value = currentTechnician.name || '';
-    document.getElementById('techSpecialty').value = currentTechnician.specialty || currentTechnician.introduction || '';
+    document.getElementById('techSpecialty').value = currentTechnician.specialty || '';
     document.getElementById('techPosition').value = currentTechnician.position || '美容师';
     document.getElementById('techLevel').value = currentTechnician.level || '中级';
     document.getElementById('techRating').value = currentTechnician.rating || '';
-    document.getElementById('techOrderCount').value = currentTechnician.orders || currentTechnician.orderCount || '';
+    document.getElementById('techOrderCount').value = currentTechnician.orders || '';
     
     worksImages = currentTechnician.works || [];
     renderWorksGrid();
     
     document.getElementById('avatarInput').value = '';
     
-    const avatarUrl = currentTechnician.avatar || currentTechnician.avatarUrl;
-    if (avatarUrl) {
-        document.getElementById('avatarPreview').innerHTML = `<img src="${avatarUrl}" alt="头像">`;
+    if (currentTechnician.avatar) {
+        document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatar}" alt="头像">`;
     } else {
         document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     }
@@ -349,29 +348,29 @@ async function saveTechnician() {
     if (saveBtn) saveBtn.textContent = '上传中...';
     
     try {
-        let avatarUrl = '';
+        let avatar = '';
         
         // 如果有旧头像，先保留
-        if (currentTechnician && currentTechnician.avatarUrl) {
-            avatarUrl = currentTechnician.avatarUrl;
+        if (currentTechnician && (currentTechnician.avatar || currentTechnician.avatarUrl)) {
+            avatar = currentTechnician.avatar || currentTechnician.avatarUrl;
         }
         
         // 如果有新头像，上传到云存储
         if (currentTechnician && currentTechnician._tempAvatar) {
             console.log('检测到新头像，开始上传...');
-            avatarUrl = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
-            console.log('头像上传完成:', avatarUrl);
+            avatar = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
+            console.log('头像上传完成:', avatar);
         }
         
         const techData = {
             name,
-            introduction: specialty,  // 统一字段名：小程序用 introduction
+            specialty,
             position,
             level,
             rating,
             orders: orderCount,
             works: worksImages,
-            avatar: avatarUrl  // 统一字段名：小程序用 avatar
+            avatar: avatar
         };
         
         console.log('保存数据:', techData);
