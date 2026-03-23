@@ -136,8 +136,10 @@ function renderRooms() {
                 </span>
             </td>
             <td>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button class="btn-edit" onclick="editRoom('${room.id}')">编辑</button>
+                    <button class="btn-secondary" onclick="openGenerateModal('${room.id}', '${room.name}', ${room.roomCount || 0})">生成房间</button>
+                    <button class="btn-secondary" onclick="openStatusModal('${room.id}', '${room.name}')">查看状态</button>
                     <button class="btn-delete" onclick="deleteRoom('${room.id}')">删除</button>
                 </div>
             </td>
@@ -425,4 +427,227 @@ function showSuccess(message) {
 function logout() {
     localStorage.removeItem('adminToken');
     window.location.href = 'index.html';
+}
+
+// ==================== 生成房间功能 ====================
+
+let currentGenerateRoomTypeId = null;
+
+// 打开生成房间模态框
+function openGenerateModal(roomTypeId, roomTypeName, existingCount) {
+    currentGenerateRoomTypeId = roomTypeId;
+    document.getElementById('generateRoomTypeName').textContent = roomTypeName;
+    document.getElementById('existingRoomCount').textContent = existingCount;
+    document.getElementById('roomPrefix').value = '';
+    document.getElementById('generateCount').value = '1';
+    document.getElementById('generatePreview').innerHTML = '<span style="color: #9CA3AF;">输入数量后预览生成的房间号...</span>';
+    document.getElementById('generateModal').classList.add('show');
+}
+
+// 关闭生成房间模态框
+function closeGenerateModal() {
+    document.getElementById('generateModal').classList.remove('show');
+    currentGenerateRoomTypeId = null;
+}
+
+// 预览生成的房间号
+function previewGeneratedRooms() {
+    const prefix = document.getElementById('roomPrefix').value.trim();
+    const count = parseInt(document.getElementById('generateCount').value) || 0;
+    const existingCount = parseInt(document.getElementById('existingRoomCount').textContent) || 0;
+    
+    if (count <= 0 || count > 50) {
+        document.getElementById('generatePreview').innerHTML = '<span style="color: #EF4444;">请输入 1-50 之间的数量</span>';
+        return;
+    }
+    
+    const previewNumbers = [];
+    for (let i = 1; i <= Math.min(count, 10); i++) {
+        previewNumbers.push(`${prefix}${existingCount + i}`);
+    }
+    
+    let html = '<div style="color: #6B7280; margin-bottom: 8px;">预览：</div>';
+    html += '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
+    previewNumbers.forEach(num => {
+        html += `<span style="background: #F3F4F6; padding: 4px 12px; border-radius: 4px; font-size: 14px;">${num}</span>`;
+    });
+    if (count > 10) {
+        html += `<span style="color: #9CA3AF; font-size: 14px;">... 还有 ${count - 10} 个</span>`;
+    }
+    html += '</div>';
+    
+    document.getElementById('generatePreview').innerHTML = html;
+}
+
+// 确认生成房间
+async function confirmGenerateRooms() {
+    if (!currentGenerateRoomTypeId) return;
+    
+    const prefix = document.getElementById('roomPrefix').value.trim();
+    const count = parseInt(document.getElementById('generateCount').value);
+    
+    if (!count || count <= 0) {
+        alert('请输入有效的房间数量');
+        return;
+    }
+    
+    try {
+        const result = await apiCall('boarding-rooms', {
+            action: 'generateRooms',
+            typeId: currentGenerateRoomTypeId,
+            count: count,
+            prefix: prefix
+        });
+        
+        if (result.success) {
+            showSuccess(`成功生成 ${result.createdCount} 个房间`);
+            closeGenerateModal();
+            await loadRooms();
+        } else {
+            alert('生成房间失败: ' + (result.error || '未知错误'));
+        }
+    } catch (error) {
+        console.error('生成房间失败:', error);
+        alert('生成房间失败: ' + error.message);
+    }
+}
+
+// ==================== 房间状态查看功能 ====================
+
+let currentStatusRoomTypeId = null;
+let currentStatusDate = new Date();
+
+// 打开房间状态模态框
+function openStatusModal(roomTypeId, roomTypeName) {
+    currentStatusRoomTypeId = roomTypeId;
+    document.getElementById('statusRoomTypeName').textContent = roomTypeName;
+    
+    // 设置日期选择器为今天
+    document.getElementById('statusDatePicker').value = formatDateForInput(currentStatusDate);
+    updateStatusDateDisplay();
+    
+    document.getElementById('statusModal').classList.add('show');
+    loadRoomStatus();
+}
+
+// 关闭房间状态模态框
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.remove('show');
+    currentStatusRoomTypeId = null;
+}
+
+// 格式化日期为 input 格式
+function formatDateForInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// 更新日期显示
+function updateStatusDateDisplay() {
+    const dateStr = formatDateForInput(currentStatusDate);
+    const weekDay = ['日', '一', '二', '三', '四', '五', '六'][currentStatusDate.getDay()];
+    document.getElementById('statusDateDisplay').textContent = `${dateStr} 周${weekDay}`;
+}
+
+// 切换日期
+function changeStatusDate(days) {
+    currentStatusDate.setDate(currentStatusDate.getDate() + days);
+    document.getElementById('statusDatePicker').value = formatDateForInput(currentStatusDate);
+    updateStatusDateDisplay();
+    loadRoomStatus();
+}
+
+// 日期选择器变化
+function onStatusDateChange() {
+    const dateStr = document.getElementById('statusDatePicker').value;
+    if (dateStr) {
+        currentStatusDate = new Date(dateStr);
+        updateStatusDateDisplay();
+        loadRoomStatus();
+    }
+}
+
+// 加载房间状态
+async function loadRoomStatus() {
+    const grid = document.getElementById('statusRoomsGrid');
+    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #9CA3AF;">加载中...</div>';
+    
+    try {
+        const dateStr = formatDateForInput(currentStatusDate);
+        
+        const result = await apiCall('boarding-rooms', {
+            action: 'getRoomStatus',
+            typeId: currentStatusRoomTypeId,
+            date: dateStr
+        });
+        
+        if (result.success) {
+            renderRoomStatus(result.rooms || []);
+        } else {
+            grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #EF4444;">加载失败: ${result.error || '未知错误'}</div>`;
+        }
+    } catch (error) {
+        console.error('加载房间状态失败:', error);
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #EF4444;">加载失败: ${error.message}</div>`;
+    }
+}
+
+// 渲染房间状态
+function renderRoomStatus(rooms) {
+    const grid = document.getElementById('statusRoomsGrid');
+    
+    if (rooms.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #9CA3AF;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🏠</div>
+                <div>暂无房间数据</div>
+                <div style="font-size: 14px; margin-top: 8px;">请先点击"生成房间"创建房间</div>
+            </div>
+        `;
+        return;
+    }
+    
+    // 按房间号排序
+    rooms.sort((a, b) => a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true }));
+    
+    grid.innerHTML = rooms.map(room => {
+        const statusColors = {
+            'available': '#10B981',
+            'occupied': '#EF4444',
+            'checkin': '#F59E0B',
+            'checkout': '#8B5CF6',
+            'maintenance': '#6B7280'
+        };
+        
+        const statusTexts = {
+            'available': '空闲',
+            'occupied': '入住中',
+            'checkin': '今日入住',
+            'checkout': '今日退房',
+            'maintenance': '维护中'
+        };
+        
+        const color = statusColors[room.status] || '#6B7280';
+        const text = statusTexts[room.status] || '未知';
+        
+        let petInfo = '';
+        if (room.petName) {
+            petInfo = `
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E7EB; font-size: 12px; color: #6B7280;">
+                    <div style="font-weight: 600; color: #374151;">${room.petName}</div>
+                    <div>${room.checkinDate || ''} - ${room.checkoutDate || ''}</div>
+                </div>
+            `;
+        }
+        
+        return `
+            <div style="background: white; border: 2px solid ${color}; border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 18px; font-weight: 700; color: #1F2937; margin-bottom: 8px;">${room.roomNumber}</div>
+                <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; background: ${color}20; color: ${color};">${text}</span>
+                ${petInfo}
+            </div>
+        `;
+    }).join('');
 }
