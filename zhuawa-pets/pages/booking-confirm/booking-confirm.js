@@ -35,17 +35,23 @@ Page({
     if (options.info) {
       try {
         const info = JSON.parse(decodeURIComponent(options.info));
+        console.log('booking-confirm received info:', info);
+        
+        // 确保宠物信息完整，不使用默认值
+        const petInfo = info.pet && info.pet.id ? info.pet : null;
+        
         this.setData({
           info: {
-            ...this.data.info,
-            ...info,
-            service: { ...this.data.info.service, ...(info.service || {}) },
-            technician: { ...this.data.info.technician, ...(info.technician || {}) },
-            pet: { ...this.data.info.pet, ...(info.pet || {}) },
-            date: { ...this.data.info.date, ...(info.date || {}) },
-            totalPrice: info.service?.price || 99
+            service: info.service || this.data.info.service,
+            technician: info.technician || this.data.info.technician,
+            pet: petInfo,
+            date: info.date || this.data.info.date,
+            time: info.time || this.data.info.time,
+            totalPrice: info.service?.price || info.totalPrice || 99
           }
         });
+        
+        console.log('booking-confirm set info:', this.data.info);
       } catch (e) {
         console.error('解析预约信息失败:', e);
       }

@@ -376,7 +376,13 @@ Page({
     }
 
     // 路径1/3：跳转到 booking-time-1
-    const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${service.id}`;
+    const petInfo = encodeURIComponent(JSON.stringify({
+      _id: pet._id,
+      name: pet.name,
+      type: pet.type,
+      breed: pet.breed
+    }));
+    const url = `/pages/booking-time-1/booking-time-1?mode=path3&petInfo=${petInfo}&serviceId=${service.id}`;
     wx.navigateTo({ url });
   },
 

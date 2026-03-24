@@ -38,7 +38,16 @@ Page({
     }
     
     // 解析宠物信息
-    if (options.petId) {
+    if (options.petInfo) {
+      try {
+        const petInfo = JSON.parse(decodeURIComponent(options.petInfo));
+        this.setData({ selectedPet: petInfo });
+        console.log('booking-time-1 received pet:', petInfo);
+      } catch (e) {
+        console.error('解析宠物信息失败:', e);
+      }
+    } else if (options.petId) {
+      // 兼容旧版参数
       this.setData({ 
         selectedPet: {
           _id: options.petId,
