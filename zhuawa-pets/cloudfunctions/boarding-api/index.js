@@ -17,6 +17,8 @@ exports.main = async (event, context) => {
         return await getRoomTypes(event.petType);
       case 'getRoomType':
         return await getRoomType(event.id);
+      case 'getRooms':
+        return await getRoomTypes(event.petType);
       case 'checkAvailability':
         return await checkAvailability(event.roomTypeId, event.checkinDate, event.checkoutDate);
       case 'createOrder':
@@ -77,7 +79,9 @@ async function getRoomTypes(petType) {
         images: roomType.images || [],
         description: roomType.description,
         totalRooms: totalRooms,
-        availableRooms: totalRooms // 默认可用等于总数，实际需根据日期计算
+        availableRooms: totalRooms, // 兼容旧字段
+        availableCount: totalRooms, // 小程序前端使用的字段
+        roomCount: totalRooms // 兼容旧字段
       };
     })
   );

@@ -42,88 +42,68 @@ exports.main = async (event, context) => {
 
 // 创建订单
 async function createOrder(data) {
+  console.log('createOrder start');
+
   // 验证必填字段
   const requiredFields = ['userId', 'orderType', 'serviceId', 'serviceName', 'servicePrice', 'totalPrice'];
   for (const field of requiredFields) {
     if (!data[field]) {
-      return { success: false, error: `Missing required field: ${field}` };
+      return { success: false, error: `缺少必填字段: ${field}` };
     }
   }
 
   // 生成订单号
   const orderNo = generateOrderNo(data.orderType);
 
-  // 构建订单数据
+  // 构建基础订单数据
   const orderData = {
     orderNo: orderNo,
-    orderType: data.orderType, // service, boarding, visiting
-    
-    // 用户信息
+    orderType: data.orderType,
     userId: data.userId,
     customerName: data.customerName || '',
     customerPhone: data.customerPhone || '',
-    
-    // 宠物信息
     petId: data.petId || '',
     petName: data.petName || '',
     petType: data.petType || '',
     petBreed: data.petBreed || '',
-    
-    // 服务信息
     serviceId: data.serviceId,
     serviceName: data.serviceName,
     servicePrice: data.servicePrice,
-    
-    // 根据订单类型设置不同字段
-    ...(data.orderType === 'boarding' && {
-      roomId: data.roomId || '',
-      roomName: data.roomName || '',
-      checkinDate: data.checkinDate || '',
-      checkoutDate: data.checkoutDate || '',
-      nightCount: data.nightCount || 1,
-      petCount: data.petCount || 1
-    }),
-    
-    ...(data.orderType === 'visiting' && {
-      address: data.address || '',
-      latitude: data.latitude || null,
-      longitude: data.longitude || null,
-      serviceDate: data.serviceDate || '',
-      serviceTime: data.serviceTime || '',
-      serviceItems: data.serviceItems || [],
-      contactName: data.contactName || '',
-      contactPhone: data.contactPhone || '',
-      petLocation: data.petLocation || '',
-      specialNotes: data.specialNotes || ''
-    }),
-    
-    ...(data.orderType === 'service' && {
-      appointmentDate: data.appointmentDate || '',
-      appointmentTime: data.appointmentTime || '',
-      technicianId: data.technicianId || '',
-      technicianName: data.technicianName || ''
-    }),
-    
-    // 金额
     totalPrice: data.totalPrice,
     discount: data.discount || 0,
     finalPrice: data.finalPrice || data.totalPrice,
-    
-    // 状态
     status: 'pending',
     paymentStatus: 'unpaid',
-    
-    // 备注
     remark: data.remark || '',
-    
-    // 时间戳
     createTime: db.serverDate(),
     updateTime: db.serverDate()
   };
 
-  const result = await db.collection('orders').add({
-    data: orderData
-  });
+  // 根据订单类型添加特定字段
+  if (data.orderType === 'boarding') {
+    orderData.roomId = data.roomId || '';
+    orderData.roomName = data.roomName || '';
+    orderData.checkinDate = data.checkinDate || '';
+    orderData.checkoutDate = data.checkoutDate || '';
+    orderData.nightCount = data.nightCount || 1;
+    orderData.petCount = data.petCount || 1;
+  } else if (data.orderType === 'visiting') {
+    orderData.address = data.address || '';
+    orderData.serviceDate = data.serviceDate || '';
+    orderData.serviceTime = data.serviceTime || '';
+    orderData.serviceItems = data.serviceItems || [];
+    orderData.contactName = data.contactName || '';
+    orderData.contactPhone = data.contactPhone || '';
+  } else if (data.orderType === 'service') {
+    orderData.appointmentDate = data.appointmentDate || '';
+    orderData.appointmentTime = data.appointmentTime || '';
+    orderData.technicianId = data.technicianId || '';
+    orderData.technicianName = data.technicianName || '';
+  }
+
+  console.log('adding order to db');
+  const result = await db.collection('orders').add({ data: orderData });
+  console.log('order added:', result._id);
 
   return {
     success: true,

@@ -59,6 +59,7 @@
 .pet-card {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 16rpx 24rpx;
   background: #F9FAFB;
   border-radius: 16rpx;
@@ -71,6 +72,13 @@
 .pet-card.selected {
   background: #FFF7ED;
   border-color: #F97316;
+}
+
+/* 左侧主要内容区 */
+.pet-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
 .pet-avatar {
@@ -96,6 +104,27 @@
 .pet-info {
   flex: 1;
   margin-left: 20rpx;
+}
+
+/* 右侧操作按钮区 */
+.pet-actions {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  padding: 8rpx;
+}
+
+.action-text.edit,
+.action-text.delete {
+  color: #6B7280;
+}
+
+.action-text:active {
+  opacity: 0.6;
 }
 
 .pet-name {
@@ -173,6 +202,11 @@
   background: #FFFFFF;
 }
 
+.selector-footer.edit-footer {
+  display: flex;
+  gap: 24rpx;
+}
+
 .confirm-btn {
   width: 100%;
   height: 88rpx;
@@ -194,6 +228,12 @@
 
 .confirm-btn.active {
   background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+}
+
+.confirm-btn.delete {
+  width: 200rpx;
+  background: #F3F4F6;
+  color: #6B7280;
 }
 
 .confirm-btn::after {

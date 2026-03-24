@@ -198,22 +198,32 @@ Page({
       { name: '晚上', start: 18, end: 21 }
     ];
     
+    const selectedDate = this.data.dateList[this.data.selectedDateIndex];
+    const isToday = selectedDate && selectedDate.fullDate === new Date().toISOString().split('T')[0];
+    
     periods.forEach(period => {
       const times = [];
       for (let h = period.start; h < period.end; h++) {
+        const time1 = `${h.toString().padStart(2, '0')}:00`;
+        const time2 = `${h.toString().padStart(2, '0')}:30`;
+        
+        // 判断是否为今天且时间已过期
+        const disabled1 = isToday && !this.isValidBookingTime(selectedDate.fullDate, time1);
+        const disabled2 = isToday && !this.isValidBookingTime(selectedDate.fullDate, time2);
+        
         times.push({ 
-          time: `${h.toString().padStart(2, '0')}:00`, 
+          time: time1, 
           selected: false, 
-          disabled: false, 
-          status: '可约',
-          availableCount: 3 // 默认可约美容师数量
+          disabled: disabled1, 
+          status: disabled1 ? '已过期' : '可约',
+          availableCount: disabled1 ? 0 : 3
         });
         times.push({ 
-          time: `${h.toString().padStart(2, '0')}:30`, 
+          time: time2, 
           selected: false, 
-          disabled: false, 
-          status: '可约',
-          availableCount: 3
+          disabled: disabled2, 
+          status: disabled2 ? '已过期' : '可约',
+          availableCount: disabled2 ? 0 : 3
         });
       }
       slots.push({ period: period.name, times });
@@ -243,6 +253,15 @@ Page({
     const section = timeSections.find(s => s.period === period);
     if (!section || section.times[index].disabled) return;
     
+    const selectedTime = section.times[index].time;
+    const selectedDate = this.data.dateList[this.data.selectedDateIndex];
+    
+    // 校验预约时间不能早于当前时间
+    if (!this.isValidBookingTime(selectedDate.fullDate, selectedTime)) {
+      wx.showToast({ title: '预约时间不能早于当前时间', icon: 'none' });
+      return;
+    }
+    
     timeSections.forEach(s => {
       s.times.forEach(t => { t.selected = false; });
     });
@@ -251,8 +270,23 @@ Page({
     
     this.setData({
       timeSections,
-      selectedTime: section.times[index].time
+      selectedTime: selectedTime
     });
+  },
+
+  // 校验预约时间是否有效（不能早于当前时间）
+  isValidBookingTime(dateStr, timeStr) {
+    const now = new Date();
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    
+    // 构建预约时间的 Date 对象
+    const bookingDate = new Date(dateStr);
+    bookingDate.setHours(hours, minutes, 0, 0);
+    
+    // 预约时间必须晚于当前时间（至少提前30分钟）
+    const minBookingTime = new Date(now.getTime() + 30 * 60 * 1000);
+    
+    return bookingDate >= minBookingTime;
   },
 
   resetTimeSelection() {
@@ -291,17 +325,19 @@ Page({
       }
     }).then(res => {
       this.setData({ loadingTechnicians: false });
-      
+
       if (res.result && res.result.success) {
         const availableTechs = res.result.data;
         if (availableTechs.length === 0) {
           wx.showToast({ title: '该时段暂无可用美容师', icon: 'none' });
         }
+        // 只显示可约的美容师，如果没有则不显示任何美容师
         this.setData({
-          technicians: availableTechs.length > 0 ? availableTechs : this.data.technicians,
+          technicians: availableTechs,
           showTechnicianModal: true
         });
       } else {
+        // API调用失败，显示所有美容师（降级处理）
         this.setData({ showTechnicianModal: true });
       }
     }).catch(err => {

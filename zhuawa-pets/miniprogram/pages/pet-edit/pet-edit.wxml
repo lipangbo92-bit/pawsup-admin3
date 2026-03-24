@@ -1,0 +1,96 @@
+<!--pages/pet-edit/pet-edit.wxml-->
+<view class="container">
+  <!-- 头像上传 -->
+  <view class="avatar-section">
+    <view class="avatar-upload" bindtap="chooseAvatar">
+      <image wx:if="{{pet.avatar && !avatarError}}" class="avatar-img" src="{{pet.avatar}}" mode="aspectFill" binderror="onAvatarError"/>
+      <view wx:else class="avatar-placeholder">
+        <text class="avatar-emoji">{{pet.type === 'dog' ? '🐕' : pet.type === 'cat' ? '🐈' : '🐾'}}</text>
+        <text class="avatar-text">点击更换头像</text>
+      </view>
+      <view class="avatar-overlay">
+        <text class="camera-icon">📷</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 表单 -->
+  <view class="form-section">
+    <!-- 宠物名称 -->
+    <view class="form-item">
+      <text class="label required">宠物昵称</text>
+      <input class="input" placeholder="请输入宠物昵称" value="{{pet.name}}" bindinput="onNameInput"/>
+    </view>
+
+    <!-- 宠物类型 -->
+    <view class="form-item">
+      <text class="label required">宠物类型</text>
+      <view class="type-selector">
+        <view class="type-option {{pet.type === 'dog' ? 'active' : ''}}" bindtap="onTypeSelect" data-type="dog">
+          <text class="type-icon">🐕</text>
+          <text class="type-text">狗狗</text>
+        </view>
+        <view class="type-option {{pet.type === 'cat' ? 'active' : ''}}" bindtap="onTypeSelect" data-type="cat">
+          <text class="type-icon">🐈</text>
+          <text class="type-text">猫咪</text>
+        </view>
+        <view class="type-option {{pet.type === 'other' ? 'active' : ''}}" bindtap="onTypeSelect" data-type="other">
+          <text class="type-icon">🐾</text>
+          <text class="type-text">其他</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 品种 -->
+    <view class="form-item">
+      <text class="label">品种</text>
+      <input class="input" placeholder="如：金毛、布偶猫等" value="{{pet.breed}}" bindinput="onBreedInput"/>
+    </view>
+
+    <!-- 年龄 -->
+    <view class="form-item">
+      <text class="label">年龄</text>
+      <view class="age-selector">
+        <input class="input age-input" type="digit" placeholder="请输入" value="{{pet.age}}" bindinput="onAgeInput"/>
+        <text class="age-unit">岁</text>
+      </view>
+    </view>
+
+    <!-- 体重 -->
+    <view class="form-item">
+      <text class="label">体重</text>
+      <view class="weight-selector">
+        <input class="input weight-input" type="digit" placeholder="请输入" value="{{pet.weight}}" bindinput="onWeightInput"/>
+        <text class="weight-unit">kg</text>
+      </view>
+    </view>
+
+    <!-- 性别 -->
+    <view class="form-item">
+      <text class="label">性别</text>
+      <view class="gender-selector">
+        <view class="gender-option {{pet.gender === 'male' ? 'active' : ''}}" bindtap="onGenderSelect" data-gender="male">
+          <text class="gender-icon">♂</text>
+          <text class="gender-text">公</text>
+        </view>
+        <view class="gender-option {{pet.gender === 'female' ? 'active' : ''}}" bindtap="onGenderSelect" data-gender="female">
+          <text class="gender-icon">♀</text>
+          <text class="gender-text">母</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-item">
+      <text class="label">备注</text>
+      <textarea class="textarea" placeholder="如：性格特点、注意事项等" value="{{pet.notes}}" bindinput="onNotesInput" maxlength="200"/>
+      <text class="char-count">{{pet.notes ? pet.notes.length : 0}}/200</text>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <view class="delete-btn" bindtap="onDelete">删除宠物</view>
+    <view class="save-btn {{canSave ? 'active' : ''}}" bindtap="onSave">保存</view>
+  </view>
+</view>

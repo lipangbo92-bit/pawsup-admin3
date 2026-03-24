@@ -16,18 +16,25 @@
           wx:for="{{pets}}" 
           wx:key="_id"
           class="pet-card {{selectedPet && selectedPet._id === item._id ? 'selected' : ''}}"
-          data-index="{{index}}"
-          bindtap="onSelectPet"
         >
-          <view class="pet-avatar">
-            <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
-            <text wx:else class="pet-emoji">{{item.type === 'cat' ? '🐱' : '🐶'}}</text>
+          <!-- 左侧：点击选择宠物 -->
+          <view class="pet-main" data-index="{{index}}" bindtap="onSelectPet">
+            <view class="pet-avatar">
+              <image wx:if="{{item.avatar && !item.avatarError}}" src="{{item.avatar}}" mode="aspectFill" binderror="onAvatarError" data-index="{{index}}"/>
+              <text wx:else class="pet-emoji">{{item.type === 'cat' ? '🐱' : '🐶'}}</text>
+            </view>
+            <view class="pet-info">
+              <text class="pet-name">{{item.name}}</text>
+              <text class="pet-meta">{{item.breed}} · {{item.age}}岁 · {{item.gender === 'male' ? '弟弟' : '妹妹'}}</text>
+            </view>
           </view>
-          <view class="pet-info">
-            <text class="pet-name">{{item.name}}</text>
-            <text class="pet-meta">{{item.breed}} · {{item.age}}岁 · {{item.gender === 'male' ? '弟弟' : '妹妹'}}</text>
+          
+          <!-- 右侧：操作按钮 -->
+          <view class="pet-actions">
+            <text class="action-text edit" catchtap="onEditPet" data-id="{{item._id}}">编辑</text>
+            <text class="action-text delete" catchtap="onDeletePet" data-id="{{item._id}}" data-index="{{index}}">删除</text>
+            <view class="check-icon" wx:if="{{selectedPet && selectedPet._id === item._id}}">✓</view>
           </view>
-          <view class="check-icon" wx:if="{{selectedPet && selectedPet._id === item._id}}">✓</view>
         </view>
       </scroll-view>
       
@@ -124,6 +131,78 @@
       </view>
     </block>
     
+    <!-- 模式3：编辑宠物表单 -->
+    <block wx:if="{{mode === 'edit'}}">
+      <!-- 标题栏 -->
+      <view class="selector-header">
+        <text class="selector-title">编辑宠物</text>
+        <text class="selector-close" bindtap="onCloseEditForm">×</text>
+      </view>
+      
+      <!-- 紧凑表单 -->
+      <scroll-view class="add-form" scroll-y>
+        <!-- 头像和名称 -->
+        <view class="form-row">
+          <view class="avatar-upload" bindtap="onChooseEditAvatar">
+            <image wx:if="{{editPet.avatar && !editPet.avatarError}}" src="{{editPet.avatar}}" mode="aspectFill" binderror="onEditAvatarError"/>
+            <text wx:else class="upload-icon">{{editPet.type === 'dog' ? '🐕' : editPet.type === 'cat' ? '🐈' : '🐾'}}</text>
+          </view>
+          <view class="name-input-wrapper">
+            <text class="form-label required">宠物名称</text>
+            <input class="form-input" placeholder="请输入" value="{{editPet.name}}" bindinput="onEditPetNameInput"/>
+          </view>
+        </view>
+        
+        <!-- 类型和品种 -->
+        <view class="form-row">
+          <view class="half-field" bindtap="onShowEditTypePicker">
+            <text class="form-label required">类型</text>
+            <view class="picker-field">
+              <text class="{{editPet.type ? 'selected' : 'placeholder'}}">{{editPet.type ? editTypeLabel : '请选择'}}</text>
+              <text class="arrow">▼</text>
+            </view>
+          </view>
+          <view class="half-field" bindtap="onShowEditBreedPicker">
+            <text class="form-label required">品种</text>
+            <view class="picker-field">
+              <text class="{{editPet.breed ? 'selected' : 'placeholder'}}">{{editPet.breed || '请选择'}}</text>
+              <text class="arrow">▼</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 年龄、体重、性别 -->
+        <view class="form-row three-col">
+          <view class="third-field">
+            <text class="form-label required">年龄</text>
+            <input class="form-input small" type="digit" placeholder="几岁" value="{{editPet.age}}" bindinput="onEditPetAgeInput"/>
+          </view>
+          <view class="third-field">
+            <text class="form-label required">体重</text>
+            <input class="form-input small" placeholder="kg" value="{{editPet.weight}}" bindinput="onEditPetWeightInput"/>
+          </view>
+          <view class="third-field">
+            <text class="form-label required">性别</text>
+            <picker mode="selector" range="{{['弟弟', '妹妹']}}" bindchange="onEditPetGenderChange">
+              <view class="picker-field small">{{editPet.gender === 'male' ? '弟弟' : editPet.gender === 'female' ? '妹妹' : '选择'}}</view>
+            </picker>
+          </view>
+        </view>
+        
+        <!-- 备注 -->
+        <view class="form-field">
+          <text class="form-label">备注（选填）</text>
+          <input class="form-input" placeholder="如：胆小、过敏等" value="{{editPet.notes}}" bindinput="onEditPetNotesInput"/>
+        </view>
+      </scroll-view>
+      
+      <!-- 底部按钮 -->
+      <view class="selector-footer edit-footer">
+        <button class="confirm-btn delete" bindtap="onDeleteEditPet">删除</button>
+        <button class="confirm-btn active" bindtap="onSaveEditPet">保存</button>
+      </view>
+    </block>
+    
     <!-- 类型选择器 -->
     <view class="picker-popup" wx:if="{{showTypePicker}}">
       <view class="picker-header">
@@ -160,6 +239,46 @@
         >
           <text>{{item}}</text>
           <text wx:if="{{newPet.breed === item}}">✓</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 编辑模式 - 类型选择器 -->
+    <view class="picker-popup" wx:if="{{showEditTypePicker}}">
+      <view class="picker-header">
+        <text>选择类型</text>
+        <text class="picker-close" bindtap="onCloseEditTypePicker">×</text>
+      </view>
+      <view class="picker-body">
+        <view 
+          wx:for="{{typeOptions}}" 
+          wx:key="value"
+          class="picker-option {{editPet.type === item.value ? 'active' : ''}}"
+          data-type="{{item.value}}"
+          bindtap="onSelectEditType"
+        >
+          <text>{{item.label}}</text>
+          <text wx:if="{{editPet.type === item.value}}">✓</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 编辑模式 - 品种选择器 -->
+    <view class="picker-popup" wx:if="{{showEditBreedPicker}}">
+      <view class="picker-header">
+        <text>选择品种</text>
+        <text class="picker-close" bindtap="onCloseEditBreedPicker">×</text>
+      </view>
+      <view class="picker-body">
+        <view 
+          wx:for="{{editBreedOptions}}" 
+          wx:key="*this"
+          class="picker-option {{editPet.breed === item ? 'active' : ''}}"
+          data-breed="{{item}}"
+          bindtap="onSelectEditBreed"
+        >
+          <text>{{item}}</text>
+          <text wx:if="{{editPet.breed === item}}">✓</text>
         </view>
       </view>
     </view>

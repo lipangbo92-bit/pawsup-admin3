@@ -363,7 +363,19 @@ Page({
       return;
     }
 
-    // 路径1/2/3：跳转到 booking-time-1
+    // 路径2：已选美容师 -> 直接跳转到 booking-time-2
+    if (this.data.bookingMode === 'path2' && this.data.selectedTechnician) {
+      const bookingInfo = {
+        technician: this.data.selectedTechnician,
+        service: service
+      };
+      wx.navigateTo({
+        url: `/pages/booking-time-2/booking-time-2?info=${encodeURIComponent(JSON.stringify(bookingInfo))}`
+      });
+      return;
+    }
+
+    // 路径1/3：跳转到 booking-time-1
     const url = `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&petType=${pet.type}&serviceId=${service.id}`;
     wx.navigateTo({ url });
   },

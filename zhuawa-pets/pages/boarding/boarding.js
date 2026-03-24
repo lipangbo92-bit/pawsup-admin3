@@ -354,9 +354,30 @@ Page({
       remark
     } = this.data;
 
+    // 校验必填数据
+    if (!selectedRoom || !selectedRoom.id) {
+      wx.showToast({ title: '请选择房型', icon: 'none' });
+      return;
+    }
+    if (!checkinDate || !checkoutDate) {
+      wx.showToast({ title: '请选择入住和退房日期', icon: 'none' });
+      return;
+    }
+
     // 获取用户信息
-    const userInfo = wx.getStorageSync('userInfo');
-    if (!userInfo || !userInfo.openid) {
+    wx.showLoading({ title: '获取用户信息...' });
+    let openid = '';
+    try {
+      const loginRes = await wx.cloud.callFunction({
+        name: 'login'
+      });
+      openid = loginRes.result.openid;
+    } catch (err) {
+      console.error('获取用户信息失败:', err);
+    }
+    wx.hideLoading();
+
+    if (!openid) {
       wx.showToast({
         title: '请先登录',
         icon: 'none'
@@ -366,10 +387,10 @@ Page({
 
     // 构建订单数据（使用统一 orders-api，符合数据字典）
     const orderData = {
-      userId: userInfo.openid,
+      userId: openid,
       orderType: 'boarding',
-      customerName: userInfo.nickName || '',
-      customerPhone: userInfo.phone || '',
+      customerName: '',
+      customerPhone: '',
       petId: petId || '',
       petName: selectedPet ? selectedPet.name : '',
       petType: selectedPet ? selectedPet.type : '',
@@ -378,8 +399,8 @@ Page({
       serviceId: selectedRoom.id,
       serviceName: selectedRoom.name,
       servicePrice: selectedRoom.price,
-      roomTypeId: selectedRoom.id,
-      roomTypeName: selectedRoom.name,
+      roomId: '',
+      roomName: selectedRoom.name,
       roomId: '',  // 待商家分配
       roomNumber: '',
       checkinDate,
@@ -390,6 +411,8 @@ Page({
       finalPrice: totalPrice,
       remark
     };
+
+    console.log('提交订单数据:', orderData);
 
     console.log('提交订单:', orderData);
 
@@ -407,23 +430,29 @@ Page({
 
       wx.hideLoading();
 
-      if (res.result.success) {
+      console.log('创建订单响应:', res);
+
+      if (res.result && res.result.success) {
         const { orderId, orderNo } = res.result;
 
         // 调用支付
         this.createPayment(orderId, orderNo, totalPrice);
       } else {
-        wx.showToast({
-          title: res.result.error || '创建订单失败',
-          icon: 'none'
+        const errorMsg = res.result && res.result.error ? res.result.error : '创建订单失败';
+        console.error('创建订单失败:', errorMsg, res);
+        wx.showModal({
+          title: '创建订单失败',
+          content: errorMsg,
+          showCancel: false
         });
       }
     } catch (error) {
       wx.hideLoading();
-      console.error('创建订单失败:', error);
-      wx.showToast({
-        title: '创建订单失败',
-        icon: 'none'
+      console.error('创建订单异常:', error);
+      wx.showModal({
+        title: '创建订单异常',
+        content: error.message || '请检查网络后重试',
+        showCancel: false
       });
     }
   },
@@ -455,30 +484,28 @@ Page({
       wx.hideLoading();
 
       if (res.result.success) {
-        const paymentData = res.result.payment;
-
-        // 调起微信支付
-        wx.requestPayment({
-          ...paymentData,
-          success: () => {
-            // 支付成功
-            wx.navigateTo({
-              url: `/pages/booking-success/booking-success?orderId=${orderId}&orderNo=${orderNo}&amount=${amount}&type=boarding`
-            });
-          },
-          fail: (err) => {
-            console.error('支付失败:', err);
-            // 支付失败或取消，跳转到订单详情页
-            wx.showModal({
-              title: '支付未完成',
-              content: '您可以在订单详情页重新发起支付',
-              showCancel: false,
-              success: () => {
+        // 模拟支付成功（实际微信支付需要调起 wx.requestPayment）
+        wx.showModal({
+          title: '模拟支付',
+          content: `订单号: ${orderNo}\n金额: ¥${amount}\n\n点击确定模拟支付成功`,
+          showCancel: true,
+          cancelText: '取消',
+          confirmText: '支付',
+          success: (modalRes) => {
+            if (modalRes.confirm) {
+              // 模拟支付成功
+              wx.showToast({ title: '支付成功', icon: 'success' });
+              setTimeout(() => {
                 wx.navigateTo({
-                  url: `/pages/order-detail/order-detail?orderId=${orderId}&type=boarding`
+                  url: `/pages/booking-success/booking-success?orderId=${orderId}&orderNo=${orderNo}&amount=${amount}&type=boarding`
                 });
-              }
-            });
+              }, 1000);
+            } else {
+              // 取消支付
+              wx.navigateTo({
+                url: `/pages/order-detail/order-detail?orderId=${orderId}&type=boarding`
+              });
+            }
           }
         });
       } else {

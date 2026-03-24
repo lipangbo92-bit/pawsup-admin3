@@ -6,6 +6,7 @@
     "pages/technician-select/technician-select",
     "pages/pet-select/pet-select",
     "pages/pet-register/pet-register",
+    "pages/pet-edit/pet-edit",
     "pages/pet-info/pet-info",
     "pages/booking-time-1/booking-time-1",
     "pages/booking-time-2/booking-time-2",

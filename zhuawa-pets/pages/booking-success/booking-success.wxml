@@ -40,14 +40,14 @@
         <text class="info-value">{{orderInfo.service.name}}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">美容师</text>
-        <text class="info-value">{{orderInfo.technician.name}}</text>
+        <text class="info-label">{{orderType === 'boarding' ? '房型' : '美容师'}}</text>
+        <text class="info-value">{{orderInfo.technician.name || '标准间'}}</text>
       </view>
       <view class="info-row">
-        <text class="info-label">预约时间</text>
+        <text class="info-label">{{orderType === 'boarding' ? '入住时间' : (orderType === 'visiting' ? '服务时间' : '预约时间')}}</text>
         <text class="info-value">{{orderInfo.date.date}} {{orderInfo.time}}</text>
       </view>
-      <view class="info-row">
+      <view class="info-row" wx:if="{{orderInfo.pet.name && orderType !== 'boarding'}}">
         <text class="info-label">服务宠物</text>
         <view class="info-value-with-icon">
           <text class="pet-icon">{{orderInfo.service.icon}}</text>

@@ -68,102 +68,85 @@ Page({
   },
 
   // 确认支付并创建订单
-  handleConfirm() {
+  async handleConfirm() {
     if (this.data.submitting) return;
-    
+
     const { info, remark } = this.data;
-    
+
     // 验证必要信息
     if (!info.technician?.id || !info.service?.id || !info.date?.fullDate || !info.time) {
       wx.showToast({ title: '预约信息不完整', icon: 'none' });
       return;
     }
-    
+
     this.setData({ submitting: true });
     wx.showLoading({ title: '创建订单中...', mask: true });
-    
-    // 构建订单数据
+
+    // 获取用户信息
+    let openid = '';
+    try {
+      const loginRes = await wx.cloud.callFunction({ name: 'login' });
+      console.log('login result:', loginRes);
+      openid = loginRes.result.openid;
+      console.log('openid:', openid);
+    } catch (err) {
+      console.error('获取用户信息失败:', err);
+    }
+
+    if (!openid) {
+      wx.hideLoading();
+      this.setData({ submitting: false });
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    // 构建订单数据（符合 orders-api 数据字典）
     const orderData = {
+      userId: openid,
+      orderType: 'service',
       serviceId: info.service.id,
       serviceName: info.service.name,
       servicePrice: info.service.price,
-      serviceDuration: info.service.duration || 60,
-      technicianId: info.technician.id,
-      technicianName: info.technician.name,
-      technicianAvatar: info.technician.avatar,
+      totalPrice: info.totalPrice,
+      finalPrice: info.totalPrice,
       appointmentDate: info.date.fullDate,
       appointmentTime: info.time,
-      totalPrice: info.totalPrice,
-      remark: remark,
-      status: 'pending',
-      createTime: new Date().toISOString()
+      technicianId: info.technician.id,
+      technicianName: info.technician.name,
+      remark: remark
     };
-    
+
     // 如果有宠物信息，添加宠物数据
     if (info.pet?.id) {
       orderData.petId = info.pet.id;
       orderData.petName = info.pet.name;
       orderData.petType = info.pet.type;
     }
-    
+
     // 调用云函数创建订单
-    console.log('Creating order:', orderData);
+    console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
     wx.cloud.callFunction({
       name: 'orders-api',
       data: {
-        httpMethod: 'POST',
-        path: '/orders',
-        body: JSON.stringify(orderData)
+        action: 'createOrder',
+        data: orderData
       }
     }).then(res => {
       wx.hideLoading();
       this.setData({ submitting: false });
-      
+
       console.log('Create order response:', res);
+      console.log('Request data was:', orderData);
       
-      // 解析云函数返回结果
-      let result = res.result;
-      if (typeof result === 'string') {
-        try {
-          result = JSON.parse(result);
-        } catch (e) {
-          console.error('Parse result error:', e);
-        }
-      }
+      // 云函数返回结果
+      const result = res.result;
       
-      // 云函数返回的是 HTTP 响应格式
-      if (result && (result.success || result.statusCode === 201)) {
-        const data = result.data || JSON.parse(result.body)?.data;
-        const orderId = data._id;
-        const orderNo = data.orderNo;
+      if (result && result.success) {
+        const orderId = result.orderId;
+        const orderNo = result.orderNo;
         
-        // 构建预约成功页面需要的数据
-        const successInfo = {
-          service: {
-            name: info.service.name,
-            price: info.totalPrice,
-            icon: info.service.icon || '🐕',
-            duration: info.service.duration
-          },
-          technician: {
-            name: info.technician.name,
-            avatar: info.technician.avatar || '👤'
-          },
-          pet: {
-            name: info.pet?.name || '宠物',
-            type: info.pet?.type || ''
-          },
-          date: {
-            date: this.formatDate(info.date.fullDate)
-          },
-          time: info.time,
-          orderNo: orderNo
-        };
-        
-        // 跳转到预约成功页面，传递完整信息
-        wx.redirectTo({
-          url: `/pages/booking-success/booking-success?info=${encodeURIComponent(JSON.stringify(successInfo))}`
-        });
+        // 调用支付
+        this.createPayment(orderId, orderNo, info.totalPrice, info);
       } else {
         const errorMsg = result?.error || result?.message || '请稍后再试';
         console.error('Create order failed:', result);
@@ -182,6 +165,96 @@ Page({
         content: '网络错误，请稍后再试',
         showCancel: false
       });
+    });
+  },
+
+  // 创建支付
+  async createPayment(orderId, orderNo, amount, info) {
+    if (amount === 0) {
+      // 金额为0，直接成功
+      this.goToSuccessPage(orderNo, info);
+      return;
+    }
+
+    wx.showLoading({ title: '发起支付...' });
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'payment-api',
+        data: {
+          action: 'createPayment',
+          orderId: orderId,
+          orderNo: orderNo,
+          amount: amount,
+          type: 'service'
+        }
+      });
+
+      wx.hideLoading();
+
+      if (res.result.success) {
+        // 模拟支付成功
+        wx.showModal({
+          title: '模拟支付',
+          content: `订单号: ${orderNo}\n金额: ¥${amount}\n\n点击确定模拟支付成功`,
+          showCancel: true,
+          cancelText: '取消',
+          confirmText: '支付',
+          success: (modalRes) => {
+            if (modalRes.confirm) {
+              wx.showToast({ title: '支付成功', icon: 'success' });
+              setTimeout(() => {
+                this.goToSuccessPage(orderNo, info);
+              }, 1000);
+            } else {
+              wx.navigateTo({
+                url: `/pages/order-detail/order-detail?orderId=${orderId}&type=service`
+              });
+            }
+          }
+        });
+      } else {
+        wx.showToast({
+          title: res.result.error || '发起支付失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('发起支付失败:', error);
+      wx.showToast({
+        title: '发起支付失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 跳转到成功页面
+  goToSuccessPage(orderNo, info) {
+    const successInfo = {
+      service: {
+        name: info.service.name,
+        price: info.totalPrice,
+        icon: info.service.icon || '🐕',
+        duration: info.service.duration
+      },
+      technician: {
+        name: info.technician.name,
+        avatar: info.technician.avatar || '👤'
+      },
+      pet: {
+        name: info.pet?.name || '宠物',
+        type: info.pet?.type || ''
+      },
+      date: {
+        date: this.formatDate(info.date.fullDate)
+      },
+      time: info.time,
+      orderNo: orderNo
+    };
+
+    wx.redirectTo({
+      url: `/pages/booking-success/booking-success?info=${encodeURIComponent(JSON.stringify(successInfo))}`
     });
   },
 

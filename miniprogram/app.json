@@ -4,6 +4,8 @@
     "pages/technician/technician",
     "pages/booking-time/booking-time",
     "pages/pet-select/pet-select",
+    "pages/pet-register/pet-register",
+    "pages/pet-edit/pet-edit",
     "pages/booking-confirm/booking-confirm",
     "pages/booking-success/booking-success",
     "pages/orders/orders",

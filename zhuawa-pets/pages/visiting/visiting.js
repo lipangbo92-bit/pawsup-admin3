@@ -344,6 +344,10 @@ Page({
       case 4:
         canProceed = true;
         break;
+      case 5:
+        // 第5步确认页面，可以支付
+        canProceed = true;
+        break;
     }
 
     this.setData({ canProceed });
@@ -353,7 +357,7 @@ Page({
   nextStep() {
     if (!this.data.canProceed) return;
 
-    if (this.data.currentStep < 4) {
+    if (this.data.currentStep < 5) {
       // 确保 selectedPet 不为 null
       const selectedPet = this.data.selectedPet || { id: '', name: '', type: '', breed: '', avatar: '' };
       this.setData({
@@ -362,6 +366,7 @@ Page({
       });
       this.updateCanProceed();
     } else {
+      // 第5步确认页面，点击提交订单
       this.submitOrder();
     }
   },
@@ -371,8 +376,19 @@ Page({
     const { selectedService, selectedPet, selectedDateStr, selectedTime, addressInfo, serviceItems, remark, totalPrice } = this.data;
 
     // 获取用户信息
-    const userInfo = wx.getStorageSync('userInfo');
-    if (!userInfo || !userInfo.openid) {
+    wx.showLoading({ title: '获取用户信息...' });
+    let openid = '';
+    try {
+      const loginRes = await wx.cloud.callFunction({
+        name: 'login'
+      });
+      openid = loginRes.result.openid;
+    } catch (err) {
+      console.error('获取用户信息失败:', err);
+    }
+    wx.hideLoading();
+
+    if (!openid) {
       wx.showToast({
         title: '请先登录',
         icon: 'none'
@@ -382,7 +398,7 @@ Page({
 
     // 构建订单数据（使用统一 orders-api）
     const orderData = {
-      userId: userInfo.openid,
+      userId: openid,
       orderType: 'visiting',
       customerName: addressInfo.contactName,
       customerPhone: addressInfo.contactPhone,
@@ -456,8 +472,8 @@ Page({
     }
   },
 
-  // 创建支付
-  async createPayment(orderId, orderNo, amount) {
+  // 创建支付（模拟支付，跳过真实微信支付）
+  createPayment(orderId, orderNo, amount) {
     if (amount === 0) {
       wx.redirectTo({
         url: `/pages/booking-success/booking-success?orderId=${orderId}&orderNo=${orderNo}&amount=${amount}&type=visiting`
@@ -465,59 +481,37 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: '发起支付...' });
+    // 直接显示模拟支付弹窗，不调用云函数
+    wx.showModal({
+      title: '模拟支付',
+      content: `订单号: ${orderNo}\n金额: ¥${amount}\n\n点击确定模拟支付成功`,
+      showCancel: true,
+      cancelText: '取消',
+      confirmText: '支付',
+      success: (modalRes) => {
+        if (modalRes.confirm) {
+          // 更新订单状态为已支付
+          wx.cloud.callFunction({
+            name: 'orders-api',
+            data: {
+              action: 'updateOrderStatus',
+              orderId: orderId,
+              status: 'confirmed'
+            }
+          }).catch(err => console.error('更新订单状态失败:', err));
 
-    try {
-      const res = await wx.cloud.callFunction({
-        name: 'payment-api',
-        data: {
-          action: 'createPayment',
-          orderId: orderId,
-          orderNo: orderNo,
-          amount: amount,
-          type: 'visiting'
-        }
-      });
-
-      wx.hideLoading();
-
-      if (res.result.success) {
-        const paymentData = res.result.payment;
-
-        wx.requestPayment({
-          ...paymentData,
-          success: () => {
+          wx.showToast({ title: '支付成功', icon: 'success' });
+          setTimeout(() => {
             wx.redirectTo({
               url: `/pages/booking-success/booking-success?orderId=${orderId}&orderNo=${orderNo}&amount=${amount}&type=visiting`
             });
-          },
-          fail: (err) => {
-            console.error('支付失败:', err);
-            wx.showModal({
-              title: '支付未完成',
-              content: '您可以在订单详情页重新发起支付',
-              showCancel: false,
-              success: () => {
-                wx.redirectTo({
-                  url: `/pages/order-detail/order-detail?orderId=${orderId}&type=visiting`
-                });
-              }
-            });
-          }
-        });
-      } else {
-        wx.showToast({
-          title: res.result.error || '发起支付失败',
-          icon: 'none'
-        });
+          }, 1000);
+        } else {
+          wx.redirectTo({
+            url: `/pages/order-detail/order-detail?orderId=${orderId}&type=visiting`
+          });
+        }
       }
-    } catch (error) {
-      wx.hideLoading();
-      console.error('发起支付失败:', error);
-      wx.showToast({
-        title: '发起支付失败',
-        icon: 'none'
-      });
-    }
+    });
   }
 });

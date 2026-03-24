@@ -127,31 +127,62 @@ exports.main = async (event, context) => {
   // 查询指定美容师的可用时段（用于路径2：已选美容师）
   if (action === 'getAvailableSlots') {
     try {
+      console.log('getAvailableSlots called:', { technicianId, date, duration })
+      
+      // 支持多种ID格式
+      const techIdStr = String(technicianId)
+      
       // 从schedules查询该美容师该日期的排班
       const scheduleRes = await db.collection('schedules').where({
-        technicianId: technicianId,
-        date: date
+        date: date,
+        isRestDay: false
       }).get()
       
-      if (scheduleRes.data.length === 0) {
+      console.log('Schedules found:', scheduleRes.data.length)
+      
+      // 找到匹配的美容师排班（支持多种ID格式）
+      const schedule = scheduleRes.data.find(s => 
+        s.technicianId === technicianId || 
+        s.technicianId === techIdStr || 
+        String(s.technicianId) === techIdStr
+      )
+      
+      if (!schedule) {
+        console.log('No schedule found for tech:', technicianId)
         return {
           success: true,
           data: { date, technicianId, timeSections: generateTimeSlots() }
         }
       }
       
-      const schedule = scheduleRes.data[0]
+      console.log('Found schedule for tech:', schedule.technicianId)
+      
       const timeSlots = schedule.timeSlots || []
       const isRestDay = schedule.isRestDay
       
-      // 查询该美容师该日期的已有预约
+      // 查询该日期所有预约
       const ordersRes = await db.collection('orders').where({
-        technicianId: technicianId,
         appointmentDate: date,
         status: _.in(['pending', 'confirmed'])
       }).get()
       
-      const bookedOrders = ordersRes.data
+      console.log('Total orders on date:', ordersRes.data.length)
+      
+      // 过滤出该美容师的预约（支持多种ID格式匹配）
+      const bookedOrders = ordersRes.data.filter(o => {
+        const orderTechId = o.technicianId
+        const orderTechIdStr = String(orderTechId)
+        const isMatch = orderTechId === technicianId || 
+                       orderTechId === techIdStr || 
+                       orderTechIdStr === techIdStr
+        
+        if (isMatch) {
+          console.log('Found booking for tech:', o.technicianId, 'at', o.appointmentTime)
+        }
+        return isMatch
+      })
+      
+      console.log('Booked orders for this tech:', bookedOrders.length)
       
       // 生成所有时段并标记可用性
       const timeSections = generateTimeSlots()
@@ -162,9 +193,13 @@ exports.main = async (event, context) => {
           const isScheduled = slotInfo && slotInfo.available && !isRestDay
           
           // 检查是否与任何预约冲突（考虑服务时长）
-          const isBooked = bookedOrders.some(o => 
-            hasTimeConflict(slot.time, o.appointmentTime, o.serviceDuration)
-          )
+          const isBooked = bookedOrders.some(o => {
+            const conflict = hasTimeConflict(slot.time, o.appointmentTime, o.serviceDuration || 60)
+            if (conflict) {
+              console.log('Time conflict:', slot.time, 'vs booking at', o.appointmentTime)
+            }
+            return conflict
+          })
           
           if (isRestDay) {
             slot.disabled = true
@@ -201,11 +236,15 @@ exports.main = async (event, context) => {
     try {
       const { technicians, time } = event
       
+      console.log('getAvailableTechnicians called:', { date, time, techniciansCount: technicians.length })
+      
       // 从schedules查询该时段可约的美容师
       const schedulesRes = await db.collection('schedules').where({
         date: date,
         isRestDay: false
       }).get()
+      
+      console.log('Schedules found:', schedulesRes.data.length)
       
       const availableTechIds = []
       schedulesRes.data.forEach(schedule => {
@@ -215,29 +254,58 @@ exports.main = async (event, context) => {
         }
       })
       
+      console.log('Available techIds from schedules:', availableTechIds)
+      
       // 查询该日期所有预约
       const ordersRes = await db.collection('orders').where({
         appointmentDate: date,
         status: _.in(['pending', 'confirmed'])
       }).get()
       
+      console.log('Booked orders:', ordersRes.data.length)
+      ordersRes.data.forEach(o => {
+        console.log('Order:', o.technicianId, o.appointmentTime, o.status)
+      })
+      
       // 过滤出可约的美容师（考虑服务时长冲突）
       const results = technicians.filter(tech => {
+        // 支持多种ID格式
         const techId = tech.id || tech._id
+        const techIdStr = String(techId)
         
-        // 检查是否在排班中
-        if (!availableTechIds.includes(techId)) {
+        console.log('Checking tech:', tech.name, 'id:', techId, 'str:', techIdStr)
+        
+        // 检查是否在排班中（支持字符串和数字匹配）
+        const inSchedule = availableTechIds.some(id => 
+          id === techId || id === techIdStr || String(id) === techIdStr
+        )
+        
+        if (!inSchedule) {
+          console.log('Tech not in schedule:', tech.name)
           return false
         }
         
-        // 检查是否与任何预约冲突
-        const hasConflict = ordersRes.data.some(o => 
-          o.technicianId === techId && 
-          hasTimeConflict(time, o.appointmentTime, o.serviceDuration)
-        )
+        // 检查是否与任何预约冲突（支持多种ID格式匹配）
+        const hasConflict = ordersRes.data.some(o => {
+          const orderTechId = o.technicianId
+          const orderTechIdStr = String(orderTechId)
+          const isSameTech = orderTechId === techId || 
+                            orderTechId === techIdStr || 
+                            orderTechIdStr === techIdStr
+          
+          if (isSameTech) {
+            const conflict = hasTimeConflict(time, o.appointmentTime, o.serviceDuration)
+            console.log('Conflict check:', tech.name, 'vs order at', o.appointmentTime, 'conflict:', conflict)
+            return conflict
+          }
+          return false
+        })
         
+        console.log('Tech available:', tech.name, '!conflict:', !hasConflict)
         return !hasConflict
       })
+      
+      console.log('Final available technicians:', results.length)
       
       return {
         success: true,

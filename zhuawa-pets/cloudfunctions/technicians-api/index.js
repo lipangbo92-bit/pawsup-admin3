@@ -27,22 +27,23 @@ exports.main = async (event, context) => {
           const processedData = (listResult.data || []).map(item => {
             const processed = { ...item };
             
-            // 处理头像：如果是 base64 过大（超过 100KB），清空
-            const avatar = item.avatar || item.avatarUrl || '';
-            const avatarSize = avatar ? Math.round(avatar.length / 1024) : 0;
-            console.log(`[technicians-api] 头像大小: ${avatarSize} KB, 类型: ${avatar.startsWith('data:') ? 'base64' : 'url'}`);
-            
-            if (avatar && avatar.length > 200000 && avatar.startsWith('data:')) {
-              // 200000 字符 ≈ 150KB base64
-              console.log(`[technicians-api] 头像 base64 过大(${avatarSize}KB > 150KB)，清空:`, item._id);
-              processed.avatar = '';
-            } else {
-              processed.avatar = avatar;
+            // 处理头像：只保留 URL，过滤 base64
+            let avatar = item.avatar || item.avatarUrl || '';
+            if (avatar && avatar.startsWith('data:')) {
+              // 如果是 base64，清空（让前端显示默认头像）
+              avatar = '';
             }
+            processed.avatar = avatar;
             
-            // 列表接口不返回作品图片，避免超过 1MB 限制
-            // 作品图片在获取详情时单独返回
-            processed.works = [];
+            // 处理作品图片：只保留 URL，过滤 base64
+            let works = [];
+            if (item.works && item.works.length > 0) {
+              works = item.works.filter(work => {
+                // 只保留非 base64 的 URL
+                return work && !work.startsWith('data:');
+              }).slice(0, 6);
+            }
+            processed.works = works;
             
             return processed;
           });
@@ -96,9 +97,34 @@ exports.main = async (event, context) => {
         
       case 'get':
         const getResult = await db.collection('technicians').doc(event.id).get();
+        const detailData = getResult.data;
+        
+        // 处理头像：如果是 base64 过大，清空
+        let avatar = detailData.avatar || detailData.avatarUrl || '';
+        if (avatar && avatar.length > 200000 && avatar.startsWith('data:')) {
+          avatar = '';
+        }
+        
+        // 处理作品图片：过滤掉过大的 base64
+        let works = [];
+        if (detailData.works && detailData.works.length > 0) {
+          works = detailData.works.filter(work => {
+            if (!work) return false;
+            // 如果是 base64 且超过 500KB，过滤掉
+            if (work.length > 700000 && work.startsWith('data:')) {
+              return false;
+            }
+            return true;
+          }).slice(0, 6);
+        }
+        
         return {
           success: true,
-          data: getResult.data
+          data: {
+            ...detailData,
+            avatar,
+            works
+          }
         };
         
       default:
