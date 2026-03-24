@@ -38,7 +38,8 @@ Page({
         console.log('booking-confirm received info:', info);
         
         // 确保宠物信息完整，不使用默认值
-        const petInfo = info.pet && info.pet.id ? info.pet : null;
+        // 注意：宠物信息可能使用 _id 或 id
+        const petInfo = info.pet && (info.pet._id || info.pet.id) ? info.pet : null;
         
         this.setData({
           info: {
