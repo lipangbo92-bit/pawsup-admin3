@@ -13,5 +13,10 @@
     { "source": "/admin-schedule", "destination": "/admin-schedule.html" },
     { "source": "/admin-appointments", "destination": "/admin-appointments.html" },
     { "source": "/banner", "destination": "/banner.html" }
-  ]
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  }
 }
