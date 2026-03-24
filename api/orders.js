@@ -78,6 +78,11 @@ async function getOrders(status, date, orderType) {
   const result = await query.orderBy('createdAt', 'desc').get();
 
   // 处理订单数据，统一客户信息字段
+  console.log('[API Orders] Raw orders count:', result.data.length);
+  if (result.data.length > 0) {
+    console.log('[API Orders] First order:', JSON.stringify(result.data[0], null, 2));
+  }
+  
   const processedOrders = result.data.map(order => {
     let customerName = '';
     let customerPhone = '';
@@ -91,6 +96,8 @@ async function getOrders(status, date, orderType) {
       customerName = order.petName || '未知';
       customerPhone = order.customerPhone || '';
     }
+    
+    console.log(`[API Orders] Order ${order.orderNo}: petName=${order.petName}, customerName=${customerName}`);
 
     return {
       ...order,
