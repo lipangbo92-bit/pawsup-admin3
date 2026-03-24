@@ -29,7 +29,8 @@ module.exports = async (req, res) => {
     
     switch (action) {
       case 'list':
-        result = await getOrders(status, date);
+        const { orderType } = req.body || {};
+        result = await getOrders(status, date, orderType);
         break;
       case 'getById':
         result = await getOrderById(id);
@@ -61,20 +62,43 @@ module.exports = async (req, res) => {
 };
 
 // 获取订单列表
-async function getOrders(status, date) {
+async function getOrders(status, date, orderType) {
   let query = db.collection('orders');
-  
+
   if (status) {
     query = query.where({ status });
   }
   if (date) {
     query = query.where({ appointmentDate: date });
   }
-  
+  if (orderType) {
+    query = query.where({ orderType });
+  }
+
   const result = await query.orderBy('createdAt', 'desc').get();
+
+  // 处理订单数据，统一客户信息字段
+  const processedOrders = result.data.map(order => {
+    // 根据订单类型获取客户信息
+    let customerName = order.customerName || '';
+    let customerPhone = order.customerPhone || '';
+
+    // 上门服务使用 contactName/contactPhone
+    if (order.orderType === 'visiting') {
+      customerName = order.contactName || customerName;
+      customerPhone = order.contactPhone || customerPhone;
+    }
+
+    return {
+      ...order,
+      customerName: customerName || '未知',
+      customerPhone: customerPhone
+    };
+  });
+
   return {
     success: true,
-    data: result.data
+    data: processedOrders
   };
 }
 
