@@ -205,6 +205,10 @@ function viewOrder(orderId) {
                 <span class="label">联系电话：</span>
                 <span class="value">${selectedOrder.customerPhone || '-'}</span>
             </div>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
+            </div>
         </div>
         <div class="detail-section">
             <h4>服务信息</h4>
