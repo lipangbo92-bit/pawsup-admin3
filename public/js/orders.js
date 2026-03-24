@@ -77,7 +77,7 @@ async function loadOrders(page = 1) {
             ...order,
             _id: order._id || order.id,
             orderNo: order.orderNo || order._id,
-            customerName: order.customerName || '未知',
+            customerName: order.customerName || order.petName || '未知',
             customerPhone: order.customerPhone || '',
             serviceName: order.serviceName || '未知服务',
             amount: order.price || order.amount || 0,
