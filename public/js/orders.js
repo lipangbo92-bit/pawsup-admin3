@@ -49,6 +49,7 @@ async function loadOrders(page = 1) {
         showLoading();
         
         // 获取筛选条件
+        const orderTypeFilter = document.getElementById('orderTypeFilter');
         const statusFilter = document.getElementById('statusFilter');
         const dateFilter = document.getElementById('dateFilter');
         
@@ -56,6 +57,9 @@ async function loadOrders(page = 1) {
             action: 'list'
         };
         
+        if (orderTypeFilter && orderTypeFilter.value) {
+            params.orderType = orderTypeFilter.value;
+        }
         if (statusFilter && statusFilter.value) {
             params.status = statusFilter.value;
         }

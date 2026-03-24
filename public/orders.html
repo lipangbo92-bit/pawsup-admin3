@@ -42,6 +42,12 @@
                 <div class="page-header">
                     <h2>订单管理</h2>
                     <div class="filter-bar">
+                        <select id="orderTypeFilter" onchange="filterOrders()">
+                            <option value="">全部类型</option>
+                            <option value="service">洗护美容</option>
+                            <option value="boarding">寄养日托</option>
+                            <option value="visiting">上门服务</option>
+                        </select>
                         <select id="statusFilter" onchange="filterOrders()">
                             <option value="">全部状态</option>
                             <option value="pending">待处理</option>
