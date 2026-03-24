@@ -36,6 +36,7 @@ Page({
       try {
         const info = JSON.parse(decodeURIComponent(options.info));
         console.log('booking-confirm received info:', info);
+        console.log('booking-confirm received pet:', info.pet);
         
         // 构建新的 info 对象，避免使用默认值
         const newInfo = {
@@ -48,7 +49,12 @@ Page({
         
         // 处理宠物信息 - 注意：宠物信息可能使用 _id 或 id
         if (info.pet && (info.pet._id || info.pet.id)) {
-          newInfo.pet = info.pet;
+          newInfo.pet = {
+            _id: info.pet._id || info.pet.id,
+            name: info.pet.name || '未知',
+            type: info.pet.type || ''
+          };
+          console.log('booking-confirm set pet:', newInfo.pet);
         } else {
           // 如果没有宠物信息，显示提示
           console.warn('No pet info received');
@@ -57,7 +63,7 @@ Page({
         
         this.setData({ info: newInfo });
         
-        console.log('booking-confirm set info:', this.data.info);
+        console.log('booking-confirm final info:', this.data.info);
       } catch (e) {
         console.error('解析预约信息失败:', e);
       }
