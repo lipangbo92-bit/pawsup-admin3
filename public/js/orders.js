@@ -79,6 +79,7 @@ async function loadOrders(page = 1) {
             orderNo: order.orderNo || order._id,
             customerName: order.customerName || order.petName || '未知',
             customerPhone: order.customerPhone || '',
+            petName: order.petName || '',
             serviceName: order.serviceName || '未知服务',
             amount: order.price || order.amount || 0,
             appointmentDate: order.appointmentDate || '',

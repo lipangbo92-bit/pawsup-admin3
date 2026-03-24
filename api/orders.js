@@ -101,6 +101,7 @@ async function getOrders(status, date, orderType) {
 
     return {
       ...order,
+      petName: order.petName || '',
       customerName,
       customerPhone
     };
