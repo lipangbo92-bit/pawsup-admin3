@@ -79,20 +79,23 @@ async function getOrders(status, date, orderType) {
 
   // 处理订单数据，统一客户信息字段
   const processedOrders = result.data.map(order => {
-    // 根据订单类型获取客户信息
-    let customerName = order.customerName || '';
-    let customerPhone = order.customerPhone || '';
+    let customerName = '';
+    let customerPhone = '';
 
-    // 上门服务使用 contactName/contactPhone
     if (order.orderType === 'visiting') {
-      customerName = order.contactName || customerName;
-      customerPhone = order.contactPhone || customerPhone;
+      // 上门服务：显示客户预留的联系方式
+      customerName = order.contactName || order.customerName || '未知';
+      customerPhone = order.contactPhone || order.customerPhone || '';
+    } else {
+      // 洗护、寄养：显示宠物名字 + 手机号
+      customerName = order.petName || '未知';
+      customerPhone = order.customerPhone || '';
     }
 
     return {
       ...order,
-      customerName: customerName || '未知',
-      customerPhone: customerPhone
+      customerName,
+      customerPhone
     };
   });
 
