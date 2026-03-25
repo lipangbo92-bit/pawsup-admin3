@@ -1,7 +1,7 @@
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
 
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+cloud.init({ env: 'cloud1-4gy1jyan842d73ab' })
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()

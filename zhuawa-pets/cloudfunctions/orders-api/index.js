@@ -2,7 +2,7 @@
 const cloud = require('wx-server-sdk');
 
 cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
+  env: 'cloud1-4gy1jyan842d73ab'
 });
 
 const db = cloud.database();
@@ -232,9 +232,28 @@ async function getAllOrders(filters = {}) {
 
   const result = await query.orderBy('createTime', 'desc').get();
 
+  // 处理订单数据，统一客户信息字段
+  const processedOrders = result.data.map(order => {
+    // 根据订单类型获取客户信息
+    let customerName = order.customerName || '';
+    let customerPhone = order.customerPhone || '';
+
+    // 上门服务使用 contactName/contactPhone
+    if (order.orderType === 'visiting') {
+      customerName = order.contactName || customerName;
+      customerPhone = order.contactPhone || customerPhone;
+    }
+
+    return {
+      ...order,
+      customerName: customerName || '未知',
+      customerPhone: customerPhone
+    };
+  });
+
   return {
     success: true,
-    data: result.data
+    data: processedOrders
   };
 }
 
