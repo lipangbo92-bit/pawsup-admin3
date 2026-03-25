@@ -14,6 +14,8 @@ Page({
 
   onLoad(options) {
     const { mode, petId, serviceId, technicianId, date, time } = options
+    console.log('[onLoad] options:', options)
+    console.log('[onLoad] petId:', petId)
     this.setData({ mode, date, time })
     
     // 并行加载数据
@@ -21,6 +23,7 @@ Page({
   },
 
   async loadData(serviceId, petId, technicianId) {
+    console.log('[loadData] serviceId:', serviceId, 'petId:', petId, 'technicianId:', technicianId)
     wx.showLoading({ title: '加载中...' })
     
     try {
@@ -30,7 +33,10 @@ Page({
         tasks.push(this.loadService(serviceId))
       }
       if (petId) {
+        console.log('[loadData] Adding loadPet task for petId:', petId)
         tasks.push(this.loadPet(petId))
+      } else {
+        console.warn('[loadData] No petId provided!')
       }
       if (technicianId) {
         tasks.push(this.loadTechnician(technicianId))
