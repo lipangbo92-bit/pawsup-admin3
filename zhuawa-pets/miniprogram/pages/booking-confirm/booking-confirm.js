@@ -66,10 +66,14 @@ Page({
     try {
       const { result } = await wx.cloud.callFunction({
         name: 'pets-api',
-        data: { action: 'get', petId }
+        data: {
+          httpMethod: 'GET',
+          path: `/pets/${petId}`
+        }
       })
       if (result && result.success) {
         this.setData({ pet: result.data })
+        console.log('[BookingConfirm] Loaded pet:', result.data)
       }
     } catch (err) {
       console.error('加载宠物失败:', err)
