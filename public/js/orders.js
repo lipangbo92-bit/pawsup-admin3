@@ -78,7 +78,9 @@ async function loadOrders(page = 1) {
             serviceName: order.serviceName || '未知服务',
             amount: order.price || order.amount || 0,
             appointmentDate: order.appointmentDate || '',
-            appointmentTime: order.appointmentTime || ''
+            appointmentTime: order.appointmentTime || '',
+            // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
+            petName: order.petName || order.petInfo?.name || '-'
         }));
         
         renderOrdersTable(currentOrders);
@@ -87,7 +89,7 @@ async function loadOrders(page = 1) {
     } catch (err) {
         console.error('Load orders error:', err);
         document.getElementById('ordersTableBody').innerHTML = `
-            <tr><td colspan="7" class="empty-cell">
+            <tr><td colspan="8" class="empty-cell">
                 加载失败: ${err.message}<br>
                 <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
             </td></tr>
@@ -105,10 +107,10 @@ function renderOrdersTable(orders) {
     }
     
     if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">暂无订单</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">暂无订单</td></tr>';
         return;
     }
-    
+
     tbody.innerHTML = orders.map(order => `
         <tr>
             <td><span class="order-no">${order.orderNo}</span></td>
@@ -118,6 +120,7 @@ function renderOrdersTable(orders) {
                     <span class="customer-phone">${order.customerPhone}</span>
                 </div>
             </td>
+            <td>${order.petName}</td>
             <td>${order.serviceName}</td>
             <td>
                 <div class="appointment-time">
@@ -198,6 +201,17 @@ function viewOrder(orderId) {
             <div class="detail-row">
                 <span class="label">联系电话：</span>
                 <span class="value">${selectedOrder.customerPhone || '-'}</span>
+            </div>
+        </div>
+        <div class="detail-section">
+            <h4>宠物信息</h4>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">宠物类型：</span>
+                <span class="value">${selectedOrder.petType === 'dog' ? '🐕 狗狗' : selectedOrder.petType === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type === 'dog' ? '🐕 狗狗' : selectedOrder.petInfo?.type === 'cat' ? '🐈 猫咪' : '-'}</span>
             </div>
         </div>
         <div class="detail-section">
@@ -361,7 +375,7 @@ function renderPagination() {
 function showLoading() {
     const tbody = document.getElementById('ordersTableBody');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loading-cell">加载中...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">加载中...</td></tr>';
     }
 }
 
