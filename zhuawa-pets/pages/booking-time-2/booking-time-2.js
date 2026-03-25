@@ -58,13 +58,14 @@ Page({
     wx.showLoading({ title: '加载中...' });
     
     try {
-      // 并行加载美容师和服务信息
-      const [techRes, serviceRes] = await Promise.all([
+      // 并行加载美容师、服务和宠物信息
+      const [techRes, serviceRes, petRes] = await Promise.all([
         this.loadTechnician(technicianId),
-        this.loadService(serviceId)
+        this.loadService(serviceId),
+        this.loadPet(petId)
       ]);
       
-      console.log('加载结果:', { techRes, serviceRes });
+      console.log('加载结果:', { techRes, serviceRes, petRes });
       
       if (!techRes || !serviceRes) {
         console.error('加载数据失败: techRes 或 serviceRes 为空');
@@ -75,10 +76,11 @@ Page({
       this.setData({
         selectedTechnician: techRes,
         selectedService: serviceRes,
-        totalPrice: serviceRes.price || 0,
-        selectedPetId: petId
+        selectedPet: petRes,
+        selectedPetId: petId,
+        totalPrice: serviceRes.price || 0
       }, () => {
-        console.log('setData 完成:', this.data.selectedTechnician, this.data.selectedService);
+        console.log('setData 完成:', this.data.selectedTechnician, this.data.selectedService, this.data.selectedPet);
       });
       
       // 加载该美容师的时段
@@ -164,6 +166,40 @@ Page({
       }
     } catch (err) {
       console.error('加载服务失败:', err);
+    }
+    return null;
+  },
+
+  // 加载宠物信息
+  async loadPet(petId) {
+    console.log('loadPet called with id:', petId);
+    if (!petId) {
+      console.warn('petId is empty');
+      return null;
+    }
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'pets-api',
+        data: {
+          httpMethod: 'GET',
+          path: `/pets/${petId}`
+        }
+      });
+      console.log('pets-api response:', res);
+      
+      if (res.result && res.result.success && res.result.data) {
+        const pet = res.result.data;
+        return {
+          _id: pet._id || pet.id,
+          name: pet.name,
+          type: pet.type,
+          breed: pet.breed
+        };
+      } else {
+        console.error('pets-api 返回数据格式错误:', res.result);
+      }
+    } catch (err) {
+      console.error('加载宠物失败:', err);
     }
     return null;
   },
@@ -357,13 +393,18 @@ Page({
     }
     
     const selectedDate = this.data.dateList[this.data.selectedDateIndex];
+    
+    // 构建 bookingInfo，包含完整的宠物信息
     const bookingInfo = {
       technician: this.data.selectedTechnician,
       service: this.data.selectedService,
+      pet: this.data.selectedPet || { _id: this.data.selectedPetId },
       date: selectedDate,
       time: this.data.selectedTime,
       totalPrice: this.data.totalPrice
     };
+    
+    console.log('[booking-time-2] onConfirm bookingInfo:', bookingInfo);
     
     wx.navigateTo({
       url: `/pages/booking-confirm/booking-confirm?info=${encodeURIComponent(JSON.stringify(bookingInfo))}`
