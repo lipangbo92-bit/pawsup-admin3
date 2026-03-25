@@ -130,8 +130,17 @@ Page({
     const { mode, petId, serviceId, appointmentDate, appointmentTime } = this.data
     console.log('[technician-select] goToConfirm petId:', petId)
     
+    // 构建 bookingInfo 对象
+    const bookingInfo = {
+      service: { _id: serviceId },
+      pet: { _id: petId },
+      technician: { _id: technician._id, name: technician.name },
+      date: { fullDate: appointmentDate },
+      time: appointmentTime
+    }
+    
     wx.navigateTo({
-      url: `/pages/booking-confirm/booking-confirm?mode=${mode}&petId=${petId}&serviceId=${serviceId}&technicianId=${technician._id}&date=${appointmentDate}&time=${appointmentTime}`
+      url: `/pages/booking-confirm/booking-confirm?info=${encodeURIComponent(JSON.stringify(bookingInfo))}`
     })
   },
 
