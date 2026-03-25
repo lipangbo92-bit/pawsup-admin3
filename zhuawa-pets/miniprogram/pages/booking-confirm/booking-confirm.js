@@ -64,6 +64,7 @@ Page({
 
   async loadPet(petId) {
     try {
+      console.log('[loadPet] Loading pet:', petId)
       const { result } = await wx.cloud.callFunction({
         name: 'pets-api',
         data: {
@@ -71,9 +72,14 @@ Page({
           path: `/pets/${petId}`
         }
       })
+      console.log('[loadPet] API result:', result)
       if (result && result.success) {
         this.setData({ pet: result.data })
         console.log('[BookingConfirm] Loaded pet:', result.data)
+        console.log('[BookingConfirm] Pet name:', result.data?.name)
+        console.log('[BookingConfirm] Pet type:', result.data?.type)
+      } else {
+        console.error('[loadPet] Failed to load pet:', result)
       }
     } catch (err) {
       console.error('加载宠物失败:', err)
@@ -114,6 +120,12 @@ Page({
 
   async submitOrder() {
     const { service, pet, technician, date, time, remark, totalPrice } = this.data
+    
+    // 调试日志
+    console.log('[submitOrder] pet data:', pet)
+    console.log('[submitOrder] pet.name:', pet?.name)
+    console.log('[submitOrder] pet.type:', pet?.type)
+    console.log('[submitOrder] pet.breed:', pet?.breed)
     
     if (!service || !date || !time) {
       wx.showToast({ title: '信息不完整', icon: 'none' })
