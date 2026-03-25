@@ -215,11 +215,11 @@ function viewOrder(orderId) {
             <h4>宠物信息</h4>
             <div class="detail-row">
                 <span class="label">宠物名字：</span>
-                <span class="value">${selectedOrder.petName}</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
             </div>
             <div class="detail-row">
                 <span class="label">宠物类型：</span>
-                <span class="value">${selectedOrder.petType === 'dog' ? '🐕 狗狗' : selectedOrder.petType === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type === 'dog' ? '🐕 狗狗' : selectedOrder.petInfo?.type === 'cat' ? '🐈 猫咪' : '-'}</span>
+                <span class="value">${selectedOrder.petType === 'dog' ? '🐕 狗狗' : selectedOrder.petType === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type === 'dog' ? '🐕 狗狗' : selectedOrder.petInfo?.type === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type ? selectedOrder.petInfo.type : '-'}</span>
             </div>
         </div>
         <div class="detail-section">
