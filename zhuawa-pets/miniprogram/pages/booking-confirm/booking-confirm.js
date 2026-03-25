@@ -121,31 +121,38 @@ Page({
     wx.showLoading({ title: '提交中...' })
 
     try {
+      // 获取用户信息
+      const userInfo = wx.getStorageSync('userInfo')
+      if (!userInfo || !userInfo.openid) {
+        throw new Error('请先登录')
+      }
+
       // 构建订单数据
       const orderData = {
+        userId: userInfo.openid,
+        orderType: 'service',
         serviceId: service._id,
         serviceName: service.name,
         servicePrice: service.price,
         petId: pet?._id || '',
         petName: pet?.name || '',
         petType: pet?.type || '',
+        petBreed: pet?.breed || '',
         technicianId: technician?._id || '',
         technicianName: technician?.name || '待分配',
         appointmentDate: date,
         appointmentTime: time,
         totalPrice: totalPrice,
-        remark: remark,
-        status: 'pending',
-        createTime: new Date().toISOString()
+        finalPrice: totalPrice,
+        remark: remark
       }
 
       // 调用 orders-api 创建订单
       const { result } = await wx.cloud.callFunction({
         name: 'orders-api',
         data: {
-          httpMethod: 'POST',
-          path: '/orders',
-          body: JSON.stringify(orderData)
+          action: 'createOrder',
+          data: orderData
         }
       })
 
