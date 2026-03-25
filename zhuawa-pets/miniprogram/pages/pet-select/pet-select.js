@@ -16,11 +16,17 @@ Page({
     try {
       const { result } = await wx.cloud.callFunction({
         name: 'pets-api',
-        data: { action: 'list' }
+        data: {
+          httpMethod: 'GET',
+          path: '/pets'
+        }
       })
+      
+      console.log('[loadPets] API result:', result)
       
       if (result && result.success) {
         this.setData({ pets: result.data })
+        console.log('[loadPets] Loaded pets:', result.data)
         
         // 如果没有宠物，提示添加
         if (result.data.length === 0) {
@@ -35,23 +41,12 @@ Page({
           })
         }
       } else {
-        // 降级到模拟数据
-        this.setData({
-          pets: [
-            { id: '1', name: '豆豆', type: 'dog', breed: '柯基', age: 2, weight: '10kg' },
-            { id: '2', name: '咪咪', type: 'cat', breed: '英短', age: 1, weight: '5kg' }
-          ]
-        })
+        console.error('[loadPets] API returned error:', result)
+        wx.showToast({ title: '加载宠物失败', icon: 'none' })
       }
     } catch (err) {
-      console.error('加载宠物失败:', err)
-      // 降级到模拟数据
-      this.setData({
-        pets: [
-          { id: '1', name: '豆豆', type: 'dog', breed: '柯基', age: 2, weight: '10kg' },
-          { id: '2', name: '咪咪', type: 'cat', breed: '英短', age: 1, weight: '5kg' }
-        ]
-      })
+      console.error('[loadPets] 加载宠物失败:', err)
+      wx.showToast({ title: '加载宠物失败', icon: 'none' })
     } finally {
       this.setData({ loading: false })
     }
@@ -141,10 +136,14 @@ Page({
     }
 
     const pet = this.data.selectedPet
+    const petId = pet._id || pet.id
+    
+    console.log('[confirm] Selected pet:', pet)
+    console.log('[confirm] petId:', petId)
     
     // 路径1：选宠物 -> 选服务（mode=path1）
     wx.navigateTo({
-      url: `/pages/service-select/service-select?mode=path1&petId=${pet.id || pet._id}`
+      url: `/pages/service-select/service-select?mode=path1&petId=${petId}`
     })
   }
 })
