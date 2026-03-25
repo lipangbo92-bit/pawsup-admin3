@@ -138,20 +138,24 @@ async function createOrder(data) {
     address,
     remark
   } = data;
-  
+
   // 验证必填字段
   if (!customerName || !customerPhone || !serviceId || !appointmentDate || !appointmentTime) {
     return { success: false, error: 'Missing required fields' };
   }
-  
+
   // 生成订单号
   const orderNo = 'ORD' + Date.now();
-  
-  // 创建订单
+
+  // 创建订单 - 同时存储 petName/petType 字段以兼容统一订单结构
   const orderData = {
     orderNo,
     customerName,
     customerPhone,
+    // 统一订单字段结构
+    petName: petInfo?.name || '',
+    petType: petInfo?.type || '',
+    // 保留 petInfo 对象以兼容旧数据
     petInfo: petInfo || {},
     serviceId,
     serviceName: serviceName || '',

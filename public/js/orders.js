@@ -77,13 +77,14 @@ async function loadOrders(page = 1) {
             ...order,
             _id: order._id || order.id,
             orderNo: order.orderNo || order._id,
-            customerName: order.customerName || order.petName || '未知',
+            customerName: order.customerName || '未知',
             customerPhone: order.customerPhone || '',
-            petName: order.petName || '',
             serviceName: order.serviceName || '未知服务',
             amount: order.price || order.amount || 0,
             appointmentDate: order.appointmentDate || '',
-            appointmentTime: order.appointmentTime || ''
+            appointmentTime: order.appointmentTime || '',
+            // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
+            petName: order.petName || order.petInfo?.name || '-'
         }));
         
         renderOrdersTable(currentOrders);
@@ -113,7 +114,7 @@ function renderOrdersTable(orders) {
         tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">暂无订单</td></tr>';
         return;
     }
-    
+
     tbody.innerHTML = orders.map(order => `
         <tr>
             <td><span class="order-no">${order.orderNo}</span></td>
@@ -208,6 +209,17 @@ function viewOrder(orderId) {
             <div class="detail-row">
                 <span class="label">宠物名字：</span>
                 <span class="value">${selectedOrder.petName || '-'}</span>
+            </div>
+        </div>
+        <div class="detail-section">
+            <h4>宠物信息</h4>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">宠物类型：</span>
+                <span class="value">${selectedOrder.petType === 'dog' ? '🐕 狗狗' : selectedOrder.petType === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type === 'dog' ? '🐕 狗狗' : selectedOrder.petInfo?.type === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type ? selectedOrder.petInfo.type : '-'}</span>
             </div>
         </div>
         <div class="detail-section">

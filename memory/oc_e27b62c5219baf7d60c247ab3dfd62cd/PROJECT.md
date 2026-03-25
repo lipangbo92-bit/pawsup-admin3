@@ -4,6 +4,22 @@
 
 ---
 
+## 项目路径（重要！）
+
+### ✅ 正确路径
+- **管理端**: `/Users/themachine/.openclaw/workspaces/code/zhuawa-admin/`
+- **小程序端**: `/Users/themachine/.openclaw/workspaces/code/zhuawa-pets/`
+
+### ❌ 错误路径（请勿使用）
+- `/Users/themachine/.openclaw/workspaces/kimi/prototype/`
+- `/Users/themachine/Desktop/pawsup-admin/`
+- `/Users/themachine/Documents/GitHub/pawsup-admin/`
+
+### GitHub 仓库
+- https://github.com/lipangbo92-bit/pawsup-admin3
+
+---
+
 ## 阶段划分
 
 ### 阶段1：V1.0 用户端核心预约流程（当前）
