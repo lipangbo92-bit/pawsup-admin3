@@ -9,7 +9,6 @@ page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
 }
 
 /* ========== 顶部导航栏 ========== */
@@ -135,7 +134,7 @@ page {
 }
 
 .confirm-wrapper {
-  padding-bottom: 480rpx;
+  padding-bottom: 420rpx;
 }
 
 /* ========== 区块卡片 ========== */
@@ -222,6 +221,14 @@ page {
   background: linear-gradient(135deg, #FEF9C3 0%, #FDE68A 100%);
 }
 
+.room-icon-wrap.dog {
+  background: linear-gradient(135deg, #DBEAFE 0%, #93C5FD 100%);
+}
+
+.room-icon-wrap.cat {
+  background: linear-gradient(135deg, #FCE7F3 0%, #F9A8D4 100%);
+}
+
 .room-emoji {
   font-size: 48rpx;
 }
@@ -280,6 +287,120 @@ page {
 .tag.gold {
   color: #B45309;
   background-color: rgba(251, 191, 36, 0.2);
+}
+
+/* 加载和空状态 */
+.loading-state {
+  padding: 60rpx;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #9CA3AF;
+}
+
+.empty-state {
+  padding: 80rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #9CA3AF;
+}
+
+/* 房型设施标签 */
+.room-facilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.facility-tag {
+  font-size: 20rpx;
+  color: #6B7280;
+  background-color: #F3F4F6;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+/* 房型元信息 */
+.room-meta {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx solid #F3F4F6;
+}
+
+.meta-item {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+.meta-item.low {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+/* 宠物信息 */
+.pet-info-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 32rpx;
+  gap: 20rpx;
+}
+
+.pet-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #F3F4F6;
+}
+
+.pet-detail {
+  flex: 1;
+}
+
+.pet-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.pet-meta {
+  font-size: 26rpx;
+  color: #6B7280;
+}
+
+/* 备注输入 */
+.remark-input {
+  width: 100%;
+  min-height: 160rpx;
+  padding: 20rpx;
+  border: 2rpx solid #E5E7EB;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.remark-count {
+  display: block;
+  text-align: right;
+  font-size: 24rpx;
+  color: #9CA3AF;
+  margin-top: 12rpx;
 }
 
 /* ========== 提示条 ========== */

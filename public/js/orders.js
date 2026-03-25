@@ -49,6 +49,7 @@ async function loadOrders(page = 1) {
         showLoading();
         
         // 获取筛选条件
+        const orderTypeFilter = document.getElementById('orderTypeFilter');
         const statusFilter = document.getElementById('statusFilter');
         const dateFilter = document.getElementById('dateFilter');
         
@@ -56,6 +57,9 @@ async function loadOrders(page = 1) {
             action: 'list'
         };
         
+        if (orderTypeFilter && orderTypeFilter.value) {
+            params.orderType = orderTypeFilter.value;
+        }
         if (statusFilter && statusFilter.value) {
             params.status = statusFilter.value;
         }
@@ -120,7 +124,7 @@ function renderOrdersTable(orders) {
                     <span class="customer-phone">${order.customerPhone}</span>
                 </div>
             </td>
-            <td>${order.petName}</td>
+            <td>${order.petName || '-'}</td>
             <td>${order.serviceName}</td>
             <td>
                 <div class="appointment-time">
@@ -201,6 +205,10 @@ function viewOrder(orderId) {
             <div class="detail-row">
                 <span class="label">联系电话：</span>
                 <span class="value">${selectedOrder.customerPhone || '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
             </div>
         </div>
         <div class="detail-section">

@@ -1,0 +1,70 @@
+<view class="container">
+  <!-- 顶部导航 -->
+  <view class="custom-nav">
+    <view class="nav-back" bindtap="goBack">
+      <text class="back-icon">‹</text>
+    </view>
+    <text class="nav-title">选择服务</text>
+    <view class="nav-placeholder"></view>
+  </view>
+  
+  <!-- 已选信息提示 -->
+  <view class="info-bar" wx:if="{{selectedTechnician}}">
+    <text class="info-text">已选择美容师：{{selectedTechnician.name}}</text>
+  </view>
+  
+  <!-- 分类导航 -->
+  <view class="category-nav">
+    <scroll-view scroll-x class="category-scroll">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="index"
+        class="category-item {{currentCategory === index ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="switchCategory"
+      >
+        <text>{{item}}</text>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 服务列表 -->
+  <scroll-view class="service-list" scroll-y>
+    <view class="service-content">
+      <view 
+        wx:for="{{services}}" 
+        wx:key="_id"
+        class="service-card"
+        data-id="{{item._id}}"
+        bindtap="selectService"
+      >
+        <view class="service-image-wrapper">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
+          <view wx:else class="service-icon {{item.iconClass}}">
+            <text>{{item.iconText}}</text>
+          </view>
+        </view>
+        <view class="service-info">
+          <text class="service-name">{{item.name}}</text>
+          <text class="service-desc">{{item.desc}}</text>
+          <view class="service-bottom">
+            <view class="price-wrapper">
+              <text class="price-symbol">¥</text>
+              <text class="price-value">{{item.price}}</text>
+              <text class="price-unit">起</text>
+            </view>
+            <view class="select-btn">
+              <text class="select-text">选择</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 空状态 -->
+      <view wx:if="{{services.length === 0}}" class="empty-state">
+        <text class="empty-icon">🛁</text>
+        <text class="empty-text">该分类暂无服务</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,4 +1,4 @@
-<!--pages/services/services.wxml - 显示服务图片-->
+<!--pages/services/services.wxml-->
 <view class="container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -30,19 +30,21 @@
           wx:for="{{services}}" 
           wx:key="id"
           class="service-card"
+          bindtap="showServiceDetail"
+          data-service="{{item.id}}"
         >
-          <!-- 服务图片 -->
+          <!-- 服务图片或图标 -->
           <view class="service-image-wrapper">
             <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
-            <view wx:else class="service-image-placeholder">
-              <text class="service-image-icon">{{item.iconText}}</text>
+            <view wx:else class="service-icon {{item.iconClass}}">
+              <text>{{item.iconText}}</text>
             </view>
           </view>
           
           <view class="service-info">
             <view>
               <text class="service-name">{{item.name}}</text>
-              <text class="service-desc">{{item.desc}}</text>
+              <text class="service-desc">{{item.desc || " "}}</text>
             </view>
             <view class="service-bottom">
               <view class="price-wrapper">
@@ -50,7 +52,8 @@
                 <text class="price-value">{{item.price}}</text>
                 <text class="price-unit">{{item.unit}}</text>
               </view>
-              <view class="book-btn" bindtap="bookService" data-service="{{item.id}}">
+              <!-- 加号按钮 - 阻止冒泡，单独绑定预约事件 -->
+              <view class="book-btn" catchtap="bookService" data-service="{{item.id}}">
                 <text class="book-icon">+</text>
               </view>
             </view>
@@ -58,10 +61,51 @@
         </view>
         
         <!-- 无数据提示 -->
-        <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
-          暂无服务数据
+        <view wx:if="{{services.length === 0}}" class="empty-state">
+          <text class="empty-icon">🛁</text>
+          <text class="empty-text">该分类暂无服务</text>
         </view>
       </view>
     </scroll-view>
   </view>
+
+  <!-- 服务详情弹窗 -->
+  <view class="detail-mask" wx:if="{{showDetailModal}}" bindtap="closeDetailModal"></view>
+  <view class="detail-modal" wx:if="{{showDetailModal}}">
+    <view class="detail-header">
+      <text class="detail-title">服务详情</text>
+      <text class="detail-close" bindtap="closeDetailModal">×</text>
+    </view>
+    <view class="detail-content" wx:if="{{selectedService}}">
+      <view class="detail-image-wrapper">
+        <image wx:if="{{selectedService.image}}" src="{{selectedService.image}}" mode="aspectFill" class="detail-image"/>
+        <view wx:else class="detail-icon {{selectedService.iconClass}}">
+          <text class="detail-icon-text">{{selectedService.iconText}}</text>
+        </view>
+      </view>
+      <text class="detail-name">{{selectedService.name}}</text>
+      <text class="detail-desc">{{selectedService.desc || '暂无描述'}}</text>
+      <view class="detail-info">
+        <view class="detail-info-item">
+          <text class="detail-info-label">价格</text>
+          <text class="detail-info-value">¥{{selectedService.price}}{{selectedService.unit}}</text>
+        </view>
+        <view class="detail-info-item">
+          <text class="detail-info-label">时长</text>
+          <text class="detail-info-value">约{{selectedService.duration}}分钟</text>
+        </view>
+      </view>
+    </view>
+    <view class="detail-footer">
+      <button class="detail-book-btn" bindtap="bookFromDetail">立即预约</button>
+    </view>
+  </view>
+
+  <!-- 宠物选择弹窗 -->
+  <pet-selector 
+    visible="{{showPetSelector}}" 
+    bind:confirm="onPetSelected"
+    bind:addPet="onAddPet"
+    bind:close="onPetSelectorClose"
+  />
 </view>

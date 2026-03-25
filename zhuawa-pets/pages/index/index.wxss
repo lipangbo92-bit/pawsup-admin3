@@ -210,12 +210,38 @@
   border-radius: 8rpx;
 }
 
+/* 默认 - 金色 */
 .technician-badge {
-  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
   color: #FFFFFF;
   font-size: 20rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
+  background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+}
+
+/* 初级 - 绿色 */
+.level-junior {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+}
+
+/* 中级 - 蓝色 */
+.level-intermediate {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+}
+
+/* 高级 - 紫色 */
+.level-senior {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%) !important;
+}
+
+/* 资深 - 橙色 */
+.level-expert {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+}
+
+/* 首席 - 红色 */
+.level-master {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
 }
 
 /* 第二排：评分和订单数 */
@@ -291,4 +317,200 @@
   font-size: 22rpx;
   color: #F97316;
   font-weight: 600;
+}
+/* pages/index/index.wxss - 添加弹窗样式 */
+
+/* ========== 弹窗遮罩 ========== */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+}
+
+/* ========== 弹窗内容 ========== */
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 600rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  z-index: 101;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.modal-close {
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+  padding: 0 10rpx;
+}
+
+.modal-body {
+  padding: 40rpx 30rpx;
+}
+
+/* 弹窗头像 */
+.modal-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  margin: 0 auto 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 弹窗基本信息 */
+.modal-info {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.modal-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.modal-tags {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.modal-tag {
+  font-size: 24rpx;
+  color: #6B7280;
+  background: #F3F4F6;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+.modal-tag.tag-level {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
+.modal-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40rpx;
+}
+
+.modal-stat {
+  font-size: 26rpx;
+  color: #4B5563;
+}
+
+/* 弹窗简介 */
+.modal-desc {
+  background: #F9FAFB;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 30rpx;
+}
+
+.desc-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.desc-content {
+  font-size: 26rpx;
+  color: #6B7280;
+  line-height: 1.6;
+  display: block;
+}
+
+/* 弹窗作品展示 */
+.modal-works {
+  margin-bottom: 30rpx;
+}
+
+.works-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.works-scroll {
+  width: 100%;
+}
+
+.works-list {
+  display: flex;
+  flex-direction: row;
+  gap: 16rpx;
+  padding-right: 24rpx;
+}
+
+.work-image {
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 2rpx solid #F3F4F6;
+}
+
+/* 弹窗预约按钮 */
+.modal-book-btn {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  padding: 28rpx 0;
+  border-radius: 16rpx;
+}
+
+/* ========== Banner背景图片 ========== */
+.banner-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.banner-text-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }

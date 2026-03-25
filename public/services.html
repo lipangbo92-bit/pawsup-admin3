@@ -27,8 +27,10 @@
                     <li><a href="admin-appointments">📋 预约管理</a></li>
                     <li><a href="orders">📦 订单管理</a></li>
                     <li class="active"><a href="services">🛁 服务管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
                     <li><a href="groomers">👨‍🔧 美容师管理</a></li>
                     <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
                     <li><a href="statistics">📈 数据统计</a></li>
                 </ul>
             </nav>
@@ -58,9 +60,9 @@
                     <!-- 服务图片上传 -->
                     <div class="form-group">
                         <label>服务图片</label>
-                        <div class="service-image-upload" id="serviceImageUpload" style="position:relative;width:200px;height:200px;border:2px dashed #ddd;border-radius:12px;overflow:hidden;cursor:pointer;background:#f9f9f9;margin:0 auto;">
-                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;">
-                            <div class="service-image-preview" id="serviceImagePreview" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;">
+                        <div class="service-image-upload" id="serviceImageUpload" style="position:relative;width:200px;height:200px;border:2px dashed #ddd;border-radius:12px;overflow:hidden;cursor:pointer;background:#f9f9f9;margin:0 auto;" onclick="document.getElementById('serviceImageInput').click()">
+                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)" onclick="this.value=''" style="display:none;">
+                            <div class="service-image-preview" id="serviceImagePreview" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;pointer-events:none;">
                                 <span style="font-size:48px;margin-bottom:8px;">🖼️</span>
                                 <span style="font-size:14px;">点击上传服务图片</span>
                             </div>
@@ -99,6 +101,12 @@
                     <div class="form-group">
                         <label>服务描述</label>
                         <textarea id="serviceDesc" rows="4" placeholder="服务详情描述..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="serviceIsHot" style="width:18px;height:18px;">
+                            <span>标记为热门服务（首页展示）</span>
+                        </label>
                     </div>
                 </form>
             </div>

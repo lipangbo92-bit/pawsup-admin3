@@ -73,10 +73,68 @@ Page({
     const pet = this.data.pets.find(p => p._id === id)
     this.setData({ selectedPet: pet })
   },
-  
+
+  // 头像加载失败处理
+  onAvatarError(e) {
+    const { index } = e.currentTarget.dataset
+    const pets = this.data.pets
+    pets[index].avatarError = true
+    this.setData({ pets })
+  },
+
+  // 编辑宠物
+  onEditPet(e) {
+    const { id } = e.currentTarget.dataset
+    wx.navigateTo({
+      url: `/pages/pet-edit/pet-edit?id=${id}`
+    })
+  },
+
+  // 删除宠物
+  onDeletePet(e) {
+    const { id } = e.currentTarget.dataset
+    const pet = this.data.pets.find(p => p._id === id)
+
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除宠物「${pet.name}」吗？`,
+      confirmColor: '#EF4444',
+      success: (res) => {
+        if (res.confirm) {
+          this.deletePet(id)
+        }
+      }
+    })
+  },
+
+  // 执行删除
+  async deletePet(petId) {
+    wx.showLoading({ title: '删除中...' })
+
+    try {
+      const db = wx.cloud.database()
+      await db.collection('pets').doc(petId).remove()
+
+      wx.hideLoading()
+      wx.showToast({ title: '删除成功', icon: 'success' })
+
+      // 如果删除的是当前选中的宠物，清空选择
+      if (this.data.selectedPet && this.data.selectedPet._id === petId) {
+        this.setData({ selectedPet: null })
+      }
+
+      // 刷新列表
+      this.loadPets()
+    } catch (err) {
+      wx.hideLoading()
+      console.error('删除宠物失败:', err)
+      wx.showToast({ title: '删除失败', icon: 'none' })
+    }
+  },
+
   goToAddPet() {
     wx.navigateTo({
-      url: '/pages/pet-add/pet-add'
+      url: '/pages/pet-register/pet-register'
     })
   },
   

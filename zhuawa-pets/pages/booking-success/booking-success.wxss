@@ -208,9 +208,8 @@
 }
 
 .price-row {
-  margin-top: 8rpx;
-  padding-top: 24rpx;
-  border-top: 2rpx dashed #E5E7EB;
+  margin-top: 0;
+  padding-top: 20rpx;
 }
 
 .price-value {

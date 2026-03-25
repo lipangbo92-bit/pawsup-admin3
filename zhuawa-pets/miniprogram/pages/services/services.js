@@ -1,66 +1,127 @@
-// 服务项目页
+const app = getApp()
+
 Page({
   data: {
+    currentCategory: 0,
+    categories: ['狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
     services: [],
-    categories: ['全部', '美容', '洗澡', '寄养', '医疗'],
-    activeCategory: 0
+    allServices: [],
+    showPetSelector: false,
+    selectedServiceId: ''
   },
 
-  onLoad() {
-    this.loadServices();
+  onLoad(options) {
+    if (options && options.category !== undefined) {
+      const categoryIndex = parseInt(options.category)
+      if (!isNaN(categoryIndex) && categoryIndex >= 0 && categoryIndex < this.data.categories.length) {
+        this.setData({ currentCategory: categoryIndex })
+      }
+    }
+    this.loadServices()
   },
-  
-  // 下拉刷新
-  async onPullDownRefresh() {
-    await this.loadServices();
-    wx.stopPullDownRefresh();
+
+  onShow() {
+    const app = getApp()
+    if (app.globalData && app.globalData.selectedCategory !== undefined) {
+      const categoryIndex = app.globalData.selectedCategory
+      app.globalData.selectedCategory = undefined
+      if (categoryIndex >= 0 && categoryIndex < this.data.categories.length) {
+        this.filterServices(categoryIndex)
+      }
+    }
   },
 
   async loadServices() {
     try {
-      wx.showLoading({ title: '加载中' });
-      
       const res = await wx.cloud.callFunction({
         name: 'services-api',
         data: { action: 'list' }
-      });
+      })
       
-      wx.hideLoading();
-      
-      if (res.result && res.result.success) {
-        const services = res.result.data.map(s => ({
-          id: s._id,
-          name: s.name,
-          price: s.price,
-          duration: s.duration || 60,
-          category: s.category || '美容',
-          description: s.desc || s.description || '专业服务'
-        }));
+      if (res.result && res.result.success && res.result.data) {
+        const services = res.result.data.map(item => ({
+          _id: item._id,
+          name: item.name,
+          desc: item.desc || item.description || '',
+          price: item.price,
+          unit: item.unit || '起',
+          category: item.category || '',
+          image: item.image || '',
+          iconText: this.getIconText(item.category),
+          iconClass: this.getIconClass(item.category)
+        }))
         
-        this.setData({ services });
-      } else {
-        throw new Error('获取数据失败');
+        this.setData({ allServices: services })
+        this.filterServices(this.data.currentCategory)
       }
     } catch (err) {
-      wx.hideLoading();
-      console.error('加载服务失败:', err);
-      // 使用备用数据
-      this.setData({
-        services: [
-          { id: '1', name: '宠物美容', price: 128, duration: 60, category: '美容', description: '专业美容造型' },
-          { id: '2', name: '宠物洗澡', price: 88, duration: 45, category: '洗澡', description: '精致洗护体验' }
-        ]
-      });
+      console.error('加载失败:', err)
     }
   },
 
-  switchCategory(e) {
-    const index = e.currentTarget.dataset.index;
-    this.setData({ activeCategory: index });
+  getIconText(category) {
+    const map = {
+      '狗狗洗护': '🛁', '狗狗造型': '✂️', '狗狗寄养': '🏠',
+      '猫猫洗护': '🧼', '猫猫造型': '💇', '猫猫寄养': '🏨', '上门服务': '🚗'
+    }
+    return map[category] || '🐾'
   },
 
-  goToBooking(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/booking-time-1/booking-time-1?serviceId=${id}` });
+  getIconClass(category) {
+    const map = {
+      '狗狗洗护': 'icon-blue', '狗狗造型': 'icon-purple', '狗狗寄养': 'icon-orange',
+      '猫猫洗护': 'icon-pink', '猫猫造型': 'icon-indigo', '猫猫寄养': 'icon-teal', '上门服务': 'icon-green'
+    }
+    return map[category] || 'icon-blue'
+  },
+
+  switchCategory(e) {
+    const index = parseInt(e.currentTarget.dataset.index)
+    this.filterServices(index)
+  },
+
+  filterServices(index) {
+    const category = this.data.categories[index]
+    const filtered = this.data.allServices.filter(s => s.category === category)
+    
+    this.setData({ 
+      currentCategory: index, 
+      services: filtered
+    })
+  },
+
+  // 路径3：服务页面点击预约
+  bookService(e) {
+    const serviceId = e.currentTarget.dataset.service
+    this.setData({ 
+      showPetSelector: true, 
+      selectedServiceId: serviceId 
+    })
+  },
+
+  // 宠物选择回调
+  onPetSelected(e) {
+    const { pet } = e.detail
+    const { selectedServiceId } = this.data
+    
+    this.setData({ showPetSelector: false })
+    
+    // 路径3：去选时间
+    wx.navigateTo({ 
+      url: `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet._id}&serviceId=${selectedServiceId}` 
+    })
+  },
+
+  onAddPet() {
+    this.setData({ showPetSelector: false })
+    wx.navigateTo({ url: '/pages/pet-register/pet-register' })
+  },
+
+  onPetSelectorClose() {
+    this.setData({ showPetSelector: false })
+  },
+
+  onPullDownRefresh() {
+    this.loadServices().finally(() => wx.stopPullDownRefresh())
   }
-});
+})

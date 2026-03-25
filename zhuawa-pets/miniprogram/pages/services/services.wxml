@@ -1,37 +1,78 @@
-<!--服务项目页-->
+<!--pages/services/services.wxml-->
 <view class="container">
-  <!--分类筛选-->
-  <view class="category-tabs">
-    <view 
-      wx:for="{{categories}}" 
-      wx:key="*this"
-      class="tab-item {{activeCategory === index ? 'active' : ''}}"
-      data-index="{{index}}"
-      bindtap="switchCategory"
-    >
-      {{item}}
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <text class="nav-title">服务项目</text>
     </view>
   </view>
 
-  <!--服务列表-->
-  <view class="service-list">
-    <view 
-      wx:for="{{services}}" 
-      wx:key="id"
-      class="service-card"
-      data-id="{{item.id}}"
-      bindtap="goToBooking"
-    >
-      <view class="service-img"></view>
+  <!-- 左右分栏布局 -->
+  <view class="main-content">
+    <!-- 左侧分类导航 -->
+    <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="index"
+        class="category-item {{currentCategory === index ? 'active' : ''}}"
+        bindtap="switchCategory"
+        data-index="{{index}}"
+      >
+        <text class="category-text">{{item}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧服务列表 -->
+    <scroll-view class="service-list" scroll-y enhanced show-scrollbar="{{false}}">
       <view class="service-content">
-        <text class="service-name">{{item.name}}</text>
-        <text class="service-desc">{{item.description}}</text>
-        <view class="service-meta">
-          <text class="service-price">¥{{item.price}}</text>
-          <text class="service-duration">{{item.duration}}分钟</text>
+        <view 
+          wx:for="{{services}}" 
+          wx:key="_id"
+          class="service-card"
+          bindtap="bookService"
+          data-service="{{item._id}}"
+        >
+          <!-- 服务图片或图标 -->
+          <view class="service-image-wrapper">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="service-image"/>
+            <view wx:else class="service-icon {{item.iconClass}}">
+              <text>{{item.iconText}}</text>
+            </view>
+          </view>
+          
+          <view class="service-info">
+            <view>
+              <text class="service-name">{{item.name}}</text>
+              <text class="service-desc">{{item.desc || ' '}}</text>
+            </view>
+            <view class="service-bottom">
+              <view class="price-wrapper">
+                <text class="price-symbol">¥</text>
+                <text class="price-value">{{item.price}}</text>
+                <text class="price-unit">{{item.unit}}</text>
+              </view>
+              <view class="book-btn">
+                <text class="book-icon">+</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 无数据提示 -->
+        <view wx:if="{{services.length === 0}}" class="empty-state">
+          <text class="empty-icon">🛁</text>
+          <text class="empty-text">该分类暂无服务</text>
         </view>
       </view>
-      <button class="book-btn">预约</button>
-    </view>
+    </scroll-view>
   </view>
+
+  <!-- 宠物选择弹窗 -->
+  <pet-selector 
+    visible="{{showPetSelector}}" 
+    bind:confirm="onPetSelected"
+    bind:addPet="onAddPet"
+    bind:close="onPetSelectorClose"
+  />
 </view>

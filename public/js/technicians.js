@@ -146,7 +146,7 @@ function renderTechniciansGrid(technicians) {
     container.innerHTML = technicians.map(tech => `
         <div class="technician-card">
             <div class="tech-avatar">
-                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
+                ${tech.avatar ? `<img src="${tech.avatar}" alt="${tech.name}">` : '<span class="avatar-placeholder">👤</span>'}
             </div>
             <div class="tech-info">
                 <h4>${tech.name}</h4>
@@ -158,7 +158,7 @@ function renderTechniciansGrid(technicians) {
                 <p class="tech-specialty">专业：${tech.specialty || '暂无'}</p>
                 ${renderWorksPreview(tech.works)}
                 <div class="tech-meta">
-                    <span class="tech-orders">订单数：${tech.orderCount || 0}</span>
+                    <span class="tech-orders">订单数：${tech.orders || 0}</span>
                 </div>
             </div>
             <div class="tech-actions">
@@ -200,15 +200,15 @@ function editTechnician(techId) {
     document.getElementById('techPosition').value = currentTechnician.position || '美容师';
     document.getElementById('techLevel').value = currentTechnician.level || '中级';
     document.getElementById('techRating').value = currentTechnician.rating || '';
-    document.getElementById('techOrderCount').value = currentTechnician.orderCount || '';
+    document.getElementById('techOrderCount').value = currentTechnician.orders || '';
     
     worksImages = currentTechnician.works || [];
     renderWorksGrid();
     
     document.getElementById('avatarInput').value = '';
     
-    if (currentTechnician.avatarUrl) {
-        document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatarUrl}" alt="头像">`;
+    if (currentTechnician.avatar) {
+        document.getElementById('avatarPreview').innerHTML = `<img src="${currentTechnician.avatar}" alt="头像">`;
     } else {
         document.getElementById('avatarPreview').innerHTML = '<span>👤</span>';
     }
@@ -235,7 +235,7 @@ function renderWorksGrid() {
     if (addBtn) addBtn.style.display = worksImages.length >= 6 ? 'none' : 'flex';
 }
 
-function handleWorksUpload(input) {
+async function handleWorksUpload(input) {
     if (!input.files || input.files.length === 0) return;
     
     const remainingSlots = 6 - worksImages.length;
@@ -247,19 +247,37 @@ function handleWorksUpload(input) {
     
     const files = Array.from(input.files).slice(0, remainingSlots);
     
-    files.forEach(file => {
+    for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
             alert(`图片 ${file.name} 超过5MB限制，已跳过`);
-            return;
+            continue;
         }
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            worksImages.push(e.target.result);
+        try {
+            const base64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            
+            // 压缩作品图片：最大 800px，质量 0.7，目标 < 150KB
+            let compressed = await compressImage(base64, 800, 0.7);
+            console.log(`作品图片压缩后大小: ${Math.round(compressed.length / 1024)} KB`);
+            
+            // 如果仍然太大，进一步压缩
+            if (compressed.length > 200000) { // 约 150KB base64
+                compressed = await compressImage(compressed, 600, 0.6);
+                console.log(`二次压缩后大小: ${Math.round(compressed.length / 1024)} KB`);
+            }
+            
+            worksImages.push(compressed);
             renderWorksGrid();
-        };
-        reader.readAsDataURL(file);
-    });
+        } catch (err) {
+            console.error('处理图片失败:', err);
+            alert(`图片 ${file.name} 处理失败`);
+        }
+    }
     
     input.value = '';
 }
@@ -298,9 +316,16 @@ async function previewAvatar(input) {
         console.log('文件读取完成，开始压缩...');
         
         try {
-            // 压缩图片
-            const compressedBase64 = await compressImage(e.target.result, 400, 0.8);
-            console.log('压缩完成');
+            // 压缩图片：头像最大 400px，质量 0.7，目标大小 < 50KB
+            let compressedBase64 = await compressImage(e.target.result, 400, 0.7);
+            console.log('压缩完成，大小:', Math.round(compressedBase64.length / 1024), 'KB');
+            
+            // 如果仍然太大，进一步压缩
+            if (compressedBase64.length > 70000) { // 约 50KB base64
+                console.log('图片仍然太大，进一步压缩...');
+                compressedBase64 = await compressImage(compressedBase64, 300, 0.6);
+                console.log('二次压缩后大小:', Math.round(compressedBase64.length / 1024), 'KB');
+            }
             
             const preview = document.getElementById('avatarPreview');
             if (preview) {
@@ -348,18 +373,18 @@ async function saveTechnician() {
     if (saveBtn) saveBtn.textContent = '上传中...';
     
     try {
-        let avatarUrl = '';
+        let avatar = '';
         
         // 如果有旧头像，先保留
-        if (currentTechnician && currentTechnician.avatarUrl) {
-            avatarUrl = currentTechnician.avatarUrl;
+        if (currentTechnician && (currentTechnician.avatar || currentTechnician.avatarUrl)) {
+            avatar = currentTechnician.avatar || currentTechnician.avatarUrl;
         }
         
         // 如果有新头像，上传到云存储
         if (currentTechnician && currentTechnician._tempAvatar) {
             console.log('检测到新头像，开始上传...');
-            avatarUrl = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
-            console.log('头像上传完成:', avatarUrl);
+            avatar = await uploadToCloudStorage(currentTechnician._tempAvatar, 'avatar.jpg');
+            console.log('头像上传完成:', avatar);
         }
         
         const techData = {
@@ -370,7 +395,7 @@ async function saveTechnician() {
             rating,
             orders: orderCount,
             works: worksImages,
-            avatarUrl: avatarUrl  // 确保这个字段有值
+            avatar: avatar
         };
         
         console.log('保存数据:', techData);

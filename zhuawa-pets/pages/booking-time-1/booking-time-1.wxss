@@ -478,57 +478,72 @@
 }
 
 .technician-avatar {
-  width: 100rpx;
-  height: 100rpx;
-  background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%);
+  width: 96rpx;
+  height: 96rpx;
   border-radius: 50%;
+  overflow: hidden;
+  margin-right: 20rpx;
+  background: #E5E7EB;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.technician-avatar .avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.technician-avatar .avatar-emoji {
   font-size: 48rpx;
-  margin-right: 24rpx;
 }
 
 .technician-info {
   flex: 1;
 }
 
+.technician-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
 .technician-name {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: #1F2937;
-  display: block;
-  margin-bottom: 8rpx;
+  margin-right: 12rpx;
 }
 
-.technician-tags {
-  display: flex;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
+.technician-position {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-right: 12rpx;
 }
 
-.specialty-tag {
+.technician-badge {
   font-size: 22rpx;
   color: #F97316;
-  background-color: rgba(249, 115, 22, 0.1);
-  padding: 4rpx 16rpx;
+  background: rgba(249, 115, 22, 0.1);
+  padding: 4rpx 12rpx;
   border-radius: 8rpx;
 }
 
-.technician-rating {
+.technician-stats {
   display: flex;
   align-items: center;
 }
 
-.rating-star {
-  font-size: 24rpx;
-  margin-right: 4rpx;
-}
-
-.rating-value {
+.technician-rating {
   font-size: 26rpx;
   color: #F97316;
-  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.technician-orders {
+  font-size: 24rpx;
+  color: #6B7280;
 }
 
 /* 选择指示器 */

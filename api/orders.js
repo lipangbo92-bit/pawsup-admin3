@@ -29,7 +29,8 @@ module.exports = async (req, res) => {
     
     switch (action) {
       case 'list':
-        result = await getOrders(status, date);
+        const { orderType } = req.body || {};
+        result = await getOrders(status, date, orderType);
         break;
       case 'getById':
         result = await getOrderById(id);
@@ -61,20 +62,54 @@ module.exports = async (req, res) => {
 };
 
 // 获取订单列表
-async function getOrders(status, date) {
+async function getOrders(status, date, orderType) {
   let query = db.collection('orders');
-  
+
   if (status) {
     query = query.where({ status });
   }
   if (date) {
     query = query.where({ appointmentDate: date });
   }
-  
+  if (orderType) {
+    query = query.where({ orderType });
+  }
+
   const result = await query.orderBy('createdAt', 'desc').get();
+
+  // 处理订单数据，统一客户信息字段
+  console.log('[API Orders] Raw orders count:', result.data.length);
+  if (result.data.length > 0) {
+    console.log('[API Orders] First order:', JSON.stringify(result.data[0], null, 2));
+  }
+  
+  const processedOrders = result.data.map(order => {
+    let customerName = '';
+    let customerPhone = '';
+
+    if (order.orderType === 'visiting') {
+      // 上门服务：显示客户预留的联系方式
+      customerName = order.contactName || order.customerName || '未知';
+      customerPhone = order.contactPhone || order.customerPhone || '';
+    } else {
+      // 洗护、寄养：显示宠物名字 + 手机号
+      customerName = order.petName || '未知';
+      customerPhone = order.customerPhone || '';
+    }
+    
+    console.log(`[API Orders] Order ${order.orderNo}: petName=${order.petName}, customerName=${customerName}`);
+
+    return {
+      ...order,
+      petName: order.petName || '',
+      customerName,
+      customerPhone
+    };
+  });
+
   return {
     success: true,
-    data: result.data
+    data: processedOrders
   };
 }
 
