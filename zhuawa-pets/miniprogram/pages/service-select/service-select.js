@@ -14,6 +14,8 @@ Page({
 
   onLoad(options) {
     const { mode, petId, technicianId, category, petType } = options
+    console.log('[service-select] onLoad options:', options)
+    console.log('[service-select] petId:', petId)
     this.setData({ mode, petId, technicianId, petType })
     
     // 如果有technicianId，加载美容师信息
@@ -120,9 +122,11 @@ Page({
     if (!service) return
     
     const { mode, petId, technicianId } = this.data
+    console.log('[service-select] selectService petId:', petId)
     
     if (mode === 'path1') {
       // 路径1：已选宠物 -> 选服务 -> 选时间 -> 选美容师
+      console.log('[service-select] Navigating to booking-time-1 with petId:', petId)
       wx.navigateTo({
         url: `/pages/booking-time-1/booking-time-1?mode=path1&petId=${petId}&serviceId=${serviceId}`
       })

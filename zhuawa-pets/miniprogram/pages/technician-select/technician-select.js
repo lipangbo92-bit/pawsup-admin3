@@ -12,6 +12,8 @@ Page({
 
   onLoad(options) {
     const { mode, petId, serviceId, date, time } = options
+    console.log('[technician-select] onLoad options:', options)
+    console.log('[technician-select] petId:', petId)
     this.setData({ 
       mode, 
       petId, 
@@ -126,6 +128,7 @@ Page({
   // 跳转到确认页
   goToConfirm(technician) {
     const { mode, petId, serviceId, appointmentDate, appointmentTime } = this.data
+    console.log('[technician-select] goToConfirm petId:', petId)
     
     wx.navigateTo({
       url: `/pages/booking-confirm/booking-confirm?mode=${mode}&petId=${petId}&serviceId=${serviceId}&technicianId=${technician._id}&date=${appointmentDate}&time=${appointmentTime}`

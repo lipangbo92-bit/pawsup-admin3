@@ -13,6 +13,8 @@ Page({
 
   onLoad(options) {
     const { mode, petId, serviceId } = options
+    console.log('[booking-time-1] onLoad options:', options)
+    console.log('[booking-time-1] petId:', petId)
     this.setData({ mode, petId, serviceId })
     
     this.generateDateList()
@@ -146,6 +148,7 @@ Page({
     }
     
     const { mode, petId, serviceId, selectedDateStr, selectedTime } = this.data
+    console.log('[booking-time-1] onConfirm petId:', petId)
     
     // 路径1/3：去选美容师
     wx.navigateTo({
