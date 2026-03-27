@@ -82,22 +82,42 @@ async function getOrders(status, date, orderType) {
   if (result.data.length > 0) {
     console.log('[API Orders] First order:', JSON.stringify(result.data[0], null, 2));
   }
-  
+
+  // 获取所有订单的 userId，用于查询用户信息
+  const userIds = [...new Set(result.data.map(order => order.userId).filter(id => id))];
+  console.log('[API Orders] 需要查询的用户ID:', userIds);
+
+  // 批量查询用户信息
+  const userMap = await getUsersInfo(userIds);
+  console.log('[API Orders] 用户信息映射:', userMap);
+
   const processedOrders = result.data.map(order => {
     let customerName = '';
     let customerPhone = '';
 
-    if (order.orderType === 'visiting') {
-      // 上门服务：显示客户预留的联系方式
-      customerName = order.contactName || order.customerName || '未知';
-      customerPhone = order.contactPhone || order.customerPhone || '';
-    } else {
-      // 洗护、寄养：显示宠物名字 + 手机号
+    // 优先使用订单中保存的客户信息
+    if (order.customerName && order.customerName !== '未知') {
+      customerName = order.customerName;
+      customerPhone = order.customerPhone || '';
+    }
+    // 如果没有，根据 userId 查询用户信息
+    else if (order.userId && userMap[order.userId]) {
+      const userInfo = userMap[order.userId];
+      customerName = userInfo.nickName || userInfo.nickname || '未知';
+      customerPhone = userInfo.phone || userInfo.phoneNumber || '';
+    }
+    // 上门服务特殊处理
+    else if (order.orderType === 'visiting') {
+      customerName = order.contactName || '未知';
+      customerPhone = order.contactPhone || '';
+    }
+    // 最后 fallback
+    else {
       customerName = order.petName || '未知';
       customerPhone = order.customerPhone || '';
     }
-    
-    console.log(`[API Orders] Order ${order.orderNo}: petName=${order.petName}, customerName=${customerName}`);
+
+    console.log(`[API Orders] Order ${order.orderNo}: userId=${order.userId}, customerName=${customerName}, customerPhone=${customerPhone}`);
 
     return {
       ...order,
@@ -113,12 +133,72 @@ async function getOrders(status, date, orderType) {
   };
 }
 
+// 批量查询用户信息
+async function getUsersInfo(userIds) {
+  if (!userIds || userIds.length === 0) {
+    return {};
+  }
+
+  const userMap = {};
+
+  try {
+    // 由于云开发数据库限制，需要分批查询（每次最多 20 个）
+    const batchSize = 20;
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      const batch = userIds.slice(i, i + batchSize);
+
+      // 查询 users 集合
+      const usersResult = await db.collection('users')
+        .where({
+          _openid: db.command.in(batch)
+        })
+        .get();
+
+      console.log(`[API Orders] 查询用户结果 (${i}-${i + batch.length}):`, usersResult.data.length);
+
+      usersResult.data.forEach(user => {
+        userMap[user._openid] = {
+          nickName: user.nickName || user.nickname,
+          phone: user.phone || user.phoneNumber
+        };
+      });
+    }
+  } catch (err) {
+    console.error('[API Orders] 查询用户信息失败:', err);
+  }
+
+  return userMap;
+}
+
 // 获取单个订单
 async function getOrderById(id) {
   const result = await db.collection('orders').doc(id).get();
+  const order = result.data;
+
+  if (!order) {
+    return { success: false, error: 'Order not found' };
+  }
+
+  // 如果订单没有客户信息，根据 userId 查询
+  if ((!order.customerName || order.customerName === '未知') && order.userId) {
+    try {
+      const userResult = await db.collection('users')
+        .where({ _openid: order.userId })
+        .get();
+
+      if (userResult.data.length > 0) {
+        const userInfo = userResult.data[0];
+        order.customerName = userInfo.nickName || userInfo.nickname || '未知';
+        order.customerPhone = userInfo.phone || userInfo.phoneNumber || '';
+      }
+    } catch (err) {
+      console.error('[API Orders] 查询单个订单用户信息失败:', err);
+    }
+  }
+
   return {
     success: true,
-    data: result.data
+    data: order
   };
 }
 
