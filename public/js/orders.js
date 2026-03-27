@@ -101,7 +101,7 @@ async function loadOrders(page = 1) {
     } catch (err) {
         console.error('Load orders error:', err);
         document.getElementById('ordersTableBody').innerHTML = `
-            <tr><td colspan="8" class="empty-cell">
+            <tr><td colspan="9" class="empty-cell">
                 加载失败: ${err.message}<br>
                 <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
             </td></tr>
@@ -119,7 +119,7 @@ function renderOrdersTable(orders) {
     }
     
     if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-cell">暂无订单</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">暂无订单</td></tr>';
         return;
     }
 
@@ -134,6 +134,7 @@ function renderOrdersTable(orders) {
             </td>
             <td>${order.petName || '-'}</td>
             <td>${order.serviceName}</td>
+            <td>${order.technicianName || '不指定'}</td>
             <td>
                 <div class="appointment-time">
                     <span class="date">${order.appointmentDate}</span>
