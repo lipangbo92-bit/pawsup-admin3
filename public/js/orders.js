@@ -75,8 +75,8 @@ async function loadOrders(page = 1) {
         
         currentOrders = (result.data || []).map(order => {
             // 调试日志
-            console.log('[Orders] Processing order:', order.orderNo, 'petName:', order.petName, 'petInfo:', order.petInfo);
-            
+            console.log('[Orders] Processing order:', order.orderNo, 'petName:', order.petName, 'totalPrice:', order.totalPrice, 'finalPrice:', order.finalPrice);
+
             return {
                 ...order,
                 _id: order._id || order.id,
@@ -84,7 +84,8 @@ async function loadOrders(page = 1) {
                 customerName: order.customerName || '未知',
                 customerPhone: order.customerPhone || '',
                 serviceName: order.serviceName || '未知服务',
-                amount: order.price || order.amount || 0,
+                // 金额字段：优先使用 finalPrice（实付金额），然后是 totalPrice（订单金额）
+                amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
                 appointmentDate: order.appointmentDate || '',
                 appointmentTime: order.appointmentTime || '',
                 // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
@@ -244,8 +245,26 @@ function viewOrder(orderId) {
                 <span class="value">${selectedOrder.technicianName || '不指定'}</span>
             </div>
             <div class="detail-row">
+                <span class="label">服务价格：</span>
+                <span class="value">¥${(selectedOrder.servicePrice || 0).toFixed(2)}</span>
+            </div>
+            ${selectedOrder.discount ? `
+            <div class="detail-row">
+                <span class="label">优惠金额：</span>
+                <span class="value" style="color: #f97316;">-¥${selectedOrder.discount.toFixed(2)}</span>
+            </div>
+            ` : ''}
+            <div class="detail-row">
                 <span class="label">订单金额：</span>
-                <span class="value highlight">¥${selectedOrder.amount.toFixed(2)}</span>
+                <span class="value">¥${(selectedOrder.totalPrice || selectedOrder.amount || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">实付金额：</span>
+                <span class="value highlight">¥${(selectedOrder.finalPrice || selectedOrder.amount || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">支付状态：</span>
+                <span class="value">${selectedOrder.paymentStatus === 'paid' ? '✅ 已支付' : '⏳ 未支付'}</span>
             </div>
         </div>
         ${selectedOrder.address ? `
