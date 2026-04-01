@@ -109,8 +109,7 @@ Page({
   // 更新档位样式
   updateLevelStyle(levelNum, levels) {
     const levelConfig = levels.find(l => l.level === levelNum);
-    if (!levelConfig) return;
-
+    
     // 根据档位设置颜色和图标（新配色方案）
     const colorMap = {
       1: { 
@@ -146,8 +145,9 @@ Page({
     const colors = colorMap[levelNum] || colorMap[1];
     
     // 使用管理端上传的自定义图标，如果没有则使用默认 emoji
-    const icon = levelConfig.iconUrl || colors.icon;
-    const isCustomIcon = !!levelConfig.iconUrl;
+    // 优先从 levelConfig 获取 iconUrl，如果不存在则使用默认
+    const icon = (levelConfig && levelConfig.iconUrl) ? levelConfig.iconUrl : colors.icon;
+    const isCustomIcon = !!(levelConfig && levelConfig.iconUrl);
     
     // 修复折扣显示：0.75 应该显示为 7.5 折，不是 8 折
     const discountValue = levelConfig.discount * 10;
