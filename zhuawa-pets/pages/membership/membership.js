@@ -9,19 +9,22 @@ Page({
       points: 0
     },
     balance: 0,
-    
+
     // 档位配置
     levels: [],
     currentLevel: null,
     nextLevel: null,
     nextLevelDiff: 0,
     progressPercent: 0,
-    
+
     // 样式
     membershipColor: '#9CA3AF',
     membershipColorDark: '#6B7280',
     membershipIcon: '⭐',
-    discountText: '10'
+    discountText: '10',
+
+    // 权益图标映射
+    benefitIcons: ['💰', '🎁', '⭐', '👑', '🏠', '📞', '🎉', '💎']
   },
 
   onLoad() {
