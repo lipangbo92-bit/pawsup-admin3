@@ -184,22 +184,28 @@ Page({
 
   // 余额明细
   goToBalanceRecords() {
-    wx.navigateTo({
-      url: '/pages/balance-records/balance-records'
+    wx.showModal({
+      title: '提示',
+      content: '该功能仍在开发中，请微信联系我们～',
+      showCancel: false
     });
   },
 
   // 积分明细
   goToPointsRecords() {
-    wx.navigateTo({
-      url: '/pages/points-records/points-records'
+    wx.showModal({
+      title: '提示',
+      content: '该功能仍在开发中，请微信联系我们～',
+      showCancel: false
     });
   },
 
   // 优惠券
   goToCoupons() {
-    wx.navigateTo({
-      url: '/pages/coupons/coupons'
+    wx.showModal({
+      title: '提示',
+      content: '该功能仍在开发中，请微信联系我们～',
+      showCancel: false
     });
   },
 

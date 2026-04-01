@@ -106,8 +106,4 @@
     </view>
   </view>
 
-  <!-- 充值按钮 -->
-  <view class="recharge-section">
-    <button class="recharge-btn" bindtap="goToRecharge">立即充值</button>
-  </view>
 </view>
