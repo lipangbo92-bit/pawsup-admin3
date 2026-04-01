@@ -32,12 +32,16 @@ Page({
     this.setData({ showSelector: true })
   },
 
-  // 编辑宠物
-  editPet(e) {
+  // 显示编辑宠物弹窗
+  showEditPet(e) {
     const { id } = e.currentTarget.dataset
-    // 可以在这里实现编辑逻辑，或者跳转到编辑页面
-    wx.showToast({ title: '编辑功能开发中', icon: 'none' })
+    this.setData({ 
+      showSelector: true,
+      editPetId: id
+    })
   },
+
+
 
   // 删除宠物
   deletePet(e) {
