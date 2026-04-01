@@ -88,7 +88,20 @@ async function initDefaultLevels() {
 function fillFormData() {
     membershipLevels.forEach(level => {
         const levelNum = level.level;
-        if (levelNum === 1) return; // 普通会员不编辑
+        
+        // 填充图标（所有档位）
+        updateIconDisplay(levelNum, level.icon, level.iconUrl);
+        
+        // 填充权益（所有档位）
+        const benefitsInput = document.getElementById(`benefits-${levelNum}`);
+        if (benefitsInput && level.benefits) {
+            benefitsInput.value = Array.isArray(level.benefits) ? level.benefits.join(',') : level.benefits;
+        }
+        
+        if (levelNum === 1) {
+            // 普通会员只编辑图标和权益
+            return;
+        }
         
         // 填充名称
         const nameInput = document.getElementById(`name-${levelNum}`);
@@ -112,15 +125,6 @@ function fillFormData() {
         if (giftValueInput) {
             giftValueInput.value = (level.giftConfig?.giftValue || 0) / 100;
         }
-        
-        // 填充权益
-        const benefitsInput = document.getElementById(`benefits-${levelNum}`);
-        if (benefitsInput && level.benefits) {
-            benefitsInput.value = Array.isArray(level.benefits) ? level.benefits.join(',') : level.benefits;
-        }
-        
-        // 填充图标
-        updateIconDisplay(levelNum, level.icon, level.iconUrl);
     });
 }
 
@@ -365,9 +369,12 @@ async function saveConfig() {
                 iconUrl: iconUrl
             };
 
-            // 1档（普通会员）只需要更新 iconUrl
+            // 1档（普通会员）更新 iconUrl 和 benefits
             if (i === 1) {
-                // 普通会员只更新图标
+                // 普通会员更新图标和权益
+                const benefitsStr = document.getElementById(`benefits-${i}`)?.value || '';
+                const benefits = benefitsStr.split(',').map(b => b.trim()).filter(b => b);
+                updateData.benefits = benefits;
             } else {
                 // 2-4档更新所有字段
                 const benefitsStr = document.getElementById(`benefits-${i}`)?.value || '';
