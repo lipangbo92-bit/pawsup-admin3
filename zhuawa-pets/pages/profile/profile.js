@@ -103,7 +103,7 @@ Page({
           'userInfo.levelIcon': icon,
           'userInfo.isCustomIcon': isCustomIcon,
           'userInfo.levelColor': colors.main,
-          'stats.balance': balance,
+          'stats.balance': (balance / 100).toFixed(2),
           'stats.points': membership.points || 0
         });
         
