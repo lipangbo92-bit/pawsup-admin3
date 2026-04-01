@@ -66,6 +66,9 @@ Page({
         const balance = res.result.balance || 0;
         const levels = res.result.levels || [];
 
+        console.log('[Membership] 获取到的levels:', levels);
+        console.log('[Membership] 普通会员level 1:', levels.find(l => l.level === 1));
+
         this.setData({
           membership: membership,
           balance: (balance / 100).toFixed(2),
@@ -148,6 +151,11 @@ Page({
     // 优先从 levelConfig 获取 iconUrl，如果不存在则使用默认
     const icon = (levelConfig && levelConfig.iconUrl) ? levelConfig.iconUrl : colors.icon;
     const isCustomIcon = !!(levelConfig && levelConfig.iconUrl);
+    
+    console.log('[Membership] updateLevelStyle - levelNum:', levelNum);
+    console.log('[Membership] updateLevelStyle - levelConfig:', levelConfig);
+    console.log('[Membership] updateLevelStyle - icon:', icon);
+    console.log('[Membership] updateLevelStyle - isCustomIcon:', isCustomIcon);
     
     // 修复折扣显示：0.75 应该显示为 7.5 折，不是 8 折
     const discountValue = levelConfig.discount * 10;
