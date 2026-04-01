@@ -167,7 +167,7 @@ Page({
   // 点击统计项 - 我的宠物
   onMyPets() {
     wx.navigateTo({
-      url: '/pages/pets/pets'
+      url: '/pages/pet-select/pet-select'
     });
   },
 
@@ -189,7 +189,7 @@ Page({
   // 我的宠物
   onMyPets() {
     wx.navigateTo({
-      url: '/pages/pets/pets'
+      url: '/pages/pet-select/pet-select'
     });
   },
 
