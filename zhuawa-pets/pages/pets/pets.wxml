@@ -1,0 +1,42 @@
+<!--pages/pets/pets.wxml-->
+<view class="page-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">我的宠物</text>
+    <text class="add-btn" bindtap="showAddPet">+ 添加宠物</text>
+  </view>
+
+  <!-- 宠物列表 -->
+  <view class="pets-list" wx:if="{{pets.length > 0}}">
+    <view class="pet-card" wx:for="{{pets}}" wx:key="_id">
+      <view class="pet-avatar">
+        <image wx:if="{{item.avatar && !item.avatarError}}" src="{{item.avatar}}" mode="aspectFill" binderror="onAvatarError" data-index="{{index}}"></image>
+        <text wx:else class="avatar-placeholder">{{item.type === 'dog' ? '🐕' : item.type === 'cat' ? '🐈' : '🐾'}}</text>
+      </view>
+      <view class="pet-info">
+        <view class="pet-name-row">
+          <text class="pet-name">{{item.name}}</text>
+          <text class="pet-gender">{{item.gender === 'male' ? '♂' : '♀'}}</text>
+        </view>
+        <view class="pet-detail">
+          <text class="pet-type">{{item.type === 'dog' ? '狗狗' : item.type === 'cat' ? '猫咪' : '其他'}} · {{item.breed}}</text>
+          <text class="pet-age">{{item.age}}岁 · {{item.weight}}</text>
+        </view>
+      </view>
+      <view class="pet-actions">
+        <text class="action-btn edit" bindtap="editPet" data-id="{{item._id}}">编辑</text>
+        <text class="action-btn delete" bindtap="deletePet" data-id="{{item._id}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{pets.length === 0}}">
+    <text class="empty-icon">🐾</text>
+    <text class="empty-text">还没有添加宠物</text>
+    <text class="empty-subtext">点击上方"添加宠物"按钮添加您的第一个宠物</text>
+  </view>
+
+  <!-- 宠物选择器弹窗（用于添加/编辑） -->
+  <pet-selector visible="{{showSelector}}" bind:confirm="onPetConfirm" bind:close="onPetClose"></pet-selector>
+</view>
