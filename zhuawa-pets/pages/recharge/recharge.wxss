@@ -281,6 +281,10 @@
   font-weight: 600;
   border-radius: 40rpx;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .recharge-btn::after {
