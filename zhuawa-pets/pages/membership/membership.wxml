@@ -10,7 +10,6 @@
         </view>
         <text class="level-name">{{membership.levelName}}</text>
       </view>
-      <text class="discount-text" wx:if="{{membership.discount < 1}}">{{discountText}}折</text>
     </view>
     
     <view class="progress-section" wx:if="{{nextLevel}}">
