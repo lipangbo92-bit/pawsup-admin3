@@ -184,7 +184,8 @@ async function getMembershipLevels() {
       return {
         ...defaultLevel,
         ...doc,
-        benefits: doc.benefits || defaultLevel?.benefits || []
+        benefits: doc.benefits || defaultLevel?.benefits || [],
+        iconUrl: doc.iconUrl || ''
       }
     })
 
