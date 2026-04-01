@@ -113,6 +113,11 @@
   color: #D97706;
 }
 
+.status-confirmed {
+  background-color: #DBEAFE;
+  color: #2563EB;
+}
+
 .status-completed {
   background-color: #D1FAE5;
   color: #059669;

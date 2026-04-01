@@ -2,7 +2,7 @@
 .page-container {
   min-height: 100vh;
   background-color: #FFF7ED;
-  padding-bottom: 180rpx;
+  padding-bottom: 240rpx;
 }
 
 /* ========== 顶部导航栏 ========== */

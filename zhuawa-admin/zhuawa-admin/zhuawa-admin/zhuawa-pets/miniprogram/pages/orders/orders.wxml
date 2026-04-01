@@ -2,8 +2,8 @@
 <view class="container">
   <!--状态筛选-->
   <view class="status-tabs">
-    <view 
-      wx:for="{{statusList}}" 
+    <view
+      wx:for="{{statusList}}"
       wx:key="key"
       class="tab-item {{status === item.key ? 'active' : ''}}"
       data-status="{{item.key}}"
@@ -15,29 +15,52 @@
 
   <!--订单列表-->
   <view class="order-list">
-    <view 
-      wx:for="{{orders}}" 
-      wx:key="_id"
+    <view
+      wx:for="{{orders}}"
+      wx:key="id"
       class="order-card"
-      data-id="{{item._id}}"
+      data-id="{{item.id}}"
       bindtap="goToDetail"
     >
       <view class="order-header">
-        <text class="order-no">{{item.orderNo || item._id}}</text>
-        <text class="order-status {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</text>
+        <text class="order-no">{{item.orderNo || item.id}}</text>
+        <text class="order-status {{item.paymentStatus === 'unpaid' ? 'status-unpaid' : ''}}">{{item.statusText}}</text>
       </view>
-      
+
       <view class="order-body">
         <view class="service-name">{{item.serviceName}}</view>
         <view class="order-info">
-          <text>{{item.petName}}</text>
+          <text wx:if="{{item.petName}}">{{item.petName}}</text>
           <text>{{item.date}} {{item.time}}</text>
         </view>
       </view>
-      
+
       <view class="order-footer">
-        <text class="price">¥{{item.servicePrice}}</text>
-        <text class="arrow">›</text>
+        <view class="price-section">
+          <text class="price-label">{{item.priceLabel}}：</text>
+          <text class="price">¥{{item.displayPrice}}</text>
+        </view>
+        <view class="action-section">
+          <!-- 待支付显示去支付按钮 -->
+          <view
+            class="btn btn-primary"
+            wx:if="{{item.paymentStatus === 'unpaid'}}"
+            catchtap="payOrder"
+            data-id="{{item.id}}"
+          >
+            去支付
+          </view>
+          <!-- 待服务显示取消按钮 -->
+          <view
+            class="btn btn-default"
+            wx:if="{{item.status === 'pending' && item.paymentStatus !== 'unpaid'}}"
+            catchtap="cancelOrder"
+            data-id="{{item.id}}"
+          >
+            取消预约
+          </view>
+          <text wx:else class="arrow">›</text>
+        </view>
       </view>
     </view>
 

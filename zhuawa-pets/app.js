@@ -12,13 +12,22 @@ App({
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
 
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
+    // 检查用户是否已登录
+    this.checkUserLogin();
   },
+
+  // 检查用户登录状态
+  checkUserLogin() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (userInfo) {
+      this.globalData.userInfo = userInfo;
+      console.log('[App] 用户已登录:', userInfo);
+    } else {
+      console.log('[App] 用户未登录');
+      // 可以在这里自动跳转到登录页，或者让页面自己判断
+    }
+  },
+
   globalData: {
     userInfo: null
   }

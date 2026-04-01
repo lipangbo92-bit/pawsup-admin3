@@ -81,6 +81,34 @@ page {
   flex: 1;
 }
 
+/* 右侧操作按钮区 */
+.pet-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.action-btn {
+  padding: 12rpx 24rpx;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.action-btn.edit {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.action-btn.delete {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+.action-btn:active {
+  opacity: 0.7;
+}
+
 .pet-avatar {
   width: 96rpx;
   height: 96rpx;
@@ -103,36 +131,6 @@ page {
 
 .pet-info {
   flex: 1;
-}
-
-/* 右侧操作按钮区 */
-.pet-actions {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
-.action-btn {
-  padding: 12rpx 24rpx;
-  border-radius: 24rpx;
-  font-size: 24rpx;
-  font-weight: 600;
-}
-
-.action-btn.edit {
-  background: #EC4899;
-  color: #fff;
-}
-
-.action-btn.delete {
-  background: #FEE2E2;
-  color: #EF4444;
-  border: 2rpx solid #EF4444;
-}
-
-.action-btn:active {
-  opacity: 0.8;
-  transform: scale(0.95);
 }
 
 .pet-name {

@@ -50,66 +50,45 @@
           <text class="section-title">选择房型</text>
         </view>
         
-        <!-- 房型列表 -->
-        <view class="room-list">
-          <view class="room-card {{selectedRoom.type === 'cage' ? 'selected' : ''}}" bindtap="selectRoom" data-type="cage" data-price="88" data-name="围栏/笼养">
-            <view class="room-main">
-              <view class="room-icon-wrap cage">
-                <text class="room-emoji">🏠</text>
-              </view>
-              <view class="room-info">
-                <text class="room-name">围栏/笼养</text>
-                <text class="room-desc">适合小型犬猫咪</text>
-              </view>
-              <view class="room-price-wrap">
-                <text class="room-price">¥88</text>
-                <text class="room-unit">/晚</text>
-              </view>
-            </view>
-            <view class="room-tags">
-              <text class="tag">基础配置</text>
-              <text class="tag">24h监控</text>
-            </view>
-          </view>
+        <!-- 加载中 -->
+        <view class="loading-state" wx:if="{{loadingRooms}}">
+          <text class="loading-text">加载房型中...</text>
+        </view>
 
-          <view class="room-card {{selectedRoom.type === 'standard' ? 'selected' : ''}}" bindtap="selectRoom" data-type="standard" data-price="168" data-name="标准间">
+        <!-- 空状态 -->
+        <view class="empty-state" wx:if="{{!loadingRooms && rooms.length === 0}}">
+          <text class="empty-icon">🏠</text>
+          <text class="empty-text">暂无可用房型</text>
+        </view>
+        
+        <!-- 房型列表（动态从API获取） -->
+        <view class="room-list" wx:if="{{!loadingRooms && rooms.length > 0}}">
+          <view 
+            class="room-card {{selectedRoom && selectedRoom.id === item.id ? 'selected' : ''}}" 
+            wx:for="{{rooms}}" 
+            wx:key="id"
+            bindtap="selectRoom" 
+            data-id="{{item.id}}"
+          >
             <view class="room-main">
-              <view class="room-icon-wrap standard">
-                <text class="room-emoji">🏨</text>
+              <view class="room-icon-wrap {{item.petType}}">
+                <text class="room-emoji">{{item.petType === 'dog' ? '🐕' : '🐈'}}</text>
               </view>
               <view class="room-info">
-                <text class="room-name">标准间</text>
-                <text class="room-desc">1宠1间，有窗</text>
+                <text class="room-name">{{item.name}}</text>
+                <text class="room-desc">{{item.description || (item.petType === 'dog' ? '狗狗专属房型' : '猫咪专属房型')}}</text>
+                <view class="room-facilities" wx:if="{{item.facilities.length > 0}}">
+                  <text class="facility-tag" wx:for="{{item.facilities}}" wx:for-item="facility" wx:key="*this">{{facility}}</text>
+                </view>
               </view>
               <view class="room-price-wrap">
-                <text class="room-price">¥168</text>
+                <text class="room-price">¥{{item.price}}</text>
                 <text class="room-unit">/晚</text>
               </view>
             </view>
-            <view class="room-tags">
-              <text class="tag orange">独立空间</text>
-              <text class="tag orange">每日遛弯</text>
-            </view>
-          </view>
-
-          <view class="room-card {{selectedRoom.type === 'luxury' ? 'selected' : ''}}" bindtap="selectRoom" data-type="luxury" data-price="268" data-name="豪华间">
-            <view class="room-main">
-              <view class="room-icon-wrap luxury">
-                <text class="room-emoji">🏰</text>
-              </view>
-              <view class="room-info">
-                <text class="room-name">豪华间</text>
-                <text class="room-desc">1宠1间，豪华配置</text>
-              </view>
-              <view class="room-price-wrap">
-                <text class="room-price">¥268</text>
-                <text class="room-unit">/晚</text>
-              </view>
-            </view>
-            <view class="room-tags">
-              <text class="tag gold">VIP服务</text>
-              <text class="tag gold">专属管家</text>
-              <text class="tag gold">SPA服务</text>
+            <view class="room-meta">
+              <text class="meta-item">面积: {{item.area || '待定'}}</text>
+              <text class="meta-item {{item.availableCount < 3 ? 'low' : ''}}">剩余: {{item.availableCount || item.roomCount}}间</text>
             </view>
           </view>
         </view>
@@ -119,13 +98,13 @@
     <!-- 底部按钮栏 -->
     <view class="bottom-bar">
       <view class="bottom-info">
-        <text class="bottom-label" wx:if="{{!selectedRoom.type}}">请选择房型</text>
-        <view class="bottom-selected" wx:if="{{selectedRoom.type}}">
+        <text class="bottom-label" wx:if="{{!selectedRoom}}">请选择房型</text>
+        <view class="bottom-selected" wx:if="{{selectedRoom}}">
           <text class="selected-name">{{selectedRoom.name}}</text>
           <text class="selected-price">¥{{selectedRoom.price}}/晚</text>
         </view>
       </view>
-      <button class="next-btn {{selectedRoom.type ? 'active' : ''}}" bindtap="goToStep2" disabled="{{!selectedRoom.type}}">
+      <button class="next-btn {{selectedRoom ? 'active' : ''}}" bindtap="goToStep2" disabled="{{!selectedRoom}}">
         下一步
       </button>
     </view>
@@ -218,6 +197,24 @@
         
         <text class="pet-hint">可选1-3只宠物</text>
       </view>
+
+      <!-- 备注 -->
+      <view class="section-card" style="margin-top: 20rpx;">
+        <view class="section-header">
+          <text class="section-icon">📝</text>
+          <text class="section-title">备注（选填）</text>
+        </view>
+        <view style="padding: 24rpx;">
+          <textarea 
+            class="remark-input" 
+            placeholder="请输入特殊需求，如宠物习性、饮食要求等..."
+            value="{{remark}}"
+            bindinput="onRemarkInput"
+            maxlength="200"
+          />
+          <text class="remark-count">{{remark.length}}/200</text>
+        </view>
+      </view>
     </view>
 
     <!-- 底部按钮栏 -->
@@ -237,6 +234,21 @@
   <!-- 步骤4：确认预约 -->
   <view class="step-content" wx:if="{{currentStep === 4}}">
     <view class="content-wrapper confirm-wrapper">
+      <!-- 宠物信息卡片 -->
+      <view class="section-card" wx:if="{{selectedPet}}">
+        <view class="section-header">
+          <text class="section-icon">🐾</text>
+          <text class="section-title">宠物信息</text>
+        </view>
+        <view class="pet-info-row">
+          <image class="pet-avatar" src="{{selectedPet.avatar || '/images/pet-default.png'}}" mode="aspectFill"/>
+          <view class="pet-detail">
+            <text class="pet-name">{{selectedPet.name}}</text>
+            <text class="pet-meta">{{selectedPet.breed}} · {{selectedPet.weight}}kg</text>
+          </view>
+        </view>
+      </view>
+
       <!-- 预约信息卡片 -->
       <view class="section-card">
         <view class="section-header">
@@ -261,9 +273,13 @@
             <text class="info-label">入住天数</text>
             <text class="info-value">{{nightCount}} 晚</text>
           </view>
-          <view class="info-item last">
+          <view class="info-item">
             <text class="info-label">宠物数量</text>
             <text class="info-value">{{petCount}} 只</text>
+          </view>
+          <view class="info-item last" wx:if="{{remark}}">
+            <text class="info-label">备注</text>
+            <text class="info-value">{{remark}}</text>
           </view>
         </view>
       </view>
@@ -319,19 +335,23 @@
   <!-- 底部导航栏 -->
   <view class="tab-bar">
     <view class="tab-item {{activeTab === 'home' ? 'active' : ''}}" bindtap="switchTab" data-page="home">
-      <image class="tab-icon" src="{{activeTab === 'home' ? '/images/home-active.png' : '/images/home.png'}}" mode="aspectFit"/>
+      <image wx:if="{{activeTab === 'home'}}" class="tab-icon" src="/images/home-active.png" mode="aspectFit"/>
+      <image wx:else class="tab-icon" src="/images/home.png" mode="aspectFit"/>
       <text class="tab-text">首页</text>
     </view>
     <view class="tab-item {{activeTab === 'service' ? 'active' : ''}}" bindtap="switchTab" data-page="service">
-      <image class="tab-icon" src="{{activeTab === 'service' ? '/images/service-active.png' : '/images/service.png'}}" mode="aspectFit"/>
+      <image wx:if="{{activeTab === 'service'}}" class="tab-icon" src="/images/service-active.png" mode="aspectFit"/>
+      <image wx:else class="tab-icon" src="/images/service.png" mode="aspectFit"/>
       <text class="tab-text">服务</text>
     </view>
     <view class="tab-item {{activeTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-page="orders">
-      <image class="tab-icon" src="{{activeTab === 'orders' ? '/images/order-active.png' : '/images/order.png'}}" mode="aspectFit"/>
+      <image wx:if="{{activeTab === 'orders'}}" class="tab-icon" src="/images/order-active.png" mode="aspectFit"/>
+      <image wx:else class="tab-icon" src="/images/order.png" mode="aspectFit"/>
       <text class="tab-text">订单</text>
     </view>
     <view class="tab-item {{activeTab === 'profile' ? 'active' : ''}}" bindtap="switchTab" data-page="profile">
-      <image class="tab-icon" src="{{activeTab === 'profile' ? '/images/profile-active.png' : '/images/profile.png'}}" mode="aspectFit"/>
+      <image wx:if="{{activeTab === 'profile'}}" class="tab-icon" src="/images/profile-active.png" mode="aspectFit"/>
+      <image wx:else class="tab-icon" src="/images/profile.png" mode="aspectFit"/>
       <text class="tab-text">我的</text>
     </view>
   </view>

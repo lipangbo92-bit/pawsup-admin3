@@ -37,7 +37,7 @@ Page({
         const info = JSON.parse(decodeURIComponent(options.info));
         console.log('booking-confirm received info:', info);
         console.log('booking-confirm received pet:', info.pet);
-        
+
         // 构建新的 info 对象，避免使用默认值
         const newInfo = {
           service: info.service,
@@ -46,23 +46,25 @@ Page({
           time: info.time,
           totalPrice: info.service?.price || info.totalPrice || 99
         };
-        
+
         // 处理宠物信息 - 注意：宠物信息可能使用 _id 或 id
-        if (info.pet && (info.pet._id || info.pet.id)) {
+        if (info.pet && (info.pet._id || info.pet.id) && info.pet.name) {
           newInfo.pet = {
             _id: info.pet._id || info.pet.id,
-            name: info.pet.name || '未知',
+            name: info.pet.name,
             type: info.pet.type || ''
           };
           console.log('booking-confirm set pet:', newInfo.pet);
         } else {
-          // 如果没有宠物信息，显示提示
-          console.warn('No pet info received');
-          newInfo.pet = { name: '未选择', type: '' };
+          // 如果没有宠物信息或缺少 name，尝试从其他来源获取
+          console.warn('No pet info received or pet name missing:', info.pet);
+          // 如果有 petId，尝试显示一个提示
+          const petId = info.pet?._id || info.pet?.id;
+          newInfo.pet = { name: petId ? '加载中...' : '未选择', type: '' };
         }
-        
+
         this.setData({ info: newInfo });
-        
+
         console.log('booking-confirm final info:', this.data.info);
       } catch (e) {
         console.error('解析预约信息失败:', e);
@@ -94,6 +96,41 @@ Page({
     // 验证必要信息
     if (!info.technician?.id || !info.service?.id || !info.date?.fullDate || !info.time) {
       wx.showToast({ title: '预约信息不完整', icon: 'none' });
+      return;
+    }
+
+    // 检查用户是否已登录
+    const app = getApp();
+    let userInfo = app.globalData.userInfo;
+
+    // 如果没有，尝试从本地存储获取
+    if (!userInfo) {
+      try {
+        const localUserInfo = wx.getStorageSync('userInfo');
+        if (localUserInfo) {
+          userInfo = localUserInfo;
+          app.globalData.userInfo = userInfo;
+        }
+      } catch (e) {
+        console.log('本地存储没有用户信息');
+      }
+    }
+
+    // 如果还没有用户信息，跳转到登录页
+    if (!userInfo) {
+      wx.showModal({
+        title: '需要登录',
+        content: '请先登录后再提交订单',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
       return;
     }
 
@@ -131,14 +168,21 @@ Page({
       appointmentTime: info.time,
       technicianId: info.technician.id,
       technicianName: info.technician.name,
-      remark: remark
+      remark: remark,
+      // 添加客户信息
+      customerName: userInfo?.nickName || userInfo?.nickname || '',
+      customerPhone: userInfo?.phoneNumber || userInfo?.phone || ''
     };
 
     // 如果有宠物信息，添加宠物数据
-    if (info.pet?.id) {
-      orderData.petId = info.pet.id;
+    const petId = info.pet?._id || info.pet?.id;
+    if (petId) {
+      orderData.petId = petId;
       orderData.petName = info.pet.name;
       orderData.petType = info.pet.type;
+      console.log('添加宠物信息到订单:', { petId, name: info.pet.name, type: info.pet.type });
+    } else {
+      console.warn('订单数据中没有宠物ID:', info.pet);
     }
 
     // 调用云函数创建订单

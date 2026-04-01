@@ -134,7 +134,7 @@ Page({
 
   goToAddPet() {
     wx.navigateTo({
-      url: '/pages/pet-add/pet-add'
+      url: '/pages/pet-register/pet-register'
     })
   },
   

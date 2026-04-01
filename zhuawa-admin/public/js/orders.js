@@ -49,6 +49,7 @@ async function loadOrders(page = 1) {
         showLoading();
         
         // 获取筛选条件
+        const orderTypeFilter = document.getElementById('orderTypeFilter');
         const statusFilter = document.getElementById('statusFilter');
         const dateFilter = document.getElementById('dateFilter');
         
@@ -56,6 +57,9 @@ async function loadOrders(page = 1) {
             action: 'list'
         };
         
+        if (orderTypeFilter && orderTypeFilter.value) {
+            params.orderType = orderTypeFilter.value;
+        }
         if (statusFilter && statusFilter.value) {
             params.status = statusFilter.value;
         }
@@ -69,25 +73,35 @@ async function loadOrders(page = 1) {
             throw new Error(result.error);
         }
         
-        currentOrders = (result.data || []).map(order => ({
-            ...order,
-            _id: order._id || order.id,
-            orderNo: order.orderNo || order._id,
-            customerName: order.customerName || '未知',
-            customerPhone: order.customerPhone || '',
-            serviceName: order.serviceName || '未知服务',
-            amount: order.price || order.amount || 0,
-            appointmentDate: order.appointmentDate || '',
-            appointmentTime: order.appointmentTime || ''
-        }));
+        currentOrders = (result.data || []).map(order => {
+            // 调试日志
+            console.log('[Orders] Processing order:', order.orderNo, 'petName:', order.petName, 'totalPrice:', order.totalPrice, 'finalPrice:', order.finalPrice);
+
+            return {
+                ...order,
+                _id: order._id || order.id,
+                orderNo: order.orderNo || order._id,
+                customerName: order.customerName || '未知',
+                customerPhone: order.customerPhone || '',
+                serviceName: order.serviceName || '未知服务',
+                // 金额字段：优先使用 finalPrice（实付金额），然后是 totalPrice（订单金额）
+                amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
+                appointmentDate: order.appointmentDate || '',
+                appointmentTime: order.appointmentTime || '',
+                // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
+                petName: order.petName || order.petInfo?.name || '-',
+                petType: order.petType || order.petInfo?.type || ''
+            };
+        });
         
+        console.log('[Orders] Processed orders:', currentOrders);
         renderOrdersTable(currentOrders);
         renderPagination();
         
     } catch (err) {
         console.error('Load orders error:', err);
         document.getElementById('ordersTableBody').innerHTML = `
-            <tr><td colspan="7" class="empty-cell">
+            <tr><td colspan="9" class="empty-cell">
                 加载失败: ${err.message}<br>
                 <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
             </td></tr>
@@ -105,10 +119,10 @@ function renderOrdersTable(orders) {
     }
     
     if (orders.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">暂无订单</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">暂无订单</td></tr>';
         return;
     }
-    
+
     tbody.innerHTML = orders.map(order => `
         <tr>
             <td><span class="order-no">${order.orderNo}</span></td>
@@ -118,7 +132,9 @@ function renderOrdersTable(orders) {
                     <span class="customer-phone">${order.customerPhone}</span>
                 </div>
             </td>
+            <td>${order.petName || '-'}</td>
             <td>${order.serviceName}</td>
+            <td>${order.technicianName || '不指定'}</td>
             <td>
                 <div class="appointment-time">
                     <span class="date">${order.appointmentDate}</span>
@@ -199,6 +215,21 @@ function viewOrder(orderId) {
                 <span class="label">联系电话：</span>
                 <span class="value">${selectedOrder.customerPhone || '-'}</span>
             </div>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
+            </div>
+        </div>
+        <div class="detail-section">
+            <h4>宠物信息</h4>
+            <div class="detail-row">
+                <span class="label">宠物名字：</span>
+                <span class="value">${selectedOrder.petName || '-'}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">宠物类型：</span>
+                <span class="value">${selectedOrder.petType === 'dog' ? '🐕 狗狗' : selectedOrder.petType === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type === 'dog' ? '🐕 狗狗' : selectedOrder.petInfo?.type === 'cat' ? '🐈 猫咪' : selectedOrder.petInfo?.type ? selectedOrder.petInfo.type : '-'}</span>
+            </div>
         </div>
         <div class="detail-section">
             <h4>服务信息</h4>
@@ -215,8 +246,26 @@ function viewOrder(orderId) {
                 <span class="value">${selectedOrder.technicianName || '不指定'}</span>
             </div>
             <div class="detail-row">
+                <span class="label">服务价格：</span>
+                <span class="value">¥${(selectedOrder.servicePrice || 0).toFixed(2)}</span>
+            </div>
+            ${selectedOrder.discount ? `
+            <div class="detail-row">
+                <span class="label">优惠金额：</span>
+                <span class="value" style="color: #f97316;">-¥${selectedOrder.discount.toFixed(2)}</span>
+            </div>
+            ` : ''}
+            <div class="detail-row">
                 <span class="label">订单金额：</span>
-                <span class="value highlight">¥${selectedOrder.amount.toFixed(2)}</span>
+                <span class="value">¥${(selectedOrder.totalPrice || selectedOrder.amount || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">实付金额：</span>
+                <span class="value highlight">¥${(selectedOrder.finalPrice || selectedOrder.amount || 0).toFixed(2)}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">支付状态：</span>
+                <span class="value">${selectedOrder.paymentStatus === 'paid' ? '✅ 已支付' : '⏳ 未支付'}</span>
             </div>
         </div>
         ${selectedOrder.address ? `
@@ -361,7 +410,7 @@ function renderPagination() {
 function showLoading() {
     const tbody = document.getElementById('ordersTableBody');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="7" class="loading-cell">加载中...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">加载中...</td></tr>';
     }
 }
 

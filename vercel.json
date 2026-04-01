@@ -12,7 +12,9 @@
     { "source": "/schedule", "destination": "/schedule.html" },
     { "source": "/admin-schedule", "destination": "/admin-schedule.html" },
     { "source": "/admin-appointments", "destination": "/admin-appointments.html" },
-    { "source": "/banner", "destination": "/banner.html" }
+    { "source": "/banner", "destination": "/banner.html" },
+    { "source": "/membership-levels", "destination": "/membership-levels.html" },
+    { "source": "/coupons", "destination": "/coupons.html" }
   ],
   "functions": {
     "api/*.js": {

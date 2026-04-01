@@ -46,7 +46,7 @@
     
     <!-- 添加/编辑服务模态框 -->
     <div class="modal" id="serviceModal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
                 <h3 id="serviceModalTitle">添加服务</h3>
                 <button class="close-btn" onclick="closeServiceModal()">&times;</button>
@@ -54,6 +54,20 @@
             <div class="modal-body">
                 <form id="serviceForm">
                     <input type="hidden" id="serviceId">
+                    
+                    <!-- 服务图片上传 -->
+                    <div class="form-group">
+                        <label>服务图片</label>
+                        <div class="service-image-upload" id="serviceImageUpload">
+                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)">
+                            <div class="service-image-preview" id="serviceImagePreview">
+                                <span>🖼️</span>
+                                <span class="upload-hint">点击上传服务图片</span>
+                            </div>
+                        </div>
+                        <p class="form-hint">建议尺寸：400x300px，支持 JPG、PNG 格式</p>
+                    </div>
+                    
                     <div class="form-group">
                         <label>服务名称 *</label>
                         <input type="text" id="serviceName" required placeholder="如：基础洗护">
@@ -73,12 +87,13 @@
                         <label>服务分类 *</label>
                         <select id="serviceCategory" required>
                             <option value="">请选择分类</option>
-                            <option value="bath">洗护美容</option>
-                            <option value="grooming">美容造型</option>
-                            <option value="spa">SPA护理</option>
-                            <option value="medical">医疗护理</option>
-                            <option value="boarding">寄养服务</option>
-                            <option value="other">其他服务</option>
+                            <option value="狗狗洗护">🐕 狗狗洗护</option>
+                            <option value="狗狗造型">✂️ 狗狗造型</option>
+                            <option value="狗狗寄养">🏠 狗狗寄养</option>
+                            <option value="猫猫洗护">🐱 猫猫洗护</option>
+                            <option value="猫猫造型">💇 猫猫造型</option>
+                            <option value="猫猫寄养">🏨 猫猫寄养</option>
+                            <option value="上门服务">🚗 上门服务</option>
                         </select>
                     </div>
                     <div class="form-group">

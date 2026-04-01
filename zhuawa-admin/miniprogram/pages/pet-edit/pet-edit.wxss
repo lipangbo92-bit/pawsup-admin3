@@ -128,6 +128,7 @@ page {
   justify-content: center;
   gap: 8rpx;
   border: 2rpx solid transparent;
+  transition: all 0.2s;
 }
 
 .type-option.active {

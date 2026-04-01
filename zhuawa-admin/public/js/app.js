@@ -2,12 +2,24 @@
 
 // Initialize Cloud Base
 function initCloud() {
-    if (typeof wx !== 'undefined' && wx.cloud) {
-        wx.cloud.init({
-            env: 'cloud1-4gy1jyan842d73ab',
-            traceUser: true
-        });
-        console.log('Cloud initialized');
+    try {
+        // 使用 cloud.js SDK (Web版本)
+        if (typeof cloud !== 'undefined') {
+            cloud.init({
+                env: 'cloud1-4gy1jyan842d73ab'
+            });
+            console.log('Cloud initialized');
+        }
+        // 兼容微信小程序环境
+        else if (typeof wx !== 'undefined' && wx.cloud) {
+            wx.cloud.init({
+                env: 'cloud1-4gy1jyan842d73ab',
+                traceUser: true
+            });
+            console.log('WX Cloud initialized');
+        }
+    } catch (err) {
+        console.error('Cloud init error:', err);
     }
 }
 

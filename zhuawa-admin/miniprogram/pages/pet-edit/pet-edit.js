@@ -12,7 +12,8 @@ Page({
       avatar: '',
       notes: ''
     },
-    avatarError: false
+    avatarError: false,
+    isLoading: false
   },
 
   onLoad(options) {
@@ -220,5 +221,11 @@ Page({
       console.error('删除失败:', err)
       wx.showToast({ title: '删除失败', icon: 'none' })
     }
+  },
+
+  // 计算属性：是否可以保存
+  canSave() {
+    const { pet } = this.data
+    return pet.name.trim() && pet.type
   }
 })

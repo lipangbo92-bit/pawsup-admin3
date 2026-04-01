@@ -114,30 +114,43 @@
   <!-- 弹窗内容 -->
   <view class="modal-content">
     <view class="modal-header">
-      <text class="modal-title">选择技师</text>
+      <text class="modal-title">选择美容师</text>
       <view class="modal-close" bindtap="closeTechnicianModal">
         <text class="close-icon">✕</text>
       </view>
     </view>
     
-    <!-- 技师列表 -->
+    <!-- 美容师列表 -->
     <scroll-view class="technician-list" scroll-y="true">
       <view class="technician-item {{selectedTechnician && selectedTechnician.id === item.id ? 'selected' : ''}}" 
             wx:for="{{technicians}}" 
             wx:key="id"
             bindtap="onTechnicianSelect"
             data-id="{{item.id}}">
-        <view class="technician-avatar">{{item.avatar}}</view>
+        <!-- 头像 -->
+        <view class="technician-avatar">
+          <block wx:if="{{item.avatar && item.avatar.length > 10}}">
+            <image src="{{item.avatar}}" mode="aspectFill" class="avatar-img"/>
+          </block>
+          <block wx:else>
+            <text class="avatar-emoji">👤</text>
+          </block>
+        </view>
+        
+        <!-- 信息 -->
         <view class="technician-info">
-          <text class="technician-name">{{item.name}}</text>
-          <view class="technician-tags">
-            <text class="specialty-tag">{{item.specialty}}</text>
+          <view class="technician-name-row">
+            <text class="technician-name">{{item.name}}</text>
+            <text class="technician-position">{{item.position}}</text>
+            <text class="technician-badge">{{item.level}}</text>
           </view>
-          <view class="technician-rating">
-            <text class="rating-star">⭐</text>
-            <text class="rating-value">{{item.rating}}</text>
+          <view class="technician-stats">
+            <text class="technician-rating">⭐ {{item.rating}}分</text>
+            <text class="technician-orders">{{item.orders}}单</text>
           </view>
         </view>
+        
+        <!-- 选中标记 -->
         <view class="select-indicator" wx:if="{{selectedTechnician && selectedTechnician.id === item.id}}">
           <text class="check-icon">✓</text>
         </view>

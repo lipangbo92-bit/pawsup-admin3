@@ -1,4 +1,4 @@
-/* pages/services/services.wxss */
+/* pages/services/services.wxss - 修复导航栏 */
 page {
   background-color: #F8FAFC;
   height: 100vh;
@@ -11,13 +11,14 @@ page {
   overflow: hidden;
 }
 
-/* ========== 顶部导航栏 ========== */
+/* ========== 顶部导航栏 - 修复背景覆盖 ========== */
 .custom-nav {
   position: relative;
   height: 176rpx;
   padding-top: 88rpx;
   box-sizing: border-box;
   flex-shrink: 0;
+  width: 100%;
 }
 
 .nav-bg {
@@ -26,6 +27,7 @@ page {
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100%;
   background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
   z-index: 0;
 }
@@ -35,61 +37,39 @@ page {
   z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   height: 88rpx;
   padding: 0 20rpx;
-}
-
-.nav-back {
-  width: 88rpx;
-  height: 88rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-icon {
-  font-size: 52rpx;
-  color: #FFFFFF;
-  font-weight: 300;
-  line-height: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-title {
   font-size: 36rpx;
   font-weight: 600;
   color: #FFFFFF;
+  text-align: center;
 }
 
-.nav-placeholder {
-  width: 88rpx;
-}
-
-/* 主内容区域 */
+/* ========== 主内容区 ========== */
 .main-content {
-  display: flex;
   flex: 1;
+  display: flex;
   overflow: hidden;
 }
 
-/* 左侧分类导航 */
+/* ========== 左侧分类导航 ========== */
 .category-nav {
-  width: 160rpx;
-  background-color: #fff;
-  flex-shrink: 0;
-  height: 100%; 
-  overflow: hidden;
+  width: 200rpx;
+  background-color: #FFFFFF;
+  border-right: 1rpx solid #E5E7EB;
 }
 
 .category-item {
-  height: 100rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 32rpx 20rpx;
   text-align: center;
-  border-left: 6rpx solid transparent;
-  box-sizing: border-box;
-  transition: all 0.3s;
+  border-left: 4rpx solid transparent;
+  transition: all 0.2s;
 }
 
 .category-item.active {
@@ -99,47 +79,41 @@ page {
 
 .category-text {
   font-size: 26rpx;
-  color: #666;
+  color: #4B5563;
 }
 
 .category-item.active .category-text {
   color: #F97316;
-  font-weight: 600;
+  font-weight: 500;
 }
 
-/* 右侧服务列表 */
+/* ========== 右侧服务列表 ========== */
 .service-list {
   flex: 1;
   background-color: #F8FAFC;
-  padding: 20rpx;
-  height: 100%; 
-  overflow: hidden;
 }
 
 .service-content {
-  padding-bottom: 40rpx;
+  padding: 20rpx;
 }
 
-/* 服务卡片 */
 .service-card {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 20rpx;
   display: flex;
-  gap: 20rpx;
-  margin-bottom: 20rpx; 
-  width: 100%; 
-  box-sizing: border-box;
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
 .service-icon-wrapper {
-  width: 140rpx;
-  height: 140rpx;
-  border-radius: 16rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 20rpx;
   flex-shrink: 0;
 }
 
@@ -147,19 +121,13 @@ page {
   font-size: 48rpx;
 }
 
-/* 图标背景色 */
-.icon-orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); }
-.icon-pink { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); }
-.icon-purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
-.icon-blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
-.icon-green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); }
-.icon-yellow { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
-.icon-indigo { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); }
-.icon-teal { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); }
-.icon-cyan { background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%); }
-.icon-violet { background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); }
-.icon-red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); }
-.icon-lime { background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%); }
+.icon-orange { background: linear-gradient(135deg, #FDBA74 0%, #F97316 100%); }
+.icon-pink { background: linear-gradient(135deg, #FBCFE8 0%, #EC4899 100%); }
+.icon-purple { background: linear-gradient(135deg, #DDD6FE 0%, #8B5CF6 100%); }
+.icon-blue { background: linear-gradient(135deg, #BFDBFE 0%, #3B82F6 100%); }
+.icon-teal { background: linear-gradient(135deg, #99F6E4 0%, #14B8A6 100%); }
+.icon-green { background: linear-gradient(135deg, #BBF7D0 0%, #22C55E 100%); }
+.icon-lime { background: linear-gradient(135deg, #D9F99D 0%, #84CC16 100%); }
 
 .service-info {
   flex: 1;
@@ -169,24 +137,24 @@ page {
 }
 
 .service-name {
-  display: block;
   font-size: 30rpx;
   font-weight: 600;
-  color: #333;
+  color: #1F2937;
   margin-bottom: 8rpx;
+  display: block;
 }
 
 .service-desc {
-  display: block;
   font-size: 24rpx;
-  color: #999;
+  color: #6B7280;
+  line-height: 1.4;
 }
 
 .service-bottom {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-top: 10rpx;
+  align-items: center;
+  margin-top: 16rpx;
 }
 
 .price-wrapper {
@@ -196,35 +164,35 @@ page {
 
 .price-symbol {
   font-size: 24rpx;
-  color: #F97316;
-  font-weight: 600;
+  color: #EF4444;
+  font-weight: 500;
 }
 
 .price-value {
   font-size: 40rpx;
-  color: #F97316;
+  color: #EF4444;
   font-weight: bold;
 }
 
 .price-unit {
   font-size: 22rpx;
-  color: #999;
+  color: #9CA3AF;
   margin-left: 4rpx;
 }
 
 .book-btn {
-  width: 56rpx;
-  height: 56rpx;
-  background-color: #F97316;
-  border-radius: 50%;
+  width: 64rpx;
+  height: 64rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.3);
 }
 
 .book-icon {
-  color: #fff;
-  font-size: 32rpx;
-  font-weight: bold;
-  line-height: 1;
+  color: #FFFFFF;
+  font-size: 36rpx;
+  font-weight: 300;
 }

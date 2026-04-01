@@ -16,7 +16,7 @@ exports.main = async (event, context) => {
       case 'createOrder':
         return await createOrder(event.data);
       case 'getOrders':
-        return await getOrders(event.userId, event.orderType, event.status);
+        return await getOrders(event.userId, event.orderType, event.status, event.paymentStatus, event.excludeStatus);
       case 'getOrderDetail':
         return await getOrderDetail(event.orderId);
       case 'updateOrderStatus':
@@ -113,24 +113,70 @@ async function createOrder(data) {
 }
 
 // 获取用户订单列表
-async function getOrders(userId, orderType, status) {
+async function getOrders(userId, orderType, status, paymentStatus, excludeStatus) {
   if (!userId) {
     return { success: false, error: 'Missing userId' };
   }
 
-  let query = db.collection('orders').where({
+  console.log('getOrders params:', { userId, orderType, status, paymentStatus, excludeStatus });
+
+  // 构建基础查询条件
+  let whereCondition = {
     userId: userId
-  });
+  };
 
   if (orderType) {
-    query = query.where({ orderType: orderType });
+    whereCondition.orderType = orderType;
   }
 
   if (status) {
-    query = query.where({ status: status });
+    whereCondition.status = status;
   }
 
-  const result = await query.orderBy('createTime', 'desc').get();
+  // 处理 paymentStatus 和 excludeStatus 的组合
+  if (paymentStatus || excludeStatus) {
+    const conditions = [];
+    
+    // paymentStatus 条件
+    if (paymentStatus) {
+      if (paymentStatus === 'unpaid') {
+        // 兼容旧数据：paymentStatus 不存在视为 unpaid
+        conditions.push(_.or([
+          { paymentStatus: 'unpaid' },
+          { paymentStatus: _.exists(false) }
+        ]));
+        console.log('Condition: paymentStatus is unpaid (or missing)');
+      } else {
+        conditions.push({ paymentStatus: paymentStatus });
+        console.log('Condition: paymentStatus is', paymentStatus);
+      }
+    }
+    
+    // excludeStatus 条件
+    if (excludeStatus) {
+      if (Array.isArray(excludeStatus)) {
+        conditions.push({ status: _.nin(excludeStatus) });
+        console.log('Condition: status not in', excludeStatus);
+      } else {
+        conditions.push({ status: _.neq(excludeStatus) });
+        console.log('Condition: status !=', excludeStatus);
+      }
+    }
+    
+    // 如果有多个条件，使用 _.and 组合
+    if (conditions.length > 1) {
+      whereCondition = _.and([whereCondition, ...conditions]);
+    } else if (conditions.length === 1) {
+      // 只有一个额外条件时，合并到 whereCondition
+      Object.assign(whereCondition, conditions[0]);
+    }
+  }
+
+  console.log('Final where condition:', JSON.stringify(whereCondition));
+
+  const result = await db.collection('orders').where(whereCondition).orderBy('createTime', 'desc').get();
+
+  console.log('getOrders result count:', result.data.length);
 
   return {
     success: true,
@@ -140,6 +186,7 @@ async function getOrders(userId, orderType, status) {
       orderType: order.orderType,
       serviceName: order.serviceName,
       totalPrice: order.totalPrice,
+      finalPrice: order.finalPrice,
       status: order.status,
       paymentStatus: order.paymentStatus,
       createTime: order.createTime,

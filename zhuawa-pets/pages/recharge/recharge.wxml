@@ -1,0 +1,82 @@
+<!--pages/recharge/recharge.wxml-->
+<view class="page-container">
+  <!-- 当前余额 -->
+  <view class="current-balance">
+    <text class="balance-label">当前余额</text>
+    <view class="balance-value">
+      <text class="currency">¥</text>
+      <text class="amount">{{currentBalance}}</text>
+    </view>
+    <text class="balance-hint">充值后自动升级会员等级</text>
+  </view>
+
+  <!-- 充值档位 -->
+  <view class="recharge-section">
+    <view class="section-title">选择会员档位</view>
+    <view class="level-cards">
+      <view 
+        wx:for="{{levelCards}}" 
+        wx:key="level"
+        class="level-card {{selectedLevel === item.level ? 'selected' : ''}}"
+        bindtap="selectLevel"
+        data-level="{{item.level}}"
+        style="border-color: {{item.color}};"
+      >
+        <!-- 档位头部 -->
+        <view class="level-header" style="background: linear-gradient(135deg, {{item.color}} 0%, {{item.colorDark}} 100%);">
+          <view class="level-icon">{{item.icon}}</view>
+          <view class="level-info">
+            <view class="level-title-row">
+              <text class="level-name">{{item.name}}</text>
+              <text class="level-discount-inline" wx:if="{{item.discount < 1}}">{{item.discountText}}折</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 档位内容 - 简化版 -->
+        <view class="level-body-compact">
+          <view class="amount-line">
+            <text class="amount-main">¥{{item.rechargeAmount}}</text>
+            <text class="amount-gift" wx:if="{{item.giftAmount > 0}}">送¥{{item.giftAmount}}</text>
+          </view>
+          <view class="amount-total">到账 ¥{{item.totalAmount}}</view>
+        </view>
+        
+        <!-- 权益列表 - 简化 -->
+        <view class="benefits-compact">
+          <text class="benefit-item-compact" wx:for="{{item.benefits}}" wx:key="*this">{{item}}</text>
+        </view>
+        
+        <!-- 选中标记 -->
+        <view class="selected-mark" wx:if="{{selectedLevel === item.level}}">
+          <text class="selected-icon">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付方式 -->
+  <view class="payment-section">
+    <view class="section-title">支付方式</view>
+    <view class="payment-option selected">
+      <view class="payment-icon">💳</view>
+      <text class="payment-name">微信支付</text>
+      <view class="payment-check">✓</view>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer">
+    <view class="total-info">
+      <text class="total-label">实付金额：</text>
+      <text class="total-amount">¥{{finalAmount}}</text>
+    </view>
+    <button 
+      class="recharge-btn {{!selectedLevel ? 'disabled' : ''}}" 
+      bindtap="submitRecharge"
+      disabled="{{!selectedLevel}}"
+    >
+      立即充值
+    </button>
+  </view>
+</view>

@@ -201,43 +201,63 @@ Page({
 
   generateBaseTimeSlots() {
     const slots = [];
+    // 正确定义时段：上午9-12，下午12-18，晚上18-21
     const periods = [
-      { name: '上午', start: 9, end: 12 },
-      { name: '下午', start: 13, end: 17 },
-      { name: '晚上', start: 18, end: 21 }
+      { name: '上午', start: 9, end: 12 },   // 9:00 - 12:00
+      { name: '下午', start: 12, end: 18 }, // 12:00 - 18:00
+      { name: '晚上', start: 18, end: 21 }  // 18:00 - 21:00
     ];
-    
+
     const selectedDate = this.data.dateList[this.data.selectedDateIndex];
     const isToday = selectedDate && selectedDate.fullDate === new Date().toISOString().split('T')[0];
-    
-    periods.forEach(period => {
+
+    // 获取服务时长（分钟）
+    const serviceDuration = this.data.selectedService?.duration || 60;
+    // 计算最晚可预约时间（21:00 - 服务时长）
+    const latestHour = 21;
+    const latestStartHour = latestHour - Math.ceil(serviceDuration / 60);
+    const latestStartMinute = (60 - (serviceDuration % 60)) % 60;
+
+    periods.forEach((period, periodIndex) => {
       const times = [];
-      for (let h = period.start; h < period.end; h++) {
-        const time1 = `${h.toString().padStart(2, '0')}:00`;
-        const time2 = `${h.toString().padStart(2, '0')}:30`;
-        
-        // 判断是否为今天且时间已过期
-        const disabled1 = isToday && !this.isValidBookingTime(selectedDate.fullDate, time1);
-        const disabled2 = isToday && !this.isValidBookingTime(selectedDate.fullDate, time2);
-        
-        times.push({ 
-          time: time1, 
-          selected: false, 
-          disabled: disabled1, 
-          status: disabled1 ? '已过期' : '可约',
-          availableCount: disabled1 ? 0 : 3
-        });
-        times.push({ 
-          time: time2, 
-          selected: false, 
-          disabled: disabled2, 
-          status: disabled2 ? '已过期' : '可约',
-          availableCount: disabled2 ? 0 : 3
+      // 生成时段
+      for (let h = period.start; h <= period.end; h++) {
+        // 每个小时生成 :00 和 :30 两个时段
+        const minutesList = [0, 30];
+        minutesList.forEach(minute => {
+          // 跳过时段分界点的重复时间点
+          // 上午的12:30不应该生成（因为下午从12:00开始会生成12:30）
+          if (periodIndex === 0 && h === 12 && minute === 30) return;
+          // 下午的18:30不应该生成（因为晚上从18:00开始会生成18:30）
+          if (periodIndex === 1 && h === 18 && minute === 30) return;
+          // 跳过时段起始整点（除了第一个时段）- 避免12:00、18:00重复
+          if (minute === 0 && h === period.start && periodIndex > 0) return;
+          // 21:00 不生成（营业时间结束）
+          if (h === 21) return;
+
+          const timeStr = `${h.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+          // 判断是否为今天且时间已过期
+          const isExpired = isToday && !this.isValidBookingTime(selectedDate.fullDate, timeStr);
+
+          // 判断是否在可预约范围内（考虑服务时长）
+          let isTooLate = false;
+          if (h > latestStartHour || (h === latestStartHour && minute > latestStartMinute)) {
+            isTooLate = true;
+          }
+
+          times.push({
+            time: timeStr,
+            selected: false,
+            disabled: isExpired || isTooLate,
+            status: isExpired ? '已过期' : (isTooLate ? '不可约' : '可约'),
+            availableCount: (isExpired || isTooLate) ? 0 : 3
+          });
         });
       }
       slots.push({ period: period.name, times });
     });
-    
+
     return slots;
   },
 
@@ -258,25 +278,38 @@ Page({
   onTimeSelect(e) {
     const { period, index } = e.currentTarget.dataset;
     const timeSections = this.data.timeSections;
-    
+
     const section = timeSections.find(s => s.period === period);
-    if (!section || section.times[index].disabled) return;
-    
-    const selectedTime = section.times[index].time;
+    if (!section) return;
+
+    const selectedSlot = section.times[index];
+
+    // 如果时段不可用，显示提示
+    if (selectedSlot.disabled) {
+      if (selectedSlot.status === '不可约') {
+        const serviceDuration = this.data.selectedService?.duration || 60;
+        wx.showToast({ title: `该时段无法完成${serviceDuration}分钟服务`, icon: 'none' });
+      } else if (selectedSlot.status === '已过期') {
+        wx.showToast({ title: '该时段已过期', icon: 'none' });
+      }
+      return;
+    }
+
+    const selectedTime = selectedSlot.time;
     const selectedDate = this.data.dateList[this.data.selectedDateIndex];
-    
+
     // 校验预约时间不能早于当前时间
     if (!this.isValidBookingTime(selectedDate.fullDate, selectedTime)) {
       wx.showToast({ title: '预约时间不能早于当前时间', icon: 'none' });
       return;
     }
-    
+
     timeSections.forEach(s => {
       s.times.forEach(t => { t.selected = false; });
     });
-    
+
     section.times[index].selected = true;
-    
+
     this.setData({
       timeSections,
       selectedTime: selectedTime

@@ -367,8 +367,15 @@ Page({
     if (this.data.bookingMode === 'path2' && this.data.selectedTechnician) {
       const bookingInfo = {
         technician: this.data.selectedTechnician,
-        service: service
+        service: service,
+        pet: {
+          _id: pet._id,
+          name: pet.name,
+          type: pet.type,
+          breed: pet.breed
+        }
       };
+      console.log('[services] 路径2跳转，bookingInfo:', bookingInfo);
       wx.navigateTo({
         url: `/pages/booking-time-2/booking-time-2?info=${encodeURIComponent(JSON.stringify(bookingInfo))}`
       });

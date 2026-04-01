@@ -12,8 +12,8 @@
 
   <!-- 标签切换栏 -->
   <view class="tab-bar">
-    <view 
-      wx:for="{{tabs}}" 
+    <view
+      wx:for="{{tabs}}"
       wx:key="key"
       class="tab-item {{activeTab === item.key ? 'active' : ''}}"
       data-tab="{{item.key}}"
@@ -26,8 +26,8 @@
   <!-- 订单列表 -->
   <view class="order-list">
     <!-- 订单卡片 -->
-    <view 
-      wx:for="{{filteredOrders}}" 
+    <view
+      wx:for="{{orders}}"
       wx:key="id"
       class="order-card"
       data-id="{{item.id}}"
@@ -36,35 +36,60 @@
       <!-- 订单头部：编号 + 状态 -->
       <view class="order-header">
         <text class="order-no">订单号：{{item.orderNo}}</text>
-        <view class="status-tag status-{{item.status}}">
-          {{item.status === 'pending' ? '待消费' : (item.status === 'completed' ? '已完成' : '已取消')}}
+        <view class="status-tag status-{{item.status}} {{item.paymentStatus === 'unpaid' ? 'status-unpaid' : ''}}">
+          {{item.statusText}}
         </view>
       </view>
 
       <!-- 订单内容 -->
       <view class="order-body">
-        <view class="service-icon">{{item.service.icon}}</view>
         <view class="order-info">
-          <text class="service-name">{{item.service.name}}</text>
+          <text class="service-name">{{item.serviceName}}</text>
           <view class="meta-info">
-            <text class="meta-item">{{item.technician}}</text>
-            <text class="meta-dot">·</text>
             <text class="meta-item">{{item.date}} {{item.time}}</text>
-            <text class="meta-dot">·</text>
-            <text class="meta-item">{{item.pet}}</text>
+          </view>
+          <view class="pet-info" wx:if="{{item.petName}}">
+            <text class="pet-label">🐾 {{item.petName}}</text>
           </view>
         </view>
       </view>
 
-      <!-- 订单底部：价格 -->
+      <!-- 订单底部：价格 + 操作 -->
       <view class="order-footer">
-        <text class="price-label">实付金额：</text>
-        <text class="price-value">¥{{item.service.price}}</text>
+        <view class="price-section">
+          <text class="price-label">{{item.priceLabel}}：</text>
+          <text class="price-value">¥{{item.displayPrice}}</text>
+        </view>
+        <view class="action-section">
+          <!-- 待支付显示去支付按钮 -->
+          <view
+            class="btn btn-primary"
+            wx:if="{{item.paymentStatus === 'unpaid'}}"
+            catchtap="onPayOrder"
+            data-id="{{item.id}}"
+          >
+            去支付
+          </view>
+          <!-- 待服务显示取消按钮 -->
+          <view
+            class="btn btn-default"
+            wx:if="{{item.status === 'pending' && item.paymentStatus !== 'unpaid'}}"
+            catchtap="onCancelOrder"
+            data-id="{{item.id}}"
+          >
+            取消预约
+          </view>
+        </view>
       </view>
     </view>
 
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <text>加载中...</text>
+    </view>
+
     <!-- 空状态 -->
-    <view wx:if="{{filteredOrders.length === 0}}" class="empty-state">
+    <view wx:if="{{!loading && orders.length === 0}}" class="empty-state">
       <text class="empty-icon">📭</text>
       <text class="empty-text">暂无订单</text>
     </view>

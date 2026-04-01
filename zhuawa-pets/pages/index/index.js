@@ -348,8 +348,14 @@ Page({
       });
     } else if (bookingMode === 'path3') {
       // 路径3：已选宠物 -> 选时间（服务已固定）
+      const petInfo = encodeURIComponent(JSON.stringify({
+        _id: pet.id || pet._id,
+        name: pet.name,
+        type: pet.type,
+        breed: pet.breed
+      }));
       wx.navigateTo({
-        url: `/pages/booking-time-1/booking-time-1?mode=path3&petId=${pet.id || pet._id}&petType=${pet.type}&serviceId=${selectedServiceId}`
+        url: `/pages/booking-time-1/booking-time-1?mode=path3&petInfo=${petInfo}&serviceId=${selectedServiceId}`
       });
     } else if (bookingMode === 'boarding') {
       // 寄养日托：直接跳转到 boarding 页面

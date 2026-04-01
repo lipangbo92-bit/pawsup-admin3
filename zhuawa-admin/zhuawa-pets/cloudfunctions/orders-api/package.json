@@ -1,9 +1,9 @@
 {
   "name": "orders-api",
   "version": "1.0.0",
-  "description": "Orders CRUD API for H5 Admin",
+  "description": "统一订单管理 API",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "^2.6.3"
+    "wx-server-sdk": "latest"
   }
 }

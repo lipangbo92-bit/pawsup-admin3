@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>PawsUp 爪哇宠屋 - 美容师管理</title>
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>美容师管理</h2>
+                    <button class="btn-primary" onclick="openTechnicianModal()">+ 添加美容师</button>
+                </div>
+                
+                <div class="technicians-grid" id="techniciansGrid"></div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑美容师模态框 -->
+    <div class="modal" id="technicianModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="technicianModalTitle">添加美容师</h3>
+                <button class="close-btn" onclick="closeTechnicianModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="technicianForm">
+                    <input type="hidden" id="technicianId">
+                    
+                    <!-- 头像上传 -->
+                    <div class="form-group avatar-group">
+                        <label>头像</label>
+                        <div class="avatar-upload" id="avatarUpload">
+                            <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)">
+                            <div class="avatar-preview" id="avatarPreview">
+                                <span>👤</span>
+                            </div>
+                            <span class="upload-hint">点击上传头像</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 基本信息 -->
+                    <div class="form-group">
+                        <label>姓名 *</label>
+                        <input type="text" id="techName" required placeholder="美容师姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>专业 *</label>
+                        <input type="text" id="techSpecialty" required placeholder="如：洗护美容、SPA护理">
+                    </div>
+                    
+                    <!-- 岗位和等级 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>岗位 *</label>
+                            <select id="techPosition" required>
+                                <option value="美容师">美容师</option>
+                                <option value="洗护师">洗护师</option>
+                                <option value="助理">助理</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>等级 *</label>
+                            <select id="techLevel" required>
+                                <option value="初级">初级</option>
+                                <option value="中级" selected>中级</option>
+                                <option value="高级">高级</option>
+                                <option value="资深">资深</option>
+                                <option value="首席">首席</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- 评分和订单数 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>评分 (1-5星) *</label>
+                            <select id="techRating" required>
+                                <option value="">请选择</option>
+                                <option value="5">⭐⭐⭐⭐⭐ (5星)</option>
+                                <option value="4">⭐⭐⭐⭐ (4星)</option>
+                                <option value="3">⭐⭐⭐ (3星)</option>
+                                <option value="2">⭐⭐ (2星)</option>
+                                <option value="1">⭐ (1星)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>订单数 *</label>
+                            <input type="number" id="techOrderCount" required min="0" placeholder="0">
+                        </div>
+                    </div>
+                    
+                    <!-- 作品图片上传 -->
+                    <div class="form-group">
+                        <label>作品图片（最多6张）</label>
+                        <div class="works-upload-container">
+                            <div class="works-grid" id="worksGrid">
+                                <!-- 已上传图片显示在这里 -->
+                            </div>
+                            <div class="works-add-btn" id="worksAddBtn" onclick="document.getElementById('worksInput').click()">
+                                <span>+</span>
+                                <span>添加图片</span>
+                            </div>
+                            <input type="file" id="worksInput" accept="image/*" multiple style="display:none" onchange="handleWorksUpload(this)">
+                        </div>
+                        <p class="form-hint">支持 JPG、PNG 格式，单张不超过 5MB</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeTechnicianModal()">取消</button>
+                <button class="btn-primary" onclick="saveTechnician()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/technicians.js"></script>
+</body>
+</html>

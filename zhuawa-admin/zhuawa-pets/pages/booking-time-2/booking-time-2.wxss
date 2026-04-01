@@ -115,18 +115,21 @@
   background: linear-gradient(90deg, #F97316 0%, #EA580C 100%);
 }
 
-/* 已选技师卡片 */
+/* 已选技师卡片 - 完全复用首页样式 */
 .selected-technician-card {
   background-color: #FFFFFF;
   margin: 0 24rpx 20rpx;
-  border-radius: 16rpx;
+  border-radius: 24rpx;
   padding: 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
-.technician-header {
+.technician-card {
   display: flex;
   align-items: center;
+  background-color: #F9FAFB;
+  border-radius: 20rpx;
+  padding: 24rpx;
 }
 
 .technician-avatar {
@@ -137,26 +140,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48rpx;
-  margin-right: 20rpx;
+  margin-right: 24rpx;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .technician-info {
   flex: 1;
 }
 
+/* 第一排：名字 + 岗位/技能 + 等级 */
 .technician-name-row {
   display: flex;
   align-items: center;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
+  flex-wrap: wrap;
+  gap: 12rpx;
 }
 
 .technician-name {
   font-size: 30rpx;
   font-weight: 600;
   color: #1F2937;
-  margin-right: 12rpx;
+}
+
+.technician-position {
+  font-size: 24rpx;
+  color: #6B7280;
+  background-color: #E5E7EB;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
 }
 
 .technician-badge {
@@ -167,13 +180,7 @@
   border-radius: 8rpx;
 }
 
-.technician-skill {
-  display: block;
-  font-size: 24rpx;
-  color: #6B7280;
-  margin-bottom: 12rpx;
-}
-
+/* 第二排：评分和订单数 */
 .technician-stats {
   display: flex;
   align-items: center;

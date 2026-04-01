@@ -1,0 +1,67 @@
+<!--pages/orders/orders.wxml-->
+<view class="container">
+  <!-- Tab 切换 -->
+  <view class="tabs">
+    <view 
+      class="tab {{status === item.key ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="key"
+      bindtap="onChangeTab"
+      data-key="{{item.key}}"
+    >
+      {{item.name}}
+    </view>
+  </view>
+  
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view 
+      class="order-card"
+      wx:for="{{orders}}"
+      wx:key="_id"
+      bindtap="goToDetail"
+      data-id="{{item._id}}"
+    >
+      <view class="order-header">
+        <text class="order-no">{{item.orderNo}}</text>
+        <text class="order-status {{item.status}}">{{item.statusText}}</text>
+      </view>
+      
+      <view class="order-body">
+        <view class="order-service">{{item.serviceName}}</view>
+        <view class="order-meta">
+          {{item.date}} {{item.time}} · {{item.technicianName}}
+        </view>
+        <view class="order-pet">🐾 {{item.petName}}</view>
+      </view>
+      
+      <view class="order-footer">
+        <view class="order-price">{{item.priceLabel}} ¥{{item.price}}</view>
+        <view class="order-actions" catchtap="stopPropagation">
+          <view
+            class="btn cancel"
+            wx:if="{{item.status === 'pending' && item.paymentStatus !== 'unpaid'}}"
+            bindtap="onCancelOrder"
+            data-id="{{item.id}}"
+          >
+            取消预约
+          </view>
+          <view
+            class="btn pay"
+            wx:if="{{item.paymentStatus === 'unpaid'}}"
+            bindtap="onPayOrder"
+            data-id="{{item.id}}"
+          >
+            去支付
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{orders.length === 0}}">
+      <view class="empty-icon">📋</view>
+      <view class="empty-text">暂无订单</view>
+    </view>
+  </view>
+</view>

@@ -103,90 +103,84 @@
             color: var(--text-secondary);
         }
 
-        .service-image {
-            width: 100%;
-            height: 160px;
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(139, 92, 246, 0.1));
-            border-radius: 12px;
-            margin-bottom: 16px;
+        .service-actions {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            gap: 8px;
         }
 
-        .service-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .no-image {
-            font-size: 48px;
-        }
-
-        /* ========== 服务图片上传样式 ========== */
-        .service-image-upload {
-            position: relative;
-            width: 100%;
-            height: 180px;
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            overflow: hidden;
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: none;
             cursor: pointer;
-            transition: all 0.3s;
-            background: #f9f9f9;
-            margin-bottom: 16px;
+            transition: all 0.2s;
         }
 
-        .service-image-upload:hover {
-            border-color: #F97316;
-            background: #fff7ed;
+        .btn-edit {
+            background: #E3F2FD;
+            color: var(--info);
         }
 
-        .service-image-upload input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 2;
+        .btn-edit:hover {
+            background: #BBDEFB;
         }
 
-        .service-image-preview {
-            width: 100%;
-            height: 100%;
+        .btn-toggle {
+            background: #FFF3E0;
+            color: var(--warning);
+        }
+
+        .btn-toggle:hover {
+            background: #FFE0B2;
+        }
+
+        .btn-toggle.active {
+            background: #E8F5E9;
+            color: var(--success);
+        }
+
+        .category-tabs {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #999;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
-        .service-image-preview span:first-child {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        .service-image-preview .upload-hint {
+        .category-tab {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
             font-size: 14px;
         }
 
-        .service-image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .category-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
-        .form-hint {
-            font-size: 12px;
-            color: #999;
-            margin-top: -12px;
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
             margin-bottom: 16px;
         }
 
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -196,8 +190,8 @@
             bottom: 0;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
-            align-items: center;
             justify-content: center;
+            align-items: center;
         }
 
         .modal.show {
@@ -303,58 +297,105 @@
 
         .icon-option.selected {
             border-color: var(--primary);
-            background: rgba(249, 115, 22, 0.1);
+            background: #E8F5E9;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-danger {
+            background: #FFEBEE;
+            color: var(--danger);
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
+    <div class="admin-layout">
         <!-- 侧边栏 -->
         <aside class="sidebar">
             <div class="logo">
                 <span class="logo-icon">🐾</span>
-                <span class="logo-text">PawsUp</span>
+                <span>PawsUp</span>
             </div>
             <nav class="nav-menu">
-                <a href="dashboard" class="nav-item">
+                <a href="dashboard.html" class="nav-item">
                     <span class="nav-icon">📊</span>
-                    <span class="nav-text">数据概览</span>
+                    <span>仪表盘</span>
                 </a>
-                <a href="pawsup-technicians" class="nav-item">
-                    <span class="nav-icon">👨‍🔧</span>
-                    <span class="nav-text">技师管理</span>
+                <a href="orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>订单管理</span>
                 </a>
-                <a href="pawsup-services" class="nav-item active">
-                    <span class="nav-icon">🛁</span>
-                    <span class="nav-text">服务管理</span>
+                <a href="services.html" class="nav-item active">
+                    <span class="nav-icon">✂️</span>
+                    <span>服务管理</span>
                 </a>
-                <a href="admin-appointments" class="nav-item">
-                    <span class="nav-icon">📅</span>
-                    <span class="nav-text">预约管理</span>
+                <a href="groomers.html" class="nav-item">
+                    <span class="nav-icon">👨‍✂️</span>
+                    <span>美容师管理</span>
                 </a>
-                <a href="orders" class="nav-item">
-                    <span class="nav-icon">📦</span>
-                    <span class="nav-text">订单管理</span>
-                </a>
-                <a href="admin-schedule" class="nav-item">
-                    <span class="nav-icon">⏰</span>
-                    <span class="nav-text">排班管理</span>
-                </a>
-                <a href="statistics" class="nav-item">
+                <a href="statistics.html" class="nav-item">
                     <span class="nav-icon">📈</span>
-                    <span class="nav-text">数据统计</span>
+                    <span>数据统计</span>
                 </a>
             </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">A</div>
+                    <div class="user-detail">
+                        <span class="name">管理员</span>
+                        <span class="role">Admin</span>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- 主内容区 -->
         <main class="main-content">
-            <header class="page-header">
-                <h1>服务管理</h1>
-                <button class="btn btn-primary" onclick="openModal()">+ 添加服务</button>
+            <header class="topbar">
+                <h1 class="page-title">服务管理</h1>
+                <div class="topbar-actions">
+                    <button class="btn-primary" onclick="openModal()">
+                        <span>+</span>
+                        <span>添加服务</span>
+                    </button>
+                </div>
             </header>
 
-            <div class="content-body">
+            <div class="content">
                 <div class="category-tabs">
                     <button class="category-tab active" data-category="all">全部服务</button>
                     <button class="category-tab" data-category="wash">洗美护理</button>
@@ -379,20 +420,6 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="serviceId">
-                
-                <!-- 服务图片上传 -->
-                <div class="form-group">
-                    <label>服务图片</label>
-                    <div class="service-image-upload" id="serviceImageUpload">
-                        <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)">
-                        <div class="service-image-preview" id="serviceImagePreview">
-                            <span>🖼️</span>
-                            <span class="upload-hint">点击上传服务图片</span>
-                        </div>
-                    </div>
-                    <p class="form-hint">建议尺寸：400x300px，支持 JPG、PNG 格式</p>
-                </div>
-                
                 <div class="form-group">
                     <label>服务图标</label>
                     <div class="icon-selector" id="iconSelector">
@@ -453,265 +480,290 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveService()">保存</button>
+                <button class="btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn-primary" onclick="saveService()">保存</button>
             </div>
         </div>
     </div>
 
     <script>
-        // API 配置
+        // API 配置 - 调用 Vercel API Routes
         const API_BASE = '/api';
         let services = [];
         let currentCategory = 'all';
-        let serviceImageBase64 = '';
 
         function showError(msg) {
             document.getElementById('servicesGrid').innerHTML = `
                 <div style="grid-column:1/-1;text-align:center;padding:60px;color:#F44336;">
                     <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
                     <div>${msg}</div>
+                    <button onclick="location.reload()" style="margin-top:20px;padding:10px 20px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer;">刷新重试</button>
                 </div>
             `;
         }
 
-        // 预览服务图片
-        function previewServiceImage(input) {
-            if (!input.files || input.files.length === 0) return;
-            
-            const file = input.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                alert('图片大小超过5MB限制');
-                input.value = '';
-                return;
+        // API 调用封装
+        async function apiCall(endpoint, data) {
+            const response = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `HTTP ${response.status}`);
             }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                serviceImageBase64 = e.target.result;
-                const preview = document.getElementById('serviceImagePreview');
-                preview.innerHTML = `<img src="${e.target.result}" alt="预览">`;
-            };
-            reader.readAsDataURL(file);
+
+            return await response.json();
         }
 
         // Load services from API
         async function loadServices() {
             try {
-                const res = await fetch(`${API_BASE}/services`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'list' })
-                });
-
-                if (!res.ok) throw new Error('加载失败');
-
-                const result = await res.json();
-                if (result.success) {
-                    services = result.data || [];
-                    renderServices();
-                } else {
-                    showError(result.error || '加载失败');
+                const result = await apiCall('services', { action: 'list' });
+                
+                console.log('API Response:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.error || '加载失败');
                 }
-            } catch (err) {
-                console.error('Load services error:', err);
-                showError('加载失败：' + err.message);
+
+                services = (result.data || []).map(s => ({
+                    ...s, 
+                    id: s._id || s.id,
+                    // 字段兼容处理
+                    name: s.name || s.title || '未命名服务',
+                    desc: s.desc || s.description || s.intro || '',
+                    icon: s.icon || '🐾',
+                    category: s.category || 'wash',
+                    price: s.price || 0,
+                    priceUnit: s.priceUnit || s.unit || '次',
+                    duration: s.duration || s.time || '约60分钟',
+                    status: s.status || 'active',
+                    bookings: s.bookings || s.orderCount || s.sales || 0
+                }));
+                
+                console.log('Parsed services:', services);
+
+                // 如果没有数据，初始化默认数据
+                if (services.length === 0) {
+                    const defaultServices = [
+                        {icon: '🐕', name: '狗狗洗护套餐', category: 'wash', price: 99, priceUnit: '次', duration: '约60分钟', desc: '包含洗澡、吹干、修剪指甲、清洁耳朵等基础护理服务', status: 'active', bookings: 328},
+                        {icon: '🐈', name: '猫咪洗护套餐', category: 'wash', price: 129, priceUnit: '次', duration: '约90分钟', desc: '专为猫咪设计的轻柔洗护，包含洗澡、吹干、梳毛等服务', status: 'active', bookings: 156},
+                        {icon: '✂️', name: '宠物美容造型', category: 'groom', price: 199, priceUnit: '次', duration: '约120分钟', desc: '专业美容师定制造型，包含精修、造型设计等服务', status: 'active', bookings: 89},
+                        {icon: '🏠', name: '宠物寄养', category: 'boarding', price: 80, priceUnit: '晚', duration: '按间夜', desc: '24小时专人照顾，每日遛弯、喂食、清洁，让爱宠安心', status: 'active', bookings: 45}
+                    ];
+                    
+                    for (const service of defaultServices) {
+                        await apiCall('services', { action: 'add', data: service });
+                    }
+                    
+                    // 重新加载
+                    const reloadResult = await apiCall('services', { action: 'list' });
+                    services = (reloadResult.data || []).map(s => ({...s, id: s._id || s.id}));
+                }
+
+                renderServices();
+            } catch (error) {
+                console.error('Load services error:', error);
+                showError('加载服务数据失败: ' + error.message);
             }
         }
 
         // Render services
         function renderServices() {
-            const container = document.getElementById('servicesGrid');
-            
-            let filtered = services;
-            if (currentCategory !== 'all') {
-                filtered = services.filter(s => s.category === currentCategory);
-            }
+            const grid = document.getElementById('servicesGrid');
+            const filtered = currentCategory === 'all' ? services : services.filter(s => s.category === currentCategory);
 
             if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column:1/-1;text-align:center;padding:60px;color:#999;">
-                        <div style="font-size:48px;margin-bottom:16px;">🛁</div>
-                        <div>暂无服务</div>
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">📭</div>
+                        <div>暂无服务数据</div>
+                        <div style="font-size: 14px; margin-top: 8px;">点击"添加服务"创建第一个服务</div>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = filtered.map(service => `
+            const categoryNames = {wash: '洗美护理', groom: '美容造型', boarding: '寄养服务', extra: '增值服务'};
+
+            grid.innerHTML = filtered.map(service => `
                 <div class="service-card">
-                    <div class="service-image">
-                        ${service.image ? `<img src="${service.image}" alt="${service.name}">` : '<span class="no-image">🛁</span>'}
-                    </div>
                     <div class="service-header">
-                        <div class="service-icon">${service.icon || '✂️'}</div>
+                        <div class="service-icon">${service.icon}</div>
                         <div class="service-title">
                             <h3>${service.name}</h3>
-                            <span class="service-category">${getCategoryName(service.category)}</span>
+                            <div class="service-category">${categoryNames[service.category] || service.category}</div>
                         </div>
                         <span class="service-status ${service.status}">${service.status === 'active' ? '上架中' : '已下架'}</span>
                     </div>
-                    <div class="service-desc">${service.description || '暂无描述'}</div>
+                    <p class="service-desc">${service.desc}</p>
                     <div class="service-meta">
-                        <span>⏱ ${service.duration || '60分钟'}</span>
-                        <span>📦 ${service.unit || '次'}</span>
+                        <span>⏱️ ${service.duration}</span>
+                        <span>📋 已预约 ${service.bookings}次</span>
                     </div>
-                    <div class="service-price">¥${service.price}<span>/${service.unit || '次'}</span></div>
+                    <div class="service-price">
+                        ¥${service.price}<span>/${service.priceUnit}</span>
+                    </div>
                     <div class="service-actions">
-                        <button class="btn btn-sm btn-secondary" onclick="editService('${service._id}')">编辑</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteService('${service._id}')">删除</button>
+                        <button class="btn-sm btn-edit" onclick="editService('${service.id}')">编辑</button>
+                        <button class="btn-sm btn-toggle ${service.status === 'inactive' ? 'active' : ''}" onclick="toggleStatus('${service.id}')">
+                            ${service.status === 'active' ? '下架' : '上架'}
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function getCategoryName(cat) {
-            const names = { wash: '洗美护理', groom: '美容造型', boarding: '寄养服务', extra: '增值服务' };
-            return names[cat] || cat;
-        }
+        // Category tabs
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                renderServices();
+            });
+        });
+
+        // Icon selector
+        document.querySelectorAll('.icon-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                document.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('serviceIcon').value = this.dataset.icon;
+            });
+        });
 
         // Modal functions
-        function openModal() {
-            document.getElementById('serviceModal').classList.add('show');
-            document.getElementById('modalTitle').textContent = '添加服务';
-            document.getElementById('serviceId').value = '';
-            serviceImageBase64 = '';
-            document.getElementById('serviceImagePreview').innerHTML = '<span>🖼️</span><span class="upload-hint">点击上传服务图片</span>';
-            document.getElementById('serviceName').value = '';
-            document.getElementById('servicePrice').value = '';
-            document.getElementById('serviceDuration').value = '';
-            document.getElementById('serviceDesc').value = '';
+        function openModal(serviceId = null) {
+            const modal = document.getElementById('serviceModal');
+            const title = document.getElementById('modalTitle');
+
+            if (serviceId) {
+                const service = services.find(s => s.id === serviceId);
+                if (!service) return;
+
+                title.textContent = '编辑服务';
+                document.getElementById('serviceId').value = service.id;
+                document.getElementById('serviceIcon').value = service.icon;
+                document.querySelectorAll('.icon-option').forEach(o => {
+                    o.classList.toggle('selected', o.dataset.icon === service.icon);
+                });
+                document.getElementById('serviceName').value = service.name;
+                document.getElementById('serviceCategory').value = service.category;
+                document.getElementById('servicePrice').value = service.price;
+                document.getElementById('priceUnit').value = service.priceUnit;
+                document.getElementById('serviceDuration').value = service.duration;
+                document.getElementById('serviceDesc').value = service.desc;
+                document.getElementById('serviceStatus').value = service.status;
+            } else {
+                title.textContent = '添加服务';
+                document.getElementById('serviceId').value = '';
+                document.getElementById('serviceIcon').value = '🐕';
+                document.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+                document.querySelector('.icon-option[data-icon="🐕"]').classList.add('selected');
+                document.getElementById('serviceName').value = '';
+                document.getElementById('serviceCategory').value = 'wash';
+                document.getElementById('servicePrice').value = '';
+                document.getElementById('priceUnit').value = '次';
+                document.getElementById('serviceDuration').value = '';
+                document.getElementById('serviceDesc').value = '';
+                document.getElementById('serviceStatus').value = 'active';
+            }
+
+            modal.classList.add('show');
         }
 
         function closeModal() {
             document.getElementById('serviceModal').classList.remove('show');
         }
 
-        function editService(id) {
-            const service = services.find(s => s._id === id);
-            if (!service) return;
-
-            document.getElementById('serviceModal').classList.add('show');
-            document.getElementById('modalTitle').textContent = '编辑服务';
-            document.getElementById('serviceId').value = service._id;
-            
-            // 显示已有图片
-            if (service.image) {
-                serviceImageBase64 = service.image;
-                document.getElementById('serviceImagePreview').innerHTML = `<img src="${service.image}" alt="预览">`;
-            } else {
-                serviceImageBase64 = '';
-                document.getElementById('serviceImagePreview').innerHTML = '<span>🖼️</span><span class="upload-hint">点击上传服务图片</span>';
-            }
-            
-            document.getElementById('serviceName').value = service.name;
-            document.getElementById('servicePrice').value = service.price;
-            document.getElementById('serviceDuration').value = service.duration || '';
-            document.getElementById('serviceCategory').value = service.category;
-            document.getElementById('serviceDesc').value = service.description || '';
-            document.getElementById('serviceStatus').value = service.status;
-            
-            // Set icon
-            document.querySelectorAll('.icon-option').forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.icon === service.icon) opt.classList.add('selected');
-            });
-            document.getElementById('serviceIcon').value = service.icon;
-        }
-
+        // Save service via API
         async function saveService() {
             const id = document.getElementById('serviceId').value;
             const name = document.getElementById('serviceName').value.trim();
             const price = parseFloat(document.getElementById('servicePrice').value);
-            const duration = document.getElementById('serviceDuration').value;
-            const category = document.getElementById('serviceCategory').value;
-            const description = document.getElementById('serviceDesc').value.trim();
-            const status = document.getElementById('serviceStatus').value;
-            const icon = document.getElementById('serviceIcon').value;
 
-            if (!name || !price) {
-                alert('请填写服务名称和价格');
+            if (!name) {
+                alert('请输入服务名称');
+                return;
+            }
+            if (!price || price <= 0) {
+                alert('请输入有效的服务价格');
                 return;
             }
 
-            const serviceData = { name, price, duration, category, description, status, icon };
-            
-            // 如果有图片，添加到数据
-            if (serviceImageBase64) {
-                serviceData.image = serviceImageBase64;
-            }
+            const serviceData = {
+                icon: document.getElementById('serviceIcon').value,
+                name: name,
+                category: document.getElementById('serviceCategory').value,
+                price: price,
+                priceUnit: document.getElementById('priceUnit').value,
+                duration: document.getElementById('serviceDuration').value.trim() || '约60分钟',
+                desc: document.getElementById('serviceDesc').value.trim() || name,
+                status: document.getElementById('serviceStatus').value
+            };
 
             try {
-                const res = await fetch(`${API_BASE}/services`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: id ? 'update' : 'add',
-                        id: id || undefined,
-                        data: serviceData
-                    })
-                });
-
-                const result = await res.json();
-                if (result.success) {
-                    closeModal();
-                    loadServices();
-                    alert(id ? '更新成功' : '添加成功');
+                if (id) {
+                    console.log('Updating service:', id, serviceData);
+                    const result = await apiCall('services', { 
+                        action: 'update', 
+                        id: id, 
+                        data: serviceData 
+                    });
+                    if (!result.success) throw new Error(result.error || '更新失败');
+                    console.log('Update success');
                 } else {
-                    alert('保存失败：' + result.error);
+                    console.log('Adding new service:', serviceData);
+                    const result = await apiCall('services', { 
+                        action: 'add', 
+                        data: { ...serviceData, bookings: 0 } 
+                    });
+                    if (!result.success) throw new Error(result.error || '添加失败');
+                    console.log('Add success');
                 }
-            } catch (err) {
-                alert('保存失败：' + err.message);
+                await loadServices();
+                closeModal();
+            } catch (error) {
+                console.error('Save service error:', error);
+                alert('保存失败: ' + error.message);
             }
         }
 
-        async function deleteService(id) {
-            if (!confirm('确定要删除该服务吗？')) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/services`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', id })
-                });
-
-                const result = await res.json();
-                if (result.success) {
-                    loadServices();
-                    alert('删除成功');
-                } else {
-                    alert('删除失败：' + result.error);
-                }
-            } catch (err) {
-                alert('删除失败：' + err.message);
-            }
+        function editService(id) {
+            openModal(id);
         }
 
-        // Icon selector
-        document.querySelectorAll('.icon-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                document.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
-                opt.classList.add('selected');
-                document.getElementById('serviceIcon').value = opt.dataset.icon;
-            });
-        });
+        async function toggleStatus(id) {
+            const service = services.find(s => s.id === id);
+            if (!service) return;
 
-        // Category tabs
-        document.querySelectorAll('.category-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentCategory = tab.dataset.category;
-                renderServices();
-            });
-        });
+            try {
+                const newStatus = service.status === 'active' ? 'inactive' : 'active';
+                const result = await apiCall('services', { 
+                    action: 'update', 
+                    id: id, 
+                    data: { status: newStatus } 
+                });
+                if (!result.success) throw new Error(result.error || '更新失败');
+                await loadServices();
+            } catch (error) {
+                console.error('Toggle status error:', error);
+                alert('操作失败: ' + error.message);
+            }
+        }
 
         // Close modal on outside click
-        document.getElementById('serviceModal').addEventListener('click', (e) => {
-            if (e.target.id === 'serviceModal') closeModal();
+        document.getElementById('serviceModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
         });
 
-        // Initialize
+        // Initialize - load services on page load
         loadServices();
     </script>
 </body>

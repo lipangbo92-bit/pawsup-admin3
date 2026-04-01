@@ -1,149 +1,195 @@
-// 选择时间2 - 选择时间段和技师
 Page({
   data: {
-    date: '',
+    mode: '',
+    petId: '',
     serviceId: '',
-    service: null,
-    times: [],
+    technicianId: '',
+    selectedService: null,
+    selectedTechnician: null,
+    selectedDateIndex: 0,
+    selectedDateStr: '',
     selectedTime: '',
-    selectedTech: null,
-    technicians: []
+    dateList: [],
+    timeSections: []
   },
 
   onLoad(options) {
-    if (options.date) {
-      this.setData({ date: options.date });
-    }
-    if (options.serviceId) {
-      this.setData({ serviceId: options.serviceId });
-    }
-    this.generateTimes();
-    this.loadService();
-    this.loadTechnicians();
+    const { mode, petId, serviceId, technicianId } = options
+    this.setData({ mode, petId, serviceId, technicianId })
+    
+    this.generateDateList()
+    
+    if (serviceId) this.loadService(serviceId)
+    if (technicianId) this.loadTechnician(technicianId)
   },
 
-  generateTimes() {
-    const times = [];
-    for (let h = 9; h <= 18; h++) {
-      for (let m = 0; m < 60; m += 30) {
-        if (h === 18 && m > 0) break;
-        const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-        times.push({
-          time,
-          available: Math.random() > 0.3
-        });
-      }
-    }
-    this.setData({ times });
-  },
-
-  // 加载服务详情
-  async loadService() {
+  async loadService(serviceId) {
     try {
-      const res = await wx.cloud.callFunction({
+      const { result } = await wx.cloud.callFunction({
         name: 'services-api',
-        data: { action: 'list' }
-      });
-      
-      if (res.result && res.result.success) {
-        const service = res.result.data.find(s => s._id === this.data.serviceId);
-        if (service) {
-          this.setData({
-            service: {
-              id: service._id,
-              name: service.name,
-              price: service.price
-            }
-          });
-        }
+        data: { action: 'get', id: serviceId }
+      })
+      if (result && result.success) {
+        this.setData({ selectedService: result.data })
       }
     } catch (err) {
-      console.error('加载服务失败:', err);
-      // 备用数据
-      this.setData({
-        service: { id: this.data.serviceId, name: '宠物服务', price: 128 }
-      });
+      console.error('加载服务失败:', err)
     }
   },
 
-  // 加载技师列表
-  async loadTechnicians() {
+  async loadTechnician(technicianId) {
     try {
-      wx.showLoading({ title: '加载技师' });
-      
-      const res = await wx.cloud.callFunction({
+      const { result } = await wx.cloud.callFunction({
         name: 'technicians-api',
-        data: { action: 'list' }
-      });
-      
-      wx.hideLoading();
-      
-      if (res.result && res.result.success) {
-        const technicians = res.result.data
-          .filter(t => {
-            // 只显示在职的技师
-            const status = t.status || '';
-            return status !== 'inactive' && status !== '休息中' && status !== '离职';
-          })
-          .map(t => ({
-            id: t._id,
-            name: t.name,
-            avatar: t.avatarUrl || '',
-            // 展示等级和岗位
-            level: t.level || '中级',
-            position: t.position || '美容师',
-            // 完整显示：高级美容师
-            displayTitle: `${t.level || '中级'}${t.position || '美容师'}`
-          }));
-        
-        this.setData({ technicians });
-      } else {
-        throw new Error('获取数据失败');
+        data: { action: 'get', id: technicianId }
+      })
+      if (result && result.success) {
+        this.setData({ selectedTechnician: result.data })
       }
     } catch (err) {
-      wx.hideLoading();
-      console.error('加载技师失败:', err);
-      // 使用备用数据
-      this.setData({
-        technicians: [
-          { id: '1', name: '加载失败', avatar: '', level: '', position: '', displayTitle: '请刷新重试' }
-        ]
-      });
+      console.error('加载美容师失败:', err)
     }
   },
 
-  selectTime(e) {
-    const index = e.currentTarget.dataset.index;
-    const time = this.data.times[index];
-    if (!time.available) return;
+  generateDateList() {
+    const dateList = []
+    const today = new Date()
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
     
-    this.setData({ selectedTime: time.time });
+    for (let i = 0; i < 14; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+      
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const weekDay = date.getDay()
+      
+      let weekText = weekDays[weekDay]
+      if (i === 0) weekText = '今天'
+      if (i === 1) weekText = '明天'
+      
+      dateList.push({
+        date: `${month}-${day}`,
+        day: `${month}/${day}`,
+        week: weekText,
+        fullDate: date.toISOString().split('T')[0],
+        available: true
+      })
+    }
+    
+    this.setData({ 
+      dateList,
+      selectedDateStr: dateList[0].fullDate
+    })
+    
+    this.loadTimeSlots(dateList[0].fullDate)
   },
 
-  selectTech(e) {
-    const index = e.currentTarget.dataset.index;
-    this.setData({ selectedTech: this.data.technicians[index] });
+  // 路径2：加载指定美容师的可用时段
+  async loadTimeSlots(date) {
+    const { technicianId } = this.data
+    
+    try {
+      const { result } = await wx.cloud.callFunction({
+        name: 'availability-api',
+        data: {
+          action: 'getAvailableSlots',
+          technicianId: technicianId,
+          date: date
+        }
+      })
+      
+      if (result && result.success) {
+        this.setData({ timeSections: result.data.timeSections })
+      } else {
+        this.setDefaultTimeSlots()
+      }
+    } catch (err) {
+      console.error('加载时段失败:', err)
+      this.setDefaultTimeSlots()
+    }
   },
 
-  confirm() {
+  setDefaultTimeSlots() {
+    const timeSections = [
+      {
+        period: '上午',
+        times: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'].map(t => ({
+          time: t, selected: false, disabled: false, status: '可约'
+        }))
+      },
+      {
+        period: '下午',
+        times: ['13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'].map(t => ({
+          time: t, selected: false, disabled: false, status: '可约'
+        }))
+      },
+      {
+        period: '晚上',
+        times: ['18:00', '18:30', '19:00', '19:30', '20:00'].map(t => ({
+          time: t, selected: false, disabled: false, status: '可约'
+        }))
+      }
+    ]
+    this.setData({ timeSections })
+  },
+
+  onDateSelect(e) {
+    const index = e.currentTarget.dataset.index
+    const dateItem = this.data.dateList[index]
+    
+    this.setData({
+      selectedDateIndex: index,
+      selectedDateStr: dateItem.fullDate,
+      selectedTime: ''
+    })
+    
+    this.resetTimeSelection()
+    this.loadTimeSlots(dateItem.fullDate)
+  },
+
+  onTimeSelect(e) {
+    const { period, index } = e.currentTarget.dataset
+    const timeSections = this.data.timeSections
+    
+    const section = timeSections.find(s => s.period === period)
+    if (!section || section.times[index].disabled) return
+    
+    timeSections.forEach(s => {
+      s.times.forEach(t => { t.selected = false })
+    })
+    
+    section.times[index].selected = true
+    
+    this.setData({
+      timeSections,
+      selectedTime: section.times[index].time
+    })
+  },
+
+  resetTimeSelection() {
+    const timeSections = this.data.timeSections
+    timeSections.forEach(s => {
+      s.times.forEach(t => { t.selected = false })
+    })
+    this.setData({ timeSections, selectedTime: '' })
+  },
+
+  onConfirm() {
     if (!this.data.selectedTime) {
-      wx.showToast({ title: '请选择时间', icon: 'none' });
-      return;
+      wx.showToast({ title: '请选择预约时间', icon: 'none' })
+      return
     }
-
-    // 存储预约数据
-    const bookingData = {
-      service: this.data.service,
-      date: this.data.date,
-      time: this.data.selectedTime,
-      technician: this.data.selectedTech
-    };
     
-    // 将数据存储到全局或传递到下一页
-    wx.setStorageSync('bookingData', bookingData);
-
+    const { mode, petId, serviceId, technicianId, selectedDateStr, selectedTime } = this.data
+    
+    // 路径2：直接跳确认页
     wx.navigateTo({
-      url: '/pages/pet-select/pet-select'
-    });
+      url: `/pages/booking-confirm/booking-confirm?mode=${mode}&petId=${petId}&serviceId=${serviceId}&technicianId=${technicianId}&date=${selectedDateStr}&time=${selectedTime}`
+    })
+  },
+
+  goBack() {
+    wx.navigateBack()
   }
-});
+})

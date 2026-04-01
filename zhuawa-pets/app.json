@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/login/login",
     "pages/index/index",
     "pages/services/services",
     "pages/service-select/service-select",
@@ -15,7 +16,9 @@
     "pages/visiting/visiting",
     "pages/orders/orders",
     "pages/order-detail/order-detail",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/membership/membership",
+    "pages/recharge/recharge"
   ],
   "window": {
     "backgroundTextStyle": "light",

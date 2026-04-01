@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "build": "echo 'Static site - no build required'"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^2.11.0"
   }
 }

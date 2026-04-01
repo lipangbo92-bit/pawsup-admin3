@@ -1,0 +1,9 @@
+{
+  "name": "payment-api",
+  "version": "1.0.0",
+  "description": "模拟支付接口",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

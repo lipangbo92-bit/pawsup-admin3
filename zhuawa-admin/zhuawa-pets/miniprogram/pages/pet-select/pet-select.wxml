@@ -5,17 +5,32 @@
   <view class="pet-list">
     <view 
       wx:for="{{pets}}" 
-      wx:key="id"
-      class="pet-card {{selectedPet && selectedPet.id === item.id ? 'selected' : ''}}"
-      data-index="{{index}}"
-      bindtap="selectPet"
+      wx:key="_id"
+      class="pet-card {{selectedPet && (selectedPet._id === item._id || selectedPet.id === item.id) ? 'selected' : ''}}"
     >
-      <view class="pet-avatar"></view>
-      <view class="pet-info">
-        <text class="pet-name">{{item.name}}</text>
-        <text class="pet-breed">{{item.breed}} · {{item.age}}岁</text>
+      <!-- 左侧：点击选择宠物 -->
+      <view class="pet-main" data-index="{{index}}" bindtap="selectPet">
+        <image 
+          wx:if="{{item.avatar && !item.avatarError}}" 
+          class="pet-avatar-img" 
+          src="{{item.avatar}}" 
+          mode="aspectFill"
+          binderror="onAvatarError"
+          data-index="{{index}}"
+        />
+        <view wx:else class="pet-avatar">{{item.type === 'dog' ? '🐕' : item.type === 'cat' ? '🐈' : '🐾'}}</view>
+        <view class="pet-info">
+          <text class="pet-name">{{item.name}}</text>
+          <text class="pet-breed">{{item.breed}} · {{item.age}}岁</text>
+        </view>
       </view>
-      <view class="check-icon" wx:if="{{selectedPet && selectedPet.id === item.id}}">✓</view>
+      
+      <!-- 右侧：操作按钮 -->
+      <view class="pet-actions">
+        <view class="action-btn edit" catchtap="onEditPet" data-id="{{item._id || item.id}}">编辑</view>
+        <view class="action-btn delete" catchtap="onDeletePet" data-id="{{item._id || item.id}}" data-index="{{index}}">删除</view>
+        <view class="check-icon" wx:if="{{selectedPet && (selectedPet._id === item._id || selectedPet.id === item.id)}}">✓</view>
+      </view>
     </view>
 
     <view class="add-pet-card" bindtap="addPet">

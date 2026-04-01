@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>管理员登录 - 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-500: #EA580C;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+            --shadow-lg: 0 8px 30px rgba(249, 115, 22, 0.2);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: var(--white);
+            border-radius: 24px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .app-name {
+            font-family: 'Varela Round', sans-serif;
+            color: var(--white);
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .app-subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-top: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .login-form {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 32px 28px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .form-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-label {
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-100);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .input-field::placeholder {
+            color: #9CA3AF;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        }
+        
+        .switch-role {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .role-option {
+            background: rgba(255,255,255,0.15);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .role-option.active {
+            background: var(--white);
+            color: var(--primary);
+        }
+        
+        .admin-features {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-100);
+        }
+        
+        .feature-title {
+            font-size: 12px;
+            color: #9CA3AF;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .feature-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .feature-tag {
+            background: var(--gray-100);
+            color: var(--text-light);
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo">🐾</div>
+            <h1 class="app-name">爪哇后台</h1>
+            <p class="app-subtitle">宠物服务预约系统</p>
+            <span class="role-badge">👑 管理端</span>
+        </div>
+        
+        <div class="login-form">
+            <h2 class="form-title">管理员登录</h2>
+            
+            <div class="input-group">
+                <label class="input-label">账号</label>
+                <input type="text" class="input-field" placeholder="请输入管理员账号">
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">密码</label>
+                <input type="password" class="input-field" placeholder="请输入密码">
+            </div>
+            
+            <button class="login-btn">登 录</button>
+            
+            <div class="admin-features">
+                <div class="feature-title">管理功能</div>
+                <div class="feature-list">
+                    <span class="feature-tag">📊 数据报表</span>
+                    <span class="feature-tag">📋 预约管理</span>
+                    <span class="feature-tag">👥 技师管理</span>
+                    <span class="feature-tag">✂️ 服务管理</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="switch-role">
+            <a href="technician-login.html" class="role-option">技师端</a>
+            <a href="admin-login.html" class="role-option active">管理端</a>
+        </div>
+    </div>
+</body>
+</html>

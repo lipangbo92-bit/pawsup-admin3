@@ -5,33 +5,143 @@ Page({
     userInfo: {
       avatar: '🐱',
       name: '萌宠主人',
-      level: '⭐ 金卡会员'
+      level: '⭐ 普通会员',
+      levelColor: '#9CA3AF'
     },
     // 统计数据
     stats: {
-      orderCount: 12,
-      petCount: 3,
-      balance: 580
-    }
+      orderCount: 0,
+      petCount: 0,
+      balance: 0,
+      points: 0
+    },
+    // 会员信息
+    membership: null
   },
 
   onLoad() {
-    // 页面加载时可以从服务器获取真实数据
+    this.loadUserData();
+  },
+
+  onShow() {
+    // 每次显示页面时刷新数据
     this.loadUserData();
   },
 
   // 加载用户数据
-  loadUserData() {
-    // TODO: 从服务器获取用户数据
-    // wx.request({
-    //   url: 'https://api.example.com/user/profile',
-    //   success: (res) => {
-    //     this.setData({
-    //       userInfo: res.data.userInfo,
-    //       stats: res.data.stats
-    //     });
-    //   }
-    // });
+  async loadUserData() {
+    const userInfo = wx.getStorageSync('userInfo');
+    if (!userInfo) {
+      console.log('[Profile] 用户未登录');
+      return;
+    }
+
+    // 获取 openid
+    let openid = userInfo.openid;
+    if (!openid) {
+      try {
+        const loginRes = await wx.cloud.callFunction({ name: 'login' });
+        openid = loginRes.result.openid;
+        userInfo.openid = openid;
+        wx.setStorageSync('userInfo', userInfo);
+      } catch (err) {
+        console.error('[Profile] 获取 openid 失败:', err);
+        return;
+      }
+    }
+
+    // 更新用户信息显示
+    this.setData({
+      'userInfo.name': userInfo.nickName || userInfo.name || '萌宠主人',
+      'userInfo.avatar': userInfo.avatarUrl ? '' : '🐱'
+    });
+
+    // 并行获取统计数据
+    await Promise.all([
+      this.loadOrderCount(openid),
+      this.loadPetCount(openid),
+      this.loadMembership(openid)
+    ]);
+  },
+
+  // 获取会员信息
+  async loadMembership(userId) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'membership-api',
+        data: {
+          action: 'getUserMembership',
+          userId: userId
+        }
+      });
+      
+      if (res.result && res.result.success) {
+        const membership = res.result.data;
+        const balance = res.result.balance || 0;
+        
+        // 会员等级颜色
+        const levelColors = {
+          normal: '#9CA3AF',
+          silver: '#C0C0C0',
+          gold: '#FFD700',
+          diamond: '#B9F2FF'
+        };
+        
+        this.setData({
+          membership: membership,
+          'userInfo.level': `⭐ ${membership.levelName || '普通会员'}`,
+          'userInfo.levelColor': levelColors[membership.level] || '#9CA3AF',
+          'stats.balance': balance,
+          'stats.points': membership.points || 0
+        });
+        
+        console.log('[Profile] 会员信息:', membership);
+      }
+    } catch (error) {
+      console.error('[Profile] 获取会员信息失败:', error);
+    }
+  },
+
+  // 获取订单数量
+  async loadOrderCount(userId) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'orders-api',
+        data: {
+          action: 'getOrders',
+          userId: userId
+        }
+      });
+      
+      if (res.result && res.result.success) {
+        const orderCount = res.result.data ? res.result.data.length : 0;
+        this.setData({ 'stats.orderCount': orderCount });
+        console.log('[Profile] 订单数量:', orderCount);
+      }
+    } catch (error) {
+      console.error('[Profile] 获取订单数量失败:', error);
+    }
+  },
+
+  // 获取宠物数量
+  async loadPetCount(userId) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'pets-api',
+        data: {
+          action: 'getPets',
+          userId: userId
+        }
+      });
+      
+      if (res.result && res.result.success) {
+        const petCount = res.result.data ? res.result.data.length : 0;
+        this.setData({ 'stats.petCount': petCount });
+        console.log('[Profile] 宠物数量:', petCount);
+      }
+    } catch (error) {
+      console.error('[Profile] 获取宠物数量失败:', error);
+    }
   },
 
   // 点击统计项 - 预约次数
@@ -80,17 +190,15 @@ Page({
 
   // 会员卡
   onMemberCard() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/membership/membership'
     });
   },
 
   // 优惠券
   onCoupons() {
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/coupons/coupons'
     });
   },
 

@@ -33,9 +33,8 @@
         </view>
         
         <view class="info-item">
-          <text class="item-label">服务技师</text>
+          <text class="item-label">美容师</text>
           <view class="item-value">
-            <text class="item-avatar">{{info.technician.avatar}}</text>
             <text class="item-text">{{info.technician.name}}</text>
           </view>
         </view>
@@ -58,7 +57,7 @@
         <view class="info-item last-item">
           <text class="item-label">服务时长</text>
           <view class="item-value">
-            <text class="item-text">约{{info.duration}}分钟</text>
+            <text class="item-text">约{{info.service.duration}}分钟</text>
           </view>
         </view>
       </view>

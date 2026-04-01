@@ -1,4 +1,4 @@
-<!--首页 - 修复头像渲染-->
+<!--首页 - 从数据库加载Banner-->
 <view class="home-container">
   <!-- 顶部导航栏 -->
   <view class="custom-nav">
@@ -8,9 +8,19 @@
     </view>
   </view>
 
-  <!-- Banner轮播图 -->
+  <!-- Banner轮播图 - 从数据库加载 -->
   <view class="banner-section">
-    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000">
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" wx:if="{{banners.length > 0}}">
+      <swiper-item wx:for="{{banners}}" wx:key="_id" class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="banner-bg-image"/>
+        <view class="banner-text-wrapper">
+          <text class="banner-title">{{item.title}}</text>
+          <text class="banner-subtitle">{{item.subtitle}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+    <!-- 默认Banner（无数据时显示） -->
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" wx:if="{{banners.length === 0}}">
       <swiper-item class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
         <text class="banner-title">专业宠物美容</text>
         <text class="banner-subtitle">让您的爱宠焕然一新</text>
@@ -45,11 +55,11 @@
     </view>
     
     <view class="technician-list">
-      <view wx:for="{{technicians}}" wx:key="index" class="technician-card">
-        <!-- 头像 - 修复渲染 -->
+      <view wx:for="{{technicians}}" wx:key="index" class="technician-card" bindtap="showTechnicianDetail" data-index="{{index}}">
+        <!-- 头像 -->
         <view class="technician-avatar">
           <block wx:if="{{item.avatar && item.avatar.length > 10}}">
-            <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+            <image src="{{item.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;" binderror="onImageError" data-type="avatar" data-index="{{index}}"/>
           </block>
           <block wx:else>
             <text style="font-size:48rpx;">👤</text>
@@ -57,19 +67,17 @@
         </view>
         
         <view class="technician-info">
-          <!-- 第一排：名字 + 岗位 + 等级 -->
           <view class="technician-name-row">
             <text class="technician-name">{{item.name}}</text>
             <text class="technician-position">{{item.position}}</text>
-            <text class="technician-badge">{{item.level}}</text>
+            <text class="technician-badge level-{{item.levelCode || 'default'}}">{{item.level}}</text>
           </view>
-          <!-- 第二排：评分和订单数 -->
           <view class="technician-stats">
             <text class="technician-rating">⭐ {{item.rating}}分</text>
             <text class="technician-orders">{{item.orders}}单</text>
           </view>
         </view>
-        <view class="technician-book-btn">预约</view>
+        <view class="technician-book-btn" catchtap="bookTechnician" data-index="{{index}}">预约</view>
       </view>
     </view>
   </view>
@@ -82,10 +90,79 @@
     </view>
     <view class="hot-service-list">
       <view wx:for="{{services}}" wx:key="index" class="hot-service-item" bindtap="goToBooking" data-id="{{item.id}}">
-        <view class="hot-service-icon">🐾</view>
+        <view class="hot-service-icon">
+          <block wx:if="{{item.image}}">
+            <image src="{{item.image}}" mode="aspectFill" style="width:100%;height:100%;border-radius:20rpx;"/>
+          </block>
+          <block wx:else>
+            {{item.icon}}
+          </block>
+        </view>
         <text class="hot-service-name">{{item.name}}</text>
         <text class="hot-service-price">¥{{item.price}}起</text>
       </view>
     </view>
   </view>
+
+  <!-- 美容师详情弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="modal-content" wx:if="{{showModal}}">
+    <view class="modal-header">
+      <text class="modal-title">美容师介绍</text>
+      <text class="modal-close" bindtap="closeModal">×</text>
+    </view>
+    <view class="modal-body" wx:if="{{selectedTechnician}}">
+      <view class="modal-avatar">
+        <block wx:if="{{selectedTechnician.avatar && selectedTechnician.avatar.length > 10}}">
+          <image src="{{selectedTechnician.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;"/>
+        </block>
+        <block wx:else>
+          <text style="font-size:80rpx;">👤</text>
+        </block>
+      </view>
+      <view class="modal-info">
+        <text class="modal-name">{{selectedTechnician.name}}</text>
+        <view class="modal-tags">
+          <text class="modal-tag">{{selectedTechnician.position}}</text>
+          <text class="modal-tag tag-level">{{selectedTechnician.level}}</text>
+        </view>
+        <view class="modal-stats">
+          <text class="modal-stat">⭐ {{selectedTechnician.rating}}分</text>
+          <text class="modal-stat">📋 {{selectedTechnician.orders}}单</text>
+        </view>
+      </view>
+      <view class="modal-desc">
+        <text class="desc-title">个人简介</text>
+        <text class="desc-content">{{selectedTechnician.intro}}</text>
+      </view>
+      
+      <!-- 作品展示 -->
+      <view class="modal-works" wx:if="{{selectedTechnician.works && selectedTechnician.works.length > 0}}">
+        <text class="works-title">作品展示</text>
+        <scroll-view class="works-scroll" scroll-x="true">
+          <view class="works-list">
+            <image 
+              wx:for="{{selectedTechnician.works}}" 
+              wx:key="index"
+              src="{{item}}" 
+              mode="aspectFill"
+              class="work-image"
+              bindtap="previewWork"
+              data-url="{{item}}"
+            />
+          </view>
+        </scroll-view>
+      </view>
+      
+      <view class="modal-book-btn" bindtap="bookFromModal">立即预约</view>
+    </view>
+  </view>
+
+  <!-- 宠物选择弹窗 -->
+  <pet-selector 
+    visible="{{showPetSelector}}" 
+    bind:confirm="onPetSelected"
+    bind:addPet="onAddPet"
+    bind:close="onPetSelectorClose"
+  />
 </view>

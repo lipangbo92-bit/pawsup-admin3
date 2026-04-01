@@ -30,19 +30,22 @@
     </view>
   </view>
 
-  <!-- 已选美容师信息卡片 -->
+  <!-- 已选美容师信息卡片 - 完全复用首页样式 -->
   <view class="selected-technician-card" wx:if="{{selectedTechnician}}">
-    <view class="technician-header">
-      <view class="technician-avatar">{{selectedTechnician.avatar}}</view>
+    <view class="technician-card">
+      <view class="technician-avatar">
+        <image src="{{selectedTechnician.avatar}}" mode="aspectFill" style="width:100%;height:100%;border-radius:50%;" wx:if="{{selectedTechnician.isImage}}"></image>
+        <text style="font-size:48rpx;" wx:else>👤</text>
+      </view>
       <view class="technician-info">
         <view class="technician-name-row">
           <text class="technician-name">{{selectedTechnician.name}}</text>
-          <view class="technician-badge" wx:if="{{selectedTechnician.isGold}}">金牌</view>
+          <text class="technician-position" wx:if="{{selectedTechnician.position}}">{{selectedTechnician.position}}</text>
+          <text class="technician-badge" wx:if="{{selectedTechnician.level}}">{{selectedTechnician.level}}</text>
         </view>
-        <text class="technician-skill">{{selectedTechnician.skill}}</text>
         <view class="technician-stats">
-          <text class="technician-rating">⭐ {{selectedTechnician.rating}}</text>
-          <text class="technician-orders">已接{{selectedTechnician.orders}}单</text>
+          <text class="technician-rating">⭐ {{selectedTechnician.rating}}分</text>
+          <text class="technician-orders">{{selectedTechnician.orders}}单</text>
         </view>
       </view>
     </view>

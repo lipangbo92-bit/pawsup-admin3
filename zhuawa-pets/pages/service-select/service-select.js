@@ -6,6 +6,7 @@ Page({
     petId: '',
     technicianId: '',
     selectedTechnician: null,
+    selectedPet: null,
     categories: ['全部', '狗狗洗护', '狗狗造型', '狗狗寄养', '猫猫洗护', '猫猫造型', '猫猫寄养', '上门服务'],
     currentCategory: 0,
     services: [],
@@ -15,6 +16,24 @@ Page({
   onLoad(options) {
     const { mode, petId, technicianId, category, petType } = options
     this.setData({ mode, petId, technicianId, petType })
+
+    console.log('[service-select] onLoad options:', options)
+    console.log('[service-select] globalData:', app.globalData)
+    console.log('[service-select] selectedPet:', app.globalData.selectedPet)
+
+    // 从 globalData 获取宠物信息（用于 switchTab 跳转的场景）
+    if (app.globalData.selectedPet) {
+      const pet = app.globalData.selectedPet
+      const petIdValue = pet.id || pet._id
+      this.setData({
+        selectedPet: pet,
+        petId: petIdValue || petId
+      })
+      console.log('[service-select] 从 globalData 获取宠物:', pet)
+      console.log('[service-select] 设置的 petId:', petIdValue)
+    } else {
+      console.warn('[service-select] globalData.selectedPet 为空')
+    }
     
     // 如果有technicianId，加载美容师信息
     if (technicianId) {
@@ -116,21 +135,27 @@ Page({
   selectService(e) {
     const serviceId = e.currentTarget.dataset.id
     const service = this.data.services.find(s => s._id === serviceId)
-    
+
     if (!service) return
-    
-    const { mode, petId, technicianId } = this.data
-    
+
+    const { mode, petId, technicianId, selectedPet } = this.data
+
+    // 构建宠物信息字符串
+    const petIdStr = selectedPet ? (selectedPet.id || selectedPet._id) : petId
+    const petTypeStr = selectedPet ? selectedPet.type : ''
+
+    console.log('[service-select] selectService:', { mode, petIdStr, technicianId, selectedPet })
+
     if (mode === 'path1') {
       // 路径1：已选宠物 -> 选服务 -> 选时间 -> 选美容师
       wx.navigateTo({
-        url: `/pages/booking-time-1/booking-time-1?mode=path1&petId=${petId}&serviceId=${serviceId}`
+        url: `/pages/booking-time-1/booking-time-1?mode=path1&petId=${petIdStr}&serviceId=${serviceId}`
       })
     } else if (mode === 'path2') {
       // 路径2：已选宠物 -> 选服务 -> 选时间（美容师已固定）
-      wx.navigateTo({
-        url: `/pages/booking-time-2/booking-time-2?mode=path2&petId=${petId}&serviceId=${serviceId}&technicianId=${technicianId}`
-      })
+      const url = `/pages/booking-time-2/booking-time-2?mode=path2&petId=${petIdStr}&serviceId=${serviceId}&technicianId=${technicianId}`
+      console.log('[service-select] 跳转到:', url)
+      wx.navigateTo({ url })
     }
   },
 
