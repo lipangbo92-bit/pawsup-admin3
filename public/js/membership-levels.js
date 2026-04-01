@@ -341,10 +341,10 @@ async function saveConfig() {
     btn.textContent = '保存中...';
 
     try {
-        // 收集2-4档的配置
+        // 收集1-4档的配置（包括普通会员）
         const updates = [];
 
-        for (let i = 2; i <= 4; i++) {
+        for (let i = 1; i <= 4; i++) {
             const levelData = membershipLevels.find(l => l.level === i);
             if (!levelData) {
                 console.error(`未找到档位 ${i} 的数据`);
@@ -356,26 +356,36 @@ async function saveConfig() {
                 continue;
             }
 
-            // 获取权益
-            const benefitsStr = document.getElementById(`benefits-${i}`)?.value || '';
-            const benefits = benefitsStr.split(',').map(b => b.trim()).filter(b => b);
-            
-            // 获取图标URL
+            // 获取图标URL（所有档位都支持）
             const iconUrlInput = document.getElementById(`icon-url-${i}`);
             const iconUrl = iconUrlInput ? iconUrlInput.value : '';
 
-            const updateData = {
-                name: document.getElementById(`name-${i}`)?.value,
-                minRecharge: parseFloat(document.getElementById(`minRecharge-${i}`)?.value || 0) * 100,
-                discount: parseFloat(document.getElementById(`discount-${i}`)?.value || 1),
-                giftConfig: {
-                    enabled: document.getElementById(`giftEnabled-${i}`)?.checked || false,
-                    giftType: 'balance',
-                    giftValue: parseFloat(document.getElementById(`giftValue-${i}`)?.value || 0) * 100
-                },
-                benefits: benefits,
+            // 构建更新数据
+            let updateData = {
                 iconUrl: iconUrl
             };
+
+            // 1档（普通会员）只需要更新 iconUrl
+            if (i === 1) {
+                // 普通会员只更新图标
+            } else {
+                // 2-4档更新所有字段
+                const benefitsStr = document.getElementById(`benefits-${i}`)?.value || '';
+                const benefits = benefitsStr.split(',').map(b => b.trim()).filter(b => b);
+                
+                updateData = {
+                    ...updateData,
+                    name: document.getElementById(`name-${i}`)?.value,
+                    minRecharge: parseFloat(document.getElementById(`minRecharge-${i}`)?.value || 0) * 100,
+                    discount: parseFloat(document.getElementById(`discount-${i}`)?.value || 1),
+                    giftConfig: {
+                        enabled: document.getElementById(`giftEnabled-${i}`)?.checked || false,
+                        giftType: 'balance',
+                        giftValue: parseFloat(document.getElementById(`giftValue-${i}`)?.value || 0) * 100
+                    },
+                    benefits: benefits
+                };
+            }
 
             updates.push({
                 levelId: levelData._id,
