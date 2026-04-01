@@ -223,10 +223,19 @@ async function uploadLevelIcon(level, iconBase64) {
       fileContent: buffer
     });
 
-    // 获取文件临时链接
-    const fileUrl = result.fileID;
+    console.log('上传结果:', result);
+
+    // 获取文件临时访问链接
+    const fileID = result.fileID;
+    const tempUrlRes = await app.getTempFileURL({
+      fileList: [fileID]
+    });
     
-    return { success: true, fileUrl, fileID: result.fileID };
+    console.log('临时链接结果:', tempUrlRes);
+    
+    const fileUrl = tempUrlRes.fileList[0]?.tempFileURL || fileID;
+    
+    return { success: true, fileUrl, fileID: fileID };
   } catch (error) {
     console.error('上传图标失败:', error);
     return { success: false, error: error.message };
