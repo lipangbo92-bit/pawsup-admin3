@@ -23,8 +23,11 @@
         style="border-color: {{item.color}};"
       >
         <!-- 档位头部 -->
-        <view class="level-header" style="background: linear-gradient(135deg, {{item.color}} 0%, {{item.colorDark}} 100%);">
-          <view class="level-icon">{{item.icon}}</view>
+        <view class="level-header" style="background: linear-gradient(135deg, {{item.gradient[0]}} 0%, {{item.gradient[1]}} 100%);">
+          <view class="level-icon">
+            <image wx:if="{{item.isCustomIcon}}" src="{{item.icon}}" mode="aspectFit" class="custom-icon"></image>
+            <text wx:else>{{item.icon}}</text>
+          </view>
           <view class="level-info">
             <view class="level-title-row">
               <text class="level-name">{{item.name}}</text>

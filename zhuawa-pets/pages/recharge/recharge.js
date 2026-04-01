@@ -66,13 +66,32 @@ Page({
 
   // 生成档位卡片数据
   generateLevelCards(levels) {
-    // 只取 2/3/4 档（银卡、金卡、钻石）
+    // 只取 2/3/4 档（银卡、金卡、钛金卡）
     const targetLevels = levels.filter(l => l.level >= 2);
     
+    // 新的配色方案（银卡、金卡、钛金卡）
     const colorMap = {
-      2: { main: '#8B5CF6', dark: '#7C3AED', icon: '🌟', name: '银卡' },
-      3: { main: '#F59E0B', dark: '#D97706', icon: '👑', name: '金卡' },
-      4: { main: '#EC4899', dark: '#DB2777', icon: '💎', name: '钻石' }
+      2: { 
+        main: '#6D7081', 
+        dark: '#4A4D5C', 
+        gradient: ['#8A8D9E', '#6D7081'],
+        icon: '🥈', 
+        name: '银卡' 
+      },
+      3: { 
+        main: '#81643A', 
+        dark: '#5C4528', 
+        gradient: ['#A08050', '#81643A'],
+        icon: '🥇', 
+        name: '金卡' 
+      },
+      4: { 
+        main: '#4C4042', 
+        dark: '#2E2628', 
+        gradient: ['#6A5A5C', '#4C4042'],
+        icon: '💎', 
+        name: '钛金卡' 
+      }
     };
 
     const cards = targetLevels.map(level => {
@@ -80,17 +99,28 @@ Page({
       const rechargeAmount = level.minRecharge / 100;
       const giftAmount = level.giftConfig?.enabled ? level.giftConfig.giftValue / 100 : 0;
       const totalAmount = rechargeAmount + giftAmount;
-      const discountText = Math.round(level.discount * 10);
+      
+      // 修复折扣显示：0.75 应该显示为 7.5 折
+      const discountValue = level.discount * 10;
+      const discountText = discountValue % 1 === 0 
+        ? discountValue.toFixed(0)
+        : discountValue.toFixed(1);
 
       // 使用管理端配置的权益，如果没有则使用默认
       const benefits = level.benefits || [];
+      
+      // 使用管理端上传的自定义图标，如果没有则使用默认 emoji
+      const icon = level.iconUrl || colors.icon;
+      const isCustomIcon = !!level.iconUrl;
 
       return {
         level: level.level,
         name: level.name,
-        icon: colors.icon,
+        icon: icon,
+        isCustomIcon: isCustomIcon,
         color: colors.main,
         colorDark: colors.dark,
+        gradient: colors.gradient,
         discount: level.discount,
         discountText: discountText,
         rechargeAmount: rechargeAmount,

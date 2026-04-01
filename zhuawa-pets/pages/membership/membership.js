@@ -111,39 +111,43 @@ Page({
     const levelConfig = levels.find(l => l.level === levelNum);
     if (!levelConfig) return;
 
-    // 根据档位设置颜色和图标（参考万豪旅享家风格）
+    // 根据档位设置颜色和图标（新配色方案）
     const colorMap = {
       1: { 
-        main: '#8B7355', 
-        dark: '#6B5344', 
+        main: '#9CA3AF', 
+        dark: '#6B7280', 
         icon: '🏠',
         name: '会员',
-        gradient: ['#A0826D', '#8B7355']
+        gradient: ['#B0B5BE', '#9CA3AF']
       },
       2: { 
-        main: '#4A90A4', 
-        dark: '#2E5A6B', 
+        main: '#6D7081', 
+        dark: '#4A4D5C', 
         icon: '🥈',
         name: '银卡',
-        gradient: ['#5BA3B8', '#4A90A4']
+        gradient: ['#8A8D9E', '#6D7081']
       },
       3: { 
-        main: '#D4AF37', 
-        dark: '#B8941F', 
+        main: '#81643A', 
+        dark: '#5C4528', 
         icon: '🥇',
         name: '金卡',
-        gradient: ['#E5C158', '#D4AF37']
+        gradient: ['#A08050', '#81643A']
       },
       4: { 
-        main: '#1E3A5F', 
-        dark: '#0F1F33', 
+        main: '#4C4042', 
+        dark: '#2E2628', 
         icon: '💎',
-        name: '钻石',
-        gradient: ['#2E5A8B', '#1E3A5F']
+        name: '钛金卡',
+        gradient: ['#6A5A5C', '#4C4042']
       }
     };
 
     const colors = colorMap[levelNum] || colorMap[1];
+    
+    // 使用管理端上传的自定义图标，如果没有则使用默认 emoji
+    const icon = levelConfig.iconUrl || colors.icon;
+    const isCustomIcon = !!levelConfig.iconUrl;
     
     // 修复折扣显示：0.75 应该显示为 7.5 折，不是 8 折
     const discountValue = levelConfig.discount * 10;
@@ -154,7 +158,8 @@ Page({
     this.setData({
       membershipColor: colors.main,
       membershipColorDark: colors.dark,
-      membershipIcon: colors.icon,
+      membershipIcon: icon,
+      isCustomIcon: isCustomIcon,
       discountText: discountText
     });
   },

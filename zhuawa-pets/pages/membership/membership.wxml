@@ -4,7 +4,10 @@
   <view class="membership-card" style="background: linear-gradient(135deg, {{membershipColor}} 0%, {{membershipColorDark}} 100%);">
     <view class="membership-header">
       <view class="level-badge">
-        <text class="level-icon">{{membershipIcon}}</text>
+        <view class="level-icon">
+          <image wx:if="{{isCustomIcon}}" src="{{membershipIcon}}" mode="aspectFit" class="custom-icon"></image>
+          <text wx:else>{{membershipIcon}}</text>
+        </view>
         <text class="level-name">{{membership.levelName}}</text>
       </view>
       <text class="discount-text" wx:if="{{membership.discount < 1}}">{{discountText}}折</text>

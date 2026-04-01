@@ -91,6 +91,17 @@
 .level-icon {
   font-size: 40rpx;
   margin-right: 12rpx;
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-icon {
+  width: 40rpx;
+  height: 40rpx;
+  object-fit: contain;
 }
 
 .level-info {
