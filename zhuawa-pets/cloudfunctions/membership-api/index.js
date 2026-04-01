@@ -181,14 +181,18 @@ async function getMembershipLevels() {
 
     const processedData = sortedData.map(doc => {
       const defaultLevel = DEFAULT_LEVELS.find(l => l.level === doc.level)
+      // 显式处理 iconUrl，确保数据库中的值被保留
+      const iconUrl = doc.iconUrl || ''
+      console.log(`[Cloud] Level ${doc.level} - doc.iconUrl:`, doc.iconUrl, 'processed iconUrl:', iconUrl)
       return {
         ...defaultLevel,
         ...doc,
         benefits: doc.benefits || defaultLevel?.benefits || [],
-        iconUrl: doc.iconUrl || ''
+        iconUrl: iconUrl
       }
     })
 
+    console.log('[Cloud] processedData level 1:', processedData.find(l => l.level === 1))
     return { success: true, data: processedData }
   } catch (error) {
     console.error('获取会员档位失败:', error)
