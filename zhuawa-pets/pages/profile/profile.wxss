@@ -67,6 +67,17 @@
   border-radius: 32rpx;
 }
 
+.level-icon-img {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.level-icon-emoji {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+}
+
 .level-text {
   font-size: 24rpx;
   color: #FFFFFF;

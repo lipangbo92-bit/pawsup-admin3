@@ -78,24 +78,37 @@ Page({
       if (res.result && res.result.success) {
         const membership = res.result.data;
         const balance = res.result.balance || 0;
+        const levels = res.result.levels || [];
         
-        // 会员等级颜色
-        const levelColors = {
-          normal: '#9CA3AF',
-          silver: '#C0C0C0',
-          gold: '#FFD700',
-          diamond: '#B9F2FF'
+        // 获取当前等级的配置
+        const levelConfig = levels.find(l => l.level === membership.level);
+        
+        // 新的配色方案
+        const colorMap = {
+          1: { main: '#929292', icon: '🏠' },
+          2: { main: '#6D7081', icon: '🥈' },
+          3: { main: '#81643A', icon: '🥇' },
+          4: { main: '#4C4042', icon: '💎' }
         };
+        
+        const colors = colorMap[membership.level] || colorMap[1];
+        
+        // 使用自定义图标或默认图标
+        const icon = (levelConfig && levelConfig.iconUrl) ? levelConfig.iconUrl : colors.icon;
+        const isCustomIcon = !!(levelConfig && levelConfig.iconUrl);
         
         this.setData({
           membership: membership,
-          'userInfo.level': `⭐ ${membership.levelName || '普通会员'}`,
-          'userInfo.levelColor': levelColors[membership.level] || '#9CA3AF',
+          'userInfo.levelName': membership.levelName || '普通会员',
+          'userInfo.levelIcon': icon,
+          'userInfo.isCustomIcon': isCustomIcon,
+          'userInfo.levelColor': colors.main,
           'stats.balance': balance,
           'stats.points': membership.points || 0
         });
         
         console.log('[Profile] 会员信息:', membership);
+        console.log('[Profile] 等级配置:', levelConfig);
       }
     } catch (error) {
       console.error('[Profile] 获取会员信息失败:', error);
