@@ -1,0 +1,276 @@
+/* pages/membership/membership.wxss */
+.page-container {
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  padding-bottom: 40rpx;
+}
+
+/* ========== 会员卡片 ========== */
+.membership-card {
+  margin: 32rpx;
+  padding: 40rpx;
+  border-radius: 24rpx;
+  color: #FFFFFF;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+}
+
+.membership-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 12rpx 24rpx;
+  border-radius: 40rpx;
+}
+
+.level-icon {
+  font-size: 40rpx;
+  margin-right: 12rpx;
+}
+
+.level-name {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.discount-text {
+  font-size: 36rpx;
+  font-weight: 700;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 8rpx 20rpx;
+  border-radius: 32rpx;
+}
+
+/* 进度条 */
+.progress-section {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 24rpx;
+  border-radius: 16rpx;
+}
+
+.progress-text {
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+  opacity: 0.9;
+}
+
+.progress-bar {
+  height: 12rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 6rpx;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #FFFFFF;
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  opacity: 0.7;
+}
+
+.max-level-tip {
+  text-align: center;
+  padding: 24rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+/* ========== 资产卡片 ========== */
+.assets-card {
+  margin: 0 32rpx 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  display: flex;
+  padding: 40rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.asset-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.asset-divider {
+  width: 2rpx;
+  background-color: #E5E7EB;
+}
+
+.asset-value {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 12rpx;
+}
+
+.currency {
+  font-size: 28rpx;
+  color: #F97316;
+  font-weight: 600;
+  margin-right: 4rpx;
+}
+
+.amount {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.asset-label {
+  font-size: 26rpx;
+  color: #6B7280;
+  margin-bottom: 12rpx;
+}
+
+.asset-action {
+  display: flex;
+  align-items: center;
+  background-color: #FFF7ED;
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #F97316;
+  margin-right: 4rpx;
+}
+
+.action-arrow {
+  font-size: 24rpx;
+  color: #F97316;
+}
+
+/* ========== 权益列表 ========== */
+.benefits-section {
+  margin: 0 32rpx 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 24rpx;
+}
+
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #F9FAFB;
+  border-radius: 16rpx;
+}
+
+.benefit-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.benefit-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.benefit-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+}
+
+.benefit-desc {
+  font-size: 24rpx;
+  color: #6B7280;
+}
+
+/* ========== 菜单列表 ========== */
+.menu-section {
+  margin: 0 32rpx 32rpx;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:active {
+  background-color: #F9FAFB;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 30rpx;
+  color: #1F2937;
+}
+
+.menu-arrow {
+  font-size: 28rpx;
+  color: #9CA3AF;
+}
+
+/* ========== 充值按钮 ========== */
+.recharge-section {
+  margin: 0 32rpx;
+}
+
+.recharge-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 48rpx;
+  border: none;
+}
+
+.recharge-btn::after {
+  border: none;
+}
+
+.recharge-btn:active {
+  opacity: 0.9;
+}
