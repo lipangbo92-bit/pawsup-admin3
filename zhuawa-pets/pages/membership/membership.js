@@ -114,11 +114,11 @@ Page({
     // 根据档位设置颜色和图标（新配色方案）
     const colorMap = {
       1: { 
-        main: '#9CA3AF', 
-        dark: '#6B7280', 
+        main: '#929292', 
+        dark: '#6B6B6B', 
         icon: '🏠',
         name: '会员',
-        gradient: ['#B0B5BE', '#9CA3AF']
+        gradient: ['#A8A8A8', '#929292']
       },
       2: { 
         main: '#6D7081', 

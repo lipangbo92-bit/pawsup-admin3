@@ -69,8 +69,15 @@ Page({
     // 只取 2/3/4 档（银卡、金卡、钛金卡）
     const targetLevels = levels.filter(l => l.level >= 2);
     
-    // 新的配色方案（银卡、金卡、钛金卡）
+    // 新的配色方案（普通会员、银卡、金卡、钛金卡）
     const colorMap = {
+      1: {
+        main: '#929292',
+        dark: '#6B6B6B',
+        gradient: ['#A8A8A8', '#929292'],
+        icon: '🏠',
+        name: '普通会员'
+      },
       2: { 
         main: '#6D7081', 
         dark: '#4A4D5C', 
