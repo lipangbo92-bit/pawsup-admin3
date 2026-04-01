@@ -65,7 +65,7 @@
     <view class="benefits-list">
       <!-- 使用管理端配置的权益 -->
       <view class="benefit-item" wx:for="{{currentLevel.benefits}}" wx:key="*this">
-        <view class="benefit-icon">{{benefitIcons[index] || '✨'}}</view>
+        <view class="benefit-dot"></view>
         <view class="benefit-info">
           <text class="benefit-name">{{item}}</text>
         </view>
@@ -73,7 +73,7 @@
       <!-- 如果没有配置权益，显示默认权益 -->
       <view wx:if="{{!currentLevel.benefits || currentLevel.benefits.length === 0}}">
         <view class="benefit-item">
-          <view class="benefit-icon">💰</view>
+          <view class="benefit-dot"></view>
           <view class="benefit-info">
             <text class="benefit-name">专属折扣</text>
             <text class="benefit-desc">{{discountText === '无折扣' ? discountText : discountText + '优惠'}}</text>

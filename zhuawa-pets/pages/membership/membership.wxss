@@ -203,6 +203,15 @@
   margin-right: 20rpx;
 }
 
+.benefit-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background-color: #F97316;
+  border-radius: 4rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
 .benefit-info {
   flex: 1;
   display: flex;
