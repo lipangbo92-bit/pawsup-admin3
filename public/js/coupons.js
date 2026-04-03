@@ -74,6 +74,33 @@ function bindEvents() {
             daysGroup.style.display = 'block';
         }
     });
+    
+    // 优惠券卡片按钮事件委托
+    document.getElementById('couponsList').addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const action = btn.dataset.action;
+        const couponId = btn.dataset.id;
+        
+        switch (action) {
+            case 'edit':
+                editCoupon(couponId);
+                break;
+            case 'toggle':
+                toggleStatus(couponId, btn.dataset.status);
+                break;
+            case 'send':
+                sendCoupon(couponId);
+                break;
+            case 'delete':
+                deleteCoupon(couponId);
+                break;
+        }
+    });
 }
 
 // 加载优惠券列表
@@ -209,10 +236,10 @@ function renderCoupons() {
                     ${coupon.canStack ? '<div class="coupon-tag">可叠加</div>' : ''}
                 </div>
                 <div class="coupon-footer">
-                    <button class="btn-small" onclick="editCoupon('${coupon._id}')">编辑</button>
-                    <button class="btn-small" onclick="toggleStatus('${coupon._id}', '${coupon.status}')">${coupon.status === 'active' ? '暂停' : '启用'}</button>
-                    <button class="btn-small" onclick="sendCoupon('${coupon._id}')">发放</button>
-                    <button class="btn-small danger" onclick="deleteCoupon('${coupon._id}')">删除</button>
+                    <button class="btn-small" data-action="edit" data-id="${coupon._id}">编辑</button>
+                    <button class="btn-small" data-action="toggle" data-id="${coupon._id}" data-status="${coupon.status}">${coupon.status === 'active' ? '暂停' : '启用'}</button>
+                    <button class="btn-small" data-action="send" data-id="${coupon._id}">发放</button>
+                    <button class="btn-small danger" data-action="delete" data-id="${coupon._id}">删除</button>
                 </div>
             </div>
         `;
