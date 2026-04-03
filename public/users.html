@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - PawsUp管理后台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .users-container {
+            padding: 24px;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-input:focus {
+            border-color: #F97316;
+            outline: none;
+        }
+        
+        .search-btn {
+            background: #F97316;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .users-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px 120px 150px;
+            padding: 16px 20px;
+            background: #f5f5f5;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px 120px 150px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .table-row:hover {
+            background: #fafafa;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .user-phone {
+            color: #666;
+        }
+        
+        .user-level {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .user-level.level-2 { background: #e6f7ff; color: #1890ff; }
+        .user-level.level-3 { background: #fff7e6; color: #fa8c16; }
+        .user-level.level-4 { background: #f6ffed; color: #52c41a; }
+        
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: white;
+        }
+        
+        .btn-small:hover {
+            border-color: #F97316;
+            color: #F97316;
+        }
+        
+        .btn-small.primary {
+            background: #F97316;
+            color: white;
+            border-color: #F97316;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        /* 发放优惠券模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn-cancel {
+            padding: 10px 24px;
+            border: 1px solid #d9d9d9;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .btn-confirm {
+            padding: 10px 24px;
+            background: #F97316;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            z-index: 1001;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast.success { background: #52c41a; }
+        .toast.error { background: #ff4d4f; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
+                    <li><a href="membership-levels">💎 会员档位</a></li>
+                    <li><a href="coupons">🎫 优惠券</a></li>
+                    <li><a href="users" class="active">👥 用户管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>👥 用户管理</h2>
+                    <p class="subtitle">搜索用户并发放优惠券</p>
+                </div>
+                
+                <div class="users-container">
+                    <div class="search-bar">
+                        <input type="text" class="search-input" id="searchInput" placeholder="输入手机号搜索用户">
+                        <button class="search-btn" onclick="searchUsers()">搜索</button>
+                    </div>
+                    
+                    <div class="users-table" id="usersTable">
+                        <div class="table-header">
+                            <div>头像</div>
+                            <div>用户信息</div>
+                            <div>手机号</div>
+                            <div>会员等级</div>
+                            <div>操作</div>
+                        </div>
+                        <div id="usersList">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <p>请输入手机号搜索用户</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 发放优惠券模态框 -->
+    <div class="modal-overlay" id="sendCouponModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">发放优惠券</h3>
+                <span class="modal-close" onclick="closeSendModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>用户</label>
+                    <input type="text" id="selectedUserName" readonly>
+                    <input type="hidden" id="selectedUserId">
+                </div>
+                <div class="form-group">
+                    <label>选择优惠券</label>
+                    <select id="couponSelect">
+                        <option value="">请选择优惠券</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSendModal()">取消</button>
+                <button class="btn-confirm" onclick="confirmSendCoupon()">发放</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/app.js"></script>
+    <script src="js/users.js"></script>
+</body>
+</html>
