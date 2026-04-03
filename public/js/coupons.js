@@ -4,8 +4,8 @@
 let coupons = [];
 let currentStatus = 'all';
 
-// 云函数基础 URL（需要根据实际环境配置）
-const CLOUD_FUNCTION_BASE = 'https://cloud1-4gy1jyan842d73ab.service.tcloudbase.com';
+// API 基础 URL - 使用同域代理避免 CORS
+const API_BASE = '/api/cloud-proxy';
 
 // 页面加载
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,15 +13,18 @@ document.addEventListener('DOMContentLoaded', function() {
     bindEvents();
 });
 
-// 调用云函数的通用方法
+// 调用云函数的通用方法 - 使用 Vercel API 代理
 async function callCloudFunction(functionName, data) {
     try {
-        const response = await fetch(`${CLOUD_FUNCTION_BASE}/${functionName}`, {
+        const response = await fetch(API_BASE, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                functionName: functionName,
+                data: data
+            })
         });
         
         if (!response.ok) {
@@ -32,19 +35,6 @@ async function callCloudFunction(functionName, data) {
         return result;
     } catch (error) {
         console.error(`调用云函数 ${functionName} 失败:`, error);
-        // 降级：尝试使用 cloud.js
-        if (typeof cloud !== 'undefined') {
-            try {
-                const result = await cloud.callFunction({
-                    name: functionName,
-                    data: data
-                });
-                return result.result;
-            } catch (cloudErr) {
-                console.error('cloud.js 也失败了:', cloudErr);
-                throw cloudErr;
-            }
-        }
         throw error;
     }
 }
