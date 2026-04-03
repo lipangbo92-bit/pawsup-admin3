@@ -232,6 +232,33 @@ Page({
     });
   },
 
+  // 显示用户 OpenID
+  onShowOpenId() {
+    const userInfo = wx.getStorageSync('userInfo');
+    const openid = userInfo ? userInfo.openid : '';
+    
+    if (!openid) {
+      wx.showToast({ title: '获取ID失败', icon: 'none' });
+      return;
+    }
+    
+    wx.showModal({
+      title: '我的用户ID',
+      content: `${openid}\n\n点击确定复制`,
+      confirmText: '复制',
+      success: (res) => {
+        if (res.confirm) {
+          wx.setClipboardData({
+            data: openid,
+            success: () => {
+              wx.showToast({ title: '已复制', icon: 'success' });
+            }
+          });
+        }
+      }
+    });
+  },
+
   // 退出登录
   onLogout() {
     wx.showModal({
