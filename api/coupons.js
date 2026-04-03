@@ -6,31 +6,12 @@ const cloudbase = require('@cloudbase/node-sdk');
 // 云开发配置
 const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
 
-// 调试：打印所有环境变量
-console.log('[Debug] Environment variables:');
-console.log('[Debug] TCB_SECRET_ID exists:', !!process.env.TCB_SECRET_ID);
-console.log('[Debug] TCB_SECRET_KEY exists:', !!process.env.TCB_SECRET_KEY);
-console.log('[Debug] All env keys:', Object.keys(process.env).filter(k => k.includes('TCB') || k.includes('SECRET')));
-
 // 初始化云开发
-// 优先使用密钥认证（支持读写），否则使用匿名登录（只读）
-const appConfig = {
-  env: CLOUD_ENV
-};
-
-// 尝试不同的环境变量名（兼容大小写）
-const secretId = process.env.TCB_SECRET_ID || process.env.tcb_secret_id;
-const secretKey = process.env.TCB_SECRET_KEY || process.env.tcb_secret_key;
-
-if (secretId && secretKey) {
-  appConfig.secretId = secretId;
-  appConfig.secretKey = secretKey;
-  console.log('[CloudBase] Using secret key auth');
-} else {
-  console.log('[CloudBase] Using anonymous auth (read-only)');
-}
-
-const app = cloudbase.init(appConfig);
+const app = cloudbase.init({
+  env: CLOUD_ENV,
+  secretId: process.env.TENCENT_SECRET_ID,
+  secretKey: process.env.TENCENT_SECRET_KEY
+});
 
 const db = app.database();
 
@@ -106,10 +87,10 @@ async function getCoupons(req, res, data) {
 // 创建优惠券
 async function createCoupon(req, res, data) {
   // 检查是否有写权限
-  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+  if (!process.env.TENCENT_SECRET_ID || !process.env.TENCENT_SECRET_KEY) {
     return res.status(403).json({ 
       success: false, 
-      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY' 
     });
   }
   
@@ -146,10 +127,10 @@ async function createCoupon(req, res, data) {
 // 更新优惠券
 async function updateCoupon(req, res, data) {
   // 检查是否有写权限
-  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+  if (!process.env.TENCENT_SECRET_ID || !process.env.TENCENT_SECRET_KEY) {
     return res.status(403).json({ 
       success: false, 
-      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY' 
     });
   }
   
@@ -171,10 +152,10 @@ async function updateCoupon(req, res, data) {
 // 删除优惠券
 async function deleteCoupon(req, res, data) {
   // 检查是否有写权限
-  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+  if (!process.env.TENCENT_SECRET_ID || !process.env.TENCENT_SECRET_KEY) {
     return res.status(403).json({ 
       success: false, 
-      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY' 
     });
   }
   
@@ -193,10 +174,10 @@ async function deleteCoupon(req, res, data) {
 // 发放优惠券给用户
 async function sendCouponToUser(req, res, data) {
   // 检查是否有写权限
-  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+  if (!process.env.TENCENT_SECRET_ID || !process.env.TENCENT_SECRET_KEY) {
     return res.status(403).json({ 
       success: false, 
-      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY' 
     });
   }
   
