@@ -7,13 +7,20 @@ const cloudbase = require('@cloudbase/node-sdk');
 const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
 
 // 初始化云开发
-const app = cloudbase.init({
-  env: CLOUD_ENV,
-  // 使用匿名登录（只读）或需要密钥（读写）
-  // 在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY
-  secretId: process.env.TCB_SECRET_ID,
-  secretKey: process.env.TCB_SECRET_KEY
-});
+// 优先使用密钥认证（支持读写），否则使用匿名登录（只读）
+const appConfig = {
+  env: CLOUD_ENV
+};
+
+if (process.env.TCB_SECRET_ID && process.env.TCB_SECRET_KEY) {
+  appConfig.secretId = process.env.TCB_SECRET_ID;
+  appConfig.secretKey = process.env.TCB_SECRET_KEY;
+  console.log('[CloudBase] Using secret key auth');
+} else {
+  console.log('[CloudBase] Using anonymous auth (read-only)');
+}
+
+const app = cloudbase.init(appConfig);
 
 const db = app.database();
 
@@ -88,6 +95,14 @@ async function getCoupons(req, res, data) {
 
 // 创建优惠券
 async function createCoupon(req, res, data) {
+  // 检查是否有写权限
+  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+    return res.status(403).json({ 
+      success: false, 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+    });
+  }
+  
   const { data: couponData } = data;
   
   if (!couponData || !couponData.code || !couponData.name) {
@@ -120,6 +135,14 @@ async function createCoupon(req, res, data) {
 
 // 更新优惠券
 async function updateCoupon(req, res, data) {
+  // 检查是否有写权限
+  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+    return res.status(403).json({ 
+      success: false, 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+    });
+  }
+  
   const { couponId, data: updateData } = data;
   
   if (!couponId) {
@@ -137,6 +160,14 @@ async function updateCoupon(req, res, data) {
 
 // 删除优惠券
 async function deleteCoupon(req, res, data) {
+  // 检查是否有写权限
+  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+    return res.status(403).json({ 
+      success: false, 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+    });
+  }
+  
   const { couponId } = data;
   
   if (!couponId) {
@@ -151,6 +182,14 @@ async function deleteCoupon(req, res, data) {
 
 // 发放优惠券给用户
 async function sendCouponToUser(req, res, data) {
+  // 检查是否有写权限
+  if (!process.env.TCB_SECRET_ID || !process.env.TCB_SECRET_KEY) {
+    return res.status(403).json({ 
+      success: false, 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY' 
+    });
+  }
+  
   const { couponId, userId } = data;
   
   if (!couponId || !userId) {
