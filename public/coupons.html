@@ -531,6 +531,28 @@
         </div>
     </div>
     
+    <!-- 发放优惠券模态框 -->
+    <div class="modal-overlay" id="sendModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">发放优惠券</h3>
+                <span class="modal-close" onclick="closeSendModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="sendCouponName" style="margin-bottom: 16px; font-weight: 500;"></p>
+                <div class="form-group">
+                    <label>用户 OpenID</label>
+                    <input type="text" id="sendUserId" placeholder="请输入用户 OpenID" style="width: 100%;">
+                    <p class="hint">留空则只查看发放统计</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSendModal()">取消</button>
+                <button class="btn-confirm" onclick="confirmSend()">确定</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Toast提示 -->
     <div class="toast" id="toast"></div>
 

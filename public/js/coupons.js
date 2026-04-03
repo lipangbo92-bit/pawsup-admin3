@@ -408,18 +408,36 @@ async function deleteCoupon(couponId) {
     }
 }
 
+// 当前正在发放的优惠券ID
+let currentSendCouponId = null;
+
 // 发放优惠券
 function sendCoupon(couponId) {
     const coupon = coupons.find(c => c._id === couponId);
     if (!coupon) return;
     
-    const userId = prompt(`发放优惠券「${coupon.name}」\n\n请输入用户OpenID（留空则查看发放统计）：`);
-    if (userId === null) return; // 取消
+    currentSendCouponId = couponId;
+    document.getElementById('sendCouponName').textContent = `优惠券：${coupon.name}`;
+    document.getElementById('sendUserId').value = '';
+    document.getElementById('sendModal').classList.add('show');
+}
+
+// 关闭发放模态框
+function closeSendModal() {
+    document.getElementById('sendModal').classList.remove('show');
+    currentSendCouponId = null;
+}
+
+// 确认发放
+function confirmSend() {
+    const userId = document.getElementById('sendUserId').value.trim();
+    const coupon = coupons.find(c => c._id === currentSendCouponId);
     
-    if (userId.trim()) {
-        sendToUser(couponId, userId.trim());
-    } else {
-        // 显示发放统计
+    closeSendModal();
+    
+    if (userId) {
+        sendToUser(currentSendCouponId, userId);
+    } else if (coupon) {
         showSendStats(coupon);
     }
 }
