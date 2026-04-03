@@ -75,8 +75,7 @@ async function loadCoupons() {
     try {
         showLoading(true);
         
-        const result = await callCloudFunction('coupons-api', {
-            action: 'getCoupons',
+        const result = await callCloudFunction('getCoupons', {
             status: currentStatus === 'all' ? '' : currentStatus,
             page: 1,
             limit: 100
@@ -315,7 +314,7 @@ async function saveCoupon() {
             ? { action, couponId, data }
             : { action, data };
         
-        const result = await callCloudFunction('coupons-api', params);
+        const result = await callCloudFunction(action, couponId ? { couponId, data } : { data });
         
         if (result.success) {
             showToast(couponId ? '更新成功' : '创建成功', 'success');
@@ -337,8 +336,7 @@ async function toggleStatus(couponId, currentStatus) {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'updateCoupon',
+        const result = await callCloudFunction('updateCoupon', {
             couponId: couponId,
             data: { status: newStatus }
         });
@@ -360,8 +358,7 @@ async function deleteCoupon(couponId) {
     if (!confirm('确定要删除这个优惠券吗？此操作不可恢复。')) return;
     
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'deleteCoupon',
+        const result = await callCloudFunction('deleteCoupon', {
             couponId: couponId
         });
         
@@ -409,8 +406,7 @@ function showSendStats(coupon) {
 // 发放给指定用户
 async function sendToUser(couponId, userId) {
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'sendCouponToUser',
+        const result = await callCloudFunction('sendCouponToUser', {
             couponId: couponId,
             userId: userId
         });
