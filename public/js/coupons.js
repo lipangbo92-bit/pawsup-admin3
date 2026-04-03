@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 调用 API 的通用方法
 async function callCloudFunction(action, data) {
+    console.log(`[API Call] ${action}`, data);
     try {
         const response = await fetch(API_BASE, {
             method: 'POST',
@@ -27,18 +28,23 @@ async function callCloudFunction(action, data) {
             })
         });
         
+        console.log(`[API Response] ${action} status:`, response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[API Error] ${action} response:`, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
+        console.log(`[API Result] ${action}:`, result);
         return result;
     } catch (error) {
-        console.error(`调用 API ${action} 失败:`, error);
+        console.error(`[API Error] ${action}:`, error);
         // 返回友好的错误信息
         return {
             success: false,
-            error: '网络请求失败，请检查云函数是否已部署'
+            error: '网络请求失败: ' + error.message
         };
     }
 }
@@ -85,11 +91,12 @@ async function loadCoupons() {
             coupons = result.data || [];
             renderCoupons();
         } else {
+            console.error('[loadCoupons] 加载失败:', result.error);
             showToast(result.error || '加载失败', 'error');
         }
     } catch (error) {
-        console.error('加载优惠券失败:', error);
-        showToast('加载失败，请检查网络', 'error');
+        console.error('[loadCoupons] 异常:', error);
+        showToast('加载失败: ' + error.message, 'error');
     } finally {
         showLoading(false);
     }
