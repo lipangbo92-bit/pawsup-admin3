@@ -6,15 +6,25 @@ const cloudbase = require('@cloudbase/node-sdk');
 // 云开发配置
 const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
 
+// 调试：打印所有环境变量
+console.log('[Debug] Environment variables:');
+console.log('[Debug] TCB_SECRET_ID exists:', !!process.env.TCB_SECRET_ID);
+console.log('[Debug] TCB_SECRET_KEY exists:', !!process.env.TCB_SECRET_KEY);
+console.log('[Debug] All env keys:', Object.keys(process.env).filter(k => k.includes('TCB') || k.includes('SECRET')));
+
 // 初始化云开发
 // 优先使用密钥认证（支持读写），否则使用匿名登录（只读）
 const appConfig = {
   env: CLOUD_ENV
 };
 
-if (process.env.TCB_SECRET_ID && process.env.TCB_SECRET_KEY) {
-  appConfig.secretId = process.env.TCB_SECRET_ID;
-  appConfig.secretKey = process.env.TCB_SECRET_KEY;
+// 尝试不同的环境变量名（兼容大小写）
+const secretId = process.env.TCB_SECRET_ID || process.env.tcb_secret_id;
+const secretKey = process.env.TCB_SECRET_KEY || process.env.tcb_secret_key;
+
+if (secretId && secretKey) {
+  appConfig.secretId = secretId;
+  appConfig.secretKey = secretKey;
   console.log('[CloudBase] Using secret key auth');
 } else {
   console.log('[CloudBase] Using anonymous auth (read-only)');
