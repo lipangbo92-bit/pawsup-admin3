@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员档位配置 - PawsUp管理后台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .levels-container {
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        .level-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border-left: 3px solid #ddd;
+        }
+
+        /* 万豪旅享家风格配色 */
+        .level-card.member { border-left-color: #8B7355; }
+        .level-card.silver { border-left-color: #4A90A4; }
+        .level-card.gold { border-left-color: #D4AF37; }
+        .level-card.diamond { border-left-color: #1E3A5F; }
+
+        .level-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .level-icon-wrapper {
+            position: relative;
+            margin-right: 10px;
+        }
+
+        .level-icon {
+            font-size: 32px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-icon:hover {
+            background: #e8e8e8;
+        }
+
+        .level-icon img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .icon-upload-hint {
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .level-title {
+            flex: 1;
+        }
+
+        .level-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .level-form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 6px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #F97316;
+            outline: none;
+        }
+
+        .form-group .hint {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .gift-config {
+            grid-column: span 4;
+            background: #fafafa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        .gift-config-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .gift-config-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-save:hover {
+            opacity: 0.9;
+        }
+
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .actions-bar {
+            position: fixed;
+            bottom: 0;
+            left: 220px;
+            right: 0;
+            background: white;
+            padding: 12px 24px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .save-info {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .page-description {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .page-description h3 {
+            color: #096dd9;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .page-description p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 2px 0;
+        }
+
+        .preview-section {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .preview-section h3 {
+            color: #52c41a;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .preview-table th {
+            background: #fafafa;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { background: #52c41a; }
+        .toast.error { background: #ff4d4f; }
+
+        /* 图标上传弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .icon-upload-area {
+            border: 2px dashed #d9d9d9;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-upload-area:hover {
+            border-color: #F97316;
+            background: #fff7e6;
+        }
+
+        .icon-upload-area.has-file {
+            border-color: #52c41a;
+            background: #f6ffed;
+        }
+
+        .icon-preview {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .icon-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .icon-upload-text {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .icon-upload-hint-modal {
+            color: #999;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-confirm {
+            background: #F97316;
+            color: white;
+        }
+
+        .btn-confirm:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #iconFileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
+                    <li><a href="membership-levels" class="active">💎 会员档位</a></li>
+                    <li><a href="coupons">🎫 优惠券</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>💎 会员档位配置</h2>
+                    <p class="subtitle">配置会员等级、充值门槛、折扣和赠送规则</p>
+                </div>
+                
+                <div class="levels-container">
+                    <!-- 说明 -->
+                    <div class="page-description">
+                        <h3>📋 配置说明</h3>
+                        <p>• 会员档位分为4档：普通会员（默认）、银卡会员、金卡会员、钻石会员</p>
+                        <p>• 用户单次充值达到对应门槛即可升级，充值立即赠送对应余额</p>
+                        <p>• 点击图标区域可上传自定义图标，建议使用 64x64 像素的 PNG 图片</p>
+                        <p>• 修改配置后，新充值用户按新规则执行，已充值用户权益不变</p>
+                    </div>
+                    
+                    <!-- 预览 -->
+                    <div class="preview-section">
+                        <h3>👁️ 当前配置预览</h3>
+                        <table class="preview-table" id="previewTable">
+                            <thead>
+                                <tr>
+                                    <th>档位</th>
+                                    <th>充值门槛</th>
+                                    <th>折扣</th>
+                                    <th>赠送余额</th>
+                                    <th>实际到账</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewBody">
+                                <!-- 动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 普通会员 -->
+                    <div class="level-card member" data-level="1">
+                        <div class="level-header">
+                            <div class="level-icon-wrapper">
+                                <div class="level-icon" onclick="openIconUpload(1)">
+                                    <span id="icon-display-1">🏠</span>
+                                    <input type="hidden" id="icon-url-1" value="">
+                                </div>
+                                <span class="icon-upload-hint">点击修改</span>
+                            </div>
+                            <div class="level-title">
+                                <div class="level-name">普通会员</div>
+                                <span class="level-badge" style="background: #f5f5f5; color: #8B7355;">默认档位</span>
+                            </div>
+                        </div>
+                        <div class="level-form">
+                            <div class="form-group">
+                                <label>档位名称</label>
+                                <input type="text" id="name-1" value="普通会员" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>折扣</label>
+                                <input type="text" value="无折扣" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>说明</label>
+                                <span class="hint">默认档位，无需充值</span>
+                            </div>
+                        </div>
+                        <div class="gift-config">
+                            <div class="gift-config-row">
+                                <div class="form-group full-width">
+                                    <label>会员权益（用逗号分隔）</label>
+                                    <input type="text" id="benefits-1" value="基础服务" placeholder="如：基础服务,免费洗澡">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 银卡会员 -->
+                    <div class="level-card silver" data-level="2">
+                        <div class="level-header">
+                            <div class="level-icon-wrapper">
+                                <div class="level-icon" onclick="openIconUpload(2)">
+                                    <span id="icon-display-2">🥈</span>
+                                    <input type="hidden" id="icon-url-2" value="">
+                                </div>
+                                <span class="icon-upload-hint">点击修改</span>
+                            </div>
+                            <div class="level-title">
+                                <div class="level-name">银卡会员</div>
+                                <span class="level-badge" style="background: #e8f4f8; color: #4A90A4;">第2档</span>
+                            </div>
+                        </div>
+                        <div class="level-form">
+                            <div class="form-group">
+                                <label>档位名称</label>
+                                <input type="text" id="name-2" value="银卡会员">
+                            </div>
+                            <div class="form-group">
+                                <label>充值门槛（元）</label>
+                                <input type="number" id="minRecharge-2" value="2000">
+                            </div>
+                            <div class="form-group">
+                                <label>折扣</label>
+                                <select id="discount-2">
+                                    <option value="0.95">9.5折</option>
+                                    <option value="0.9" selected>9折</option>
+                                    <option value="0.85">8.5折</option>
+                                    <option value="0.8">8折</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>赠送金额（元）</label>
+                                <input type="number" id="giftValue-2" value="100">
+                            </div>
+                        </div>
+                        <div class="gift-config">
+                            <div class="gift-config-row">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="giftEnabled-2" checked>
+                                    <label for="giftEnabled-2">开启赠送</label>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>会员权益（用逗号分隔）</label>
+                                    <input type="text" id="benefits-2" value="9折优惠,充值赠送100元,优先预约" placeholder="如：9折优惠,充值赠送100元,优先预约">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 金卡会员 -->
+                    <div class="level-card gold" data-level="3">
+                        <div class="level-header">
+                            <div class="level-icon-wrapper">
+                                <div class="level-icon" onclick="openIconUpload(3)">
+                                    <span id="icon-display-3">🥇</span>
+                                    <input type="hidden" id="icon-url-3" value="">
+                                </div>
+                                <span class="icon-upload-hint">点击修改</span>
+                            </div>
+                            <div class="level-title">
+                                <div class="level-name">金卡会员</div>
+                                <span class="level-badge" style="background: #fcf8e8; color: #D4AF37;">第3档</span>
+                            </div>
+                        </div>
+                        <div class="level-form">
+                            <div class="form-group">
+                                <label>档位名称</label>
+                                <input type="text" id="name-3" value="金卡会员">
+                            </div>
+                            <div class="form-group">
+                                <label>充值门槛（元）</label>
+                                <input type="number" id="minRecharge-3" value="4000">
+                            </div>
+                            <div class="form-group">
+                                <label>折扣</label>
+                                <select id="discount-3">
+                                    <option value="0.9">9折</option>
+                                    <option value="0.85">8.5折</option>
+                                    <option value="0.8" selected>8折</option>
+                                    <option value="0.75">7.5折</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>赠送金额（元）</label>
+                                <input type="number" id="giftValue-3" value="300">
+                            </div>
+                        </div>
+                        <div class="gift-config">
+                            <div class="gift-config-row">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="giftEnabled-3" checked>
+                                    <label for="giftEnabled-3">开启赠送</label>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>会员权益（用逗号分隔）</label>
+                                    <input type="text" id="benefits-3" value="8折优惠,充值赠送300元,优先预约,专属客服" placeholder="如：8折优惠,充值赠送300元,优先预约,专属客服">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 钻石会员 -->
+                    <div class="level-card diamond" data-level="4">
+                        <div class="level-header">
+                            <div class="level-icon-wrapper">
+                                <div class="level-icon" onclick="openIconUpload(4)">
+                                    <span id="icon-display-4">💎</span>
+                                    <input type="hidden" id="icon-url-4" value="">
+                                </div>
+                                <span class="icon-upload-hint">点击修改</span>
+                            </div>
+                            <div class="level-title">
+                                <div class="level-name">钻石会员</div>
+                                <span class="level-badge" style="background: #e8eef5; color: #1E3A5F;">第4档 · 最高</span>
+                            </div>
+                        </div>
+                        <div class="level-form">
+                            <div class="form-group">
+                                <label>档位名称</label>
+                                <input type="text" id="name-4" value="钻石会员">
+                            </div>
+                            <div class="form-group">
+                                <label>充值门槛（元）</label>
+                                <input type="number" id="minRecharge-4" value="6000">
+                            </div>
+                            <div class="form-group">
+                                <label>折扣</label>
+                                <select id="discount-4">
+                                    <option value="0.8">8折</option>
+                                    <option value="0.75" selected>7.5折</option>
+                                    <option value="0.7">7折</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>赠送金额（元）</label>
+                                <input type="number" id="giftValue-4" value="600">
+                            </div>
+                        </div>
+                        <div class="gift-config">
+                            <div class="gift-config-row">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="giftEnabled-4" checked>
+                                    <label for="giftEnabled-4">开启赠送</label>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>会员权益（用逗号分隔）</label>
+                                    <input type="text" id="benefits-4" value="7.5折优惠,充值赠送600元,优先预约,专属客服,全年活动" placeholder="如：7.5折优惠,充值赠送600元,优先预约,专属客服,全年活动">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 底部操作栏 -->
+                <div class="actions-bar">
+                    <span class="save-info">修改配置后，点击保存生效</span>
+                    <button class="btn-save" onclick="saveConfig()">保存配置</button>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 图标上传弹窗 -->
+    <div class="modal-overlay" id="iconModal">
+        <div class="modal-content">
+            <div class="modal-title">上传会员等级图标</div>
+            <div class="icon-upload-area" id="uploadArea" onclick="document.getElementById('iconFileInput').click()">
+                <div class="icon-preview" id="iconPreview">
+                    <span style="font-size: 32px;">📁</span>
+                </div>
+                <div class="icon-upload-text">点击或拖拽上传图标</div>
+                <div class="icon-upload-hint-modal">支持 PNG、JPG 格式，建议 64x64 像素</div>
+            </div>
+            <input type="file" id="iconFileInput" accept="image/png,image/jpeg,image/jpg" onchange="handleIconSelect(event)">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeIconModal()">取消</button>
+                <button class="btn-confirm" id="confirmUploadBtn" onclick="confirmIconUpload()" disabled>确认上传</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/membership-levels.js"></script>
+</body>
+</html>
