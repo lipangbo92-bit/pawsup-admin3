@@ -4,7 +4,7 @@
 let coupons = [];
 let currentStatus = 'all';
 
-// API 基础 URL - 使用 Vercel API 直接访问数据库
+// API 基础 URL - 使用 Vercel API 代理调用云函数
 const API_BASE = '/api/coupons';
 
 // 页面加载
@@ -35,7 +35,11 @@ async function callCloudFunction(action, data) {
         return result;
     } catch (error) {
         console.error(`调用 API ${action} 失败:`, error);
-        throw error;
+        // 返回友好的错误信息
+        return {
+            success: false,
+            error: '网络请求失败，请检查云函数是否已部署'
+        };
     }
 }
 
