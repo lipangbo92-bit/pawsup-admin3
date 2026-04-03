@@ -1,9 +1,21 @@
-// Vercel Serverless Function - 优惠券 API (测试版)
-// 暂时使用内存存储，绕过云函数 HTTP 访问问题
+// Vercel Serverless Function - 优惠券 API
+// 使用微信云开发 Node.js SDK 连接数据库
 
-// 内存存储（仅用于测试，Vercel 冷启动会清空）
-let coupons = [];
-let userCoupons = [];
+const cloudbase = require('@cloudbase/node-sdk');
+
+// 云开发配置
+const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
+
+// 初始化云开发
+const app = cloudbase.init({
+  env: CLOUD_ENV,
+  // 使用匿名登录（只读）或需要密钥（读写）
+  // 在 Vercel 环境变量中设置 TCB_SECRET_ID 和 TCB_SECRET_KEY
+  secretId: process.env.TCB_SECRET_ID,
+  secretKey: process.env.TCB_SECRET_KEY
+});
+
+const db = app.database();
 
 module.exports = async (req, res) => {
   // 设置 CORS 头
@@ -54,15 +66,24 @@ module.exports = async (req, res) => {
 
 // 获取优惠券列表
 async function getCoupons(req, res, data) {
-  const { status } = data;
+  const { status, page = 1, limit = 20 } = data;
   
-  let result = coupons;
+  let query = db.collection('coupons');
+  
   if (status) {
-    result = coupons.filter(c => c.status === status);
+    query = query.where({ status: status });
   }
   
-  console.log('[getCoupons] Returning', result.length, 'coupons');
-  res.status(200).json({ success: true, data: result });
+  const skip = (page - 1) * limit;
+  
+  const result = await query
+    .orderBy('createTime', 'desc')
+    .skip(skip)
+    .limit(limit)
+    .get();
+  
+  console.log('[getCoupons] Found', result.data.length, 'coupons');
+  res.status(200).json({ success: true, data: result.data });
 }
 
 // 创建优惠券
@@ -74,26 +95,25 @@ async function createCoupon(req, res, data) {
   }
   
   // 检查券码是否已存在
-  const existing = coupons.find(c => c.code === couponData.code);
-  if (existing) {
+  const existing = await db.collection('coupons').where({ code: couponData.code }).get();
+  if (existing.data.length > 0) {
     return res.status(400).json({ success: false, error: '优惠券码已存在' });
   }
   
   const newCoupon = {
-    _id: 'coupon_' + Date.now(),
     ...couponData,
     receivedCount: 0,
     usedCount: 0,
-    createTime: new Date().toISOString(),
-    updateTime: new Date().toISOString()
+    createTime: new Date(),
+    updateTime: new Date()
   };
   
-  coupons.push(newCoupon);
+  const result = await db.collection('coupons').add(newCoupon);
   
-  console.log('[createCoupon] Created:', newCoupon._id);
+  console.log('[createCoupon] Created:', result.id);
   res.status(200).json({ 
     success: true, 
-    couponId: newCoupon._id,
+    couponId: result.id,
     message: '优惠券创建成功'
   });
 }
@@ -106,16 +126,10 @@ async function updateCoupon(req, res, data) {
     return res.status(400).json({ success: false, error: 'Missing couponId' });
   }
   
-  const index = coupons.findIndex(c => c._id === couponId);
-  if (index === -1) {
-    return res.status(404).json({ success: false, error: '优惠券不存在' });
-  }
-  
-  coupons[index] = {
-    ...coupons[index],
+  await db.collection('coupons').doc(couponId).update({
     ...updateData,
-    updateTime: new Date().toISOString()
-  };
+    updateTime: new Date()
+  });
   
   console.log('[updateCoupon] Updated:', couponId);
   res.status(200).json({ success: true, message: '优惠券更新成功' });
@@ -129,12 +143,7 @@ async function deleteCoupon(req, res, data) {
     return res.status(400).json({ success: false, error: 'Missing couponId' });
   }
   
-  const index = coupons.findIndex(c => c._id === couponId);
-  if (index === -1) {
-    return res.status(404).json({ success: false, error: '优惠券不存在' });
-  }
-  
-  coupons.splice(index, 1);
+  await db.collection('coupons').doc(couponId).remove();
   
   console.log('[deleteCoupon] Deleted:', couponId);
   res.status(200).json({ success: true, message: '优惠券删除成功' });
@@ -148,10 +157,13 @@ async function sendCouponToUser(req, res, data) {
     return res.status(400).json({ success: false, error: 'Missing parameters' });
   }
   
-  const coupon = coupons.find(c => c._id === couponId);
-  if (!coupon) {
+  // 获取优惠券
+  const couponRes = await db.collection('coupons').doc(couponId).get();
+  if (!couponRes.data) {
     return res.status(404).json({ success: false, error: '优惠券不存在' });
   }
+  
+  const coupon = couponRes.data;
   
   if (coupon.status !== 'active') {
     return res.status(400).json({ success: false, error: '优惠券未生效或已过期' });
@@ -163,11 +175,11 @@ async function sendCouponToUser(req, res, data) {
   }
   
   // 检查用户是否已达到限领数量
-  const userReceivedCount = userCoupons.filter(
-    uc => uc.userId === userId && uc.couponId === couponId
-  ).length;
+  const userReceivedRes = await db.collection('user_coupons')
+    .where({ userId: userId, couponId: couponId })
+    .get();
   
-  if (userReceivedCount >= coupon.limitPerUser) {
+  if (userReceivedRes.data.length >= coupon.limitPerUser) {
     return res.status(400).json({ success: false, error: '该用户已达到领取上限' });
   }
   
@@ -186,7 +198,6 @@ async function sendCouponToUser(req, res, data) {
   
   // 创建用户优惠券
   const userCouponData = {
-    _id: 'uc_' + Date.now(),
     userId: userId,
     couponId: couponId,
     code: coupon.code,
@@ -198,15 +209,22 @@ async function sendCouponToUser(req, res, data) {
     validFrom: validFrom,
     validTo: validTo,
     status: 'unused',
-    receivedAt: new Date().toISOString(),
-    channel: 'manual'
+    usedAt: null,
+    usedOrderId: null,
+    lockedAt: null,
+    lockedOrderId: null,
+    receivedAt: new Date(),
+    channel: 'manual',
+    createTime: new Date()
   };
   
-  userCoupons.push(userCouponData);
+  await db.collection('user_coupons').add(userCouponData);
   
   // 更新优惠券已领取数量
-  coupon.receivedCount = (coupon.receivedCount || 0) + 1;
-  coupon.updateTime = new Date().toISOString();
+  await db.collection('coupons').doc(couponId).update({
+    receivedCount: db.command.inc(1),
+    updateTime: new Date()
+  });
   
   console.log('[sendCouponToUser] Sent to:', userId);
   res.status(200).json({ success: true, message: '发放成功' });

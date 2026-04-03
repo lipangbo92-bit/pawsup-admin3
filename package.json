@@ -6,7 +6,6 @@
     "build": "echo 'Static site - no build required'"
   },
   "dependencies": {
-    "@cloudbase/node-sdk": "^2.11.0",
-    "mongodb": "^5.0.0"
+    "@cloudbase/node-sdk": "^2.11.0"
   }
 }
