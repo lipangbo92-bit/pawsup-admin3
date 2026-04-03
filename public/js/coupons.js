@@ -4,8 +4,8 @@
 let coupons = [];
 let currentStatus = 'all';
 
-// API 基础 URL - 使用同域代理避免 CORS
-const API_BASE = '/api/cloud-proxy';
+// API 基础 URL - 使用 Vercel API 直接访问数据库
+const API_BASE = '/api/coupons';
 
 // 页面加载
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     bindEvents();
 });
 
-// 调用云函数的通用方法 - 使用 Vercel API 代理
-async function callCloudFunction(functionName, data) {
+// 调用 API 的通用方法
+async function callCloudFunction(action, data) {
     try {
         const response = await fetch(API_BASE, {
             method: 'POST',
@@ -22,8 +22,8 @@ async function callCloudFunction(functionName, data) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                functionName: functionName,
-                data: data
+                action: action,
+                ...data
             })
         });
         
@@ -34,7 +34,7 @@ async function callCloudFunction(functionName, data) {
         const result = await response.json();
         return result;
     } catch (error) {
-        console.error(`调用云函数 ${functionName} 失败:`, error);
+        console.error(`调用 API ${action} 失败:`, error);
         throw error;
     }
 }
