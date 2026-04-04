@@ -25,9 +25,14 @@ module.exports = async (req, res) => {
   }
   
   const { action, ...data } = req.body;
-  
+
+  // 添加调试日志
+  console.log('[Users API] Request:', { action, data, body: req.body });
+
   try {
     switch (action) {
+      case 'ping':
+        return res.status(200).json({ success: true, message: 'Users API is working', env: process.env.NODE_ENV });
       case 'searchUsers':
         return await searchUsers(req, res, data);
       case 'getUserDetail':
