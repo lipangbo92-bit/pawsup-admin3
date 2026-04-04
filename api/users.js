@@ -41,6 +41,8 @@ module.exports = async (req, res) => {
     switch (action) {
       case 'ping':
         return res.status(200).json({ success: true, message: 'Users API is working', env: process.env.NODE_ENV });
+      case 'getUsers':
+        return await getUsers(req, res, data);
       case 'searchUsers':
         return await searchUsers(req, res, data);
       case 'getUserDetail':
@@ -104,6 +106,39 @@ async function searchUsers(req, res, data) {
   }
   
   res.status(200).json({ success: true, data: users });
+}
+
+// 获取用户列表（分页）
+async function getUsers(req, res, data) {
+  const { page = 1, pageSize = 20 } = data;
+  const skip = (page - 1) * pageSize;
+  
+  try {
+    // 获取总数
+    const countResult = await db.collection('users').count();
+    const total = countResult.total;
+    
+    // 获取用户列表，按创建时间倒序
+    const result = await db.collection('users')
+      .orderBy('createTime', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+    
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize)
+      }
+    });
+  } catch (error) {
+    console.error('获取用户列表失败:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 }
 
 // 获取用户详情

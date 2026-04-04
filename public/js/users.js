@@ -15,6 +15,7 @@ const API_BASE = '/api/users';
 document.addEventListener('DOMContentLoaded', function() {
     bindEvents();
     loadCoupons();
+    loadAllUsers(); // 页面加载时自动获取所有用户
 });
 
 // 绑定事件
@@ -25,6 +26,39 @@ function bindEvents() {
             searchUsers();
         }
     });
+}
+
+// 加载所有用户列表
+async function loadAllUsers() {
+    const container = document.getElementById('usersList');
+    const emptyState = document.getElementById('emptyState');
+    
+    // 显示加载中
+    emptyState.style.display = 'block';
+    emptyState.innerHTML = '<p>正在加载用户数据...</p>';
+    
+    try {
+        const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getUsers', page: 1, pageSize: 50 })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            users = result.data || [];
+            renderUsers();
+            if (users.length === 0) {
+                emptyState.innerHTML = '<p>暂无用户数据</p>';
+            }
+        } else {
+            emptyState.innerHTML = `<p>加载失败: ${result.error || '未知错误'}</p>`;
+        }
+    } catch (error) {
+        console.error('加载用户列表失败:', error);
+        emptyState.innerHTML = '<p>加载失败，请刷新页面重试</p>';
+    }
 }
 
 // 加载优惠券列表（用于发放选择）
