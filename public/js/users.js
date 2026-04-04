@@ -1,4 +1,9 @@
 // 用户管理页面逻辑
+// 字段规范：严格遵循数据字典 users 集合定义
+// - 昵称: nickName
+// - 头像: avatarUrl
+// - 手机号: phone
+// - 会员信息: membership { level, levelName, points, totalSpent, orderCount }
 
 let users = [];
 let coupons = [];
@@ -63,27 +68,61 @@ async function searchUsers() {
         return;
     }
     
+    // 显示加载状态
+    const searchBtn = document.querySelector('.search-btn');
+    const originalText = searchBtn.textContent;
+    searchBtn.textContent = '搜索中...';
+    searchBtn.disabled = true;
+    
     try {
+        console.log('正在搜索:', phone);
+        console.log('API地址:', API_BASE);
+        
         const response = await fetch(API_BASE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'searchUsers', phone: phone })
         });
         
-        const result = await response.json();
+        console.log('响应状态:', response.status);
+        console.log('响应头:', [...response.headers.entries()]);
+        
+        const text = await response.text();
+        console.log('原始响应:', text);
+        
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON解析失败:', e);
+            showToast('服务器返回格式错误', 'error');
+            return;
+        }
+        
+        console.log('响应结果:', result);
+        
         if (result.success) {
             users = result.data || [];
             renderUsers();
+            if (users.length === 0) {
+                showToast(`未找到包含 "${phone}" 的用户`, 'error');
+            } else {
+                showToast(`找到 ${users.length} 个用户`, 'success');
+            }
         } else {
             showToast(result.error || '搜索失败', 'error');
         }
     } catch (error) {
         console.error('搜索用户失败:', error);
-        showToast('搜索失败', 'error');
+        showToast('搜索失败: ' + error.message, 'error');
+    } finally {
+        searchBtn.textContent = originalText;
+        searchBtn.disabled = false;
     }
 }
 
 // 渲染用户列表
+// 严格遵循数据字典字段名：nickName, avatarUrl, phone, membership
 function renderUsers() {
     const container = document.getElementById('usersList');
     const emptyState = document.getElementById('emptyState');
@@ -91,31 +130,67 @@ function renderUsers() {
     if (users.length === 0) {
         container.innerHTML = '';
         emptyState.style.display = 'block';
-        emptyState.innerHTML = '<p>未找到匹配的用户</p>';
+        emptyState.innerHTML = `
+            <div style="padding: 40px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <p style="color: #666; margin-bottom: 8px;">未找到匹配的用户</p>
+                <p style="color: #999; font-size: 12px;">请检查手机号是否正确，或尝试其他关键词</p>
+            </div>
+        `;
         return;
     }
     
     emptyState.style.display = 'none';
     
     container.innerHTML = users.map(user => {
-        const levelClass = `level-${user.membership?.level || 1}`;
-        const levelName = user.membership?.levelName || '普通会员';
+        // 会员等级样式映射
+        const level = user.membership?.level || 1;
+        const levelClass = `level-${level}`;
+        const levelName = user.membership?.levelName || getDefaultLevelName(level);
         
+        // 严格使用数据字典标准字段名
+        const phone = user.phone || '未绑定';
+        const avatar = user.avatarUrl ? `<img src="${user.avatarUrl}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : '👤';
+        const name = user.nickName || '未知用户';
+        // 余额显示（分转元）
+        const balance = user.balance !== undefined ? (user.balance / 100).toFixed(2) : '0.00';
+        const balanceClass = user.balance > 0 ? 'balance-positive' : 'balance-zero';
+
         return `
             <div class="table-row">
-                <div class="user-avatar">${user.avatar || '👤'}</div>
+                <div class="user-avatar">${avatar}</div>
                 <div>
-                    <div class="user-name">${user.nickName || user.name || '未知用户'}</div>
+                    <div class="user-name">${escapeHtml(name)}</div>
                     <div style="font-size: 12px; color: #999; margin-top: 4px;">ID: ${user._id?.substring(0, 16)}...</div>
                 </div>
-                <div class="user-phone">${user.phoneNumber || '未绑定'}</div>
+                <div class="user-phone">${phone}</div>
+                <div class="user-balance ${balanceClass}">¥${balance}</div>
                 <div><span class="user-level ${levelClass}">${levelName}</span></div>
                 <div class="action-btns">
-                    <button class="btn-small primary" onclick="showSendModal('${user._id}', '${user.nickName || user.name || '用户'}')">发放优惠券</button>
+                    <button class="btn-small primary" onclick="showSendModal('${user._id}', '${escapeHtml(name)}')">发放优惠券</button>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+// 获取默认等级名称
+function getDefaultLevelName(level) {
+    const names = {
+        1: '普通会员',
+        2: '银卡会员',
+        3: '金卡会员',
+        4: '钻石会员'
+    };
+    return names[level] || '普通会员';
+}
+
+// HTML 转义，防止 XSS
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // 显示发放模态框

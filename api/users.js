@@ -41,37 +41,53 @@ module.exports = async (req, res) => {
   }
 };
 
-// 搜索用户（通过手机号）
+// 搜索用户（通过手机号/昵称/openid）
 async function searchUsers(req, res, data) {
-  const { phone } = data;
+  const { phone, keyword } = data;
+  const searchTerm = phone || keyword;
   
-  if (!phone) {
-    return res.status(400).json({ success: false, error: '请输入手机号' });
+  if (!searchTerm) {
+    return res.status(400).json({ success: false, error: '请输入搜索关键词' });
   }
   
-  // 支持模糊搜索
-  const result = await db.collection('users')
+  // 支持模糊搜索 - 按数据字典标准字段名
+  let users = [];
+  
+  // 1. 先搜索 phone 字段（数据字典标准字段）
+  const result1 = await db.collection('users')
     .where({
-      phoneNumber: db.RegExp({
-        regexp: phone,
+      phone: db.RegExp({
+        regexp: searchTerm,
         options: 'i'
       })
     })
     .limit(20)
     .get();
+  users = result1.data;
   
-  // 如果没有找到，尝试精确匹配
-  let users = result.data;
-  
+  // 2. 如果没找到，尝试搜索 openid
   if (users.length === 0) {
-    // 尝试搜索其他字段
     const result2 = await db.collection('users')
       .where({
-        _openid: phone  // 有时候用户直接给openid
+        openid: searchTerm
       })
       .limit(20)
       .get();
     users = result2.data;
+  }
+  
+  // 3. 最后尝试搜索昵称
+  if (users.length === 0) {
+    const result3 = await db.collection('users')
+      .where({
+        nickName: db.RegExp({
+          regexp: searchTerm,
+          options: 'i'
+        })
+      })
+      .limit(20)
+      .get();
+    users = result3.data;
   }
   
   res.status(200).json({ success: true, data: users });

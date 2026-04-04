@@ -49,17 +49,17 @@
         
         .table-header {
             display: grid;
-            grid-template-columns: 60px 1fr 120px 120px 150px;
+            grid-template-columns: 60px 1.5fr 120px 100px 120px 150px;
             padding: 16px 20px;
             background: #f5f5f5;
             font-weight: 600;
             font-size: 14px;
             color: #333;
         }
-        
+
         .table-row {
             display: grid;
-            grid-template-columns: 60px 1fr 120px 120px 150px;
+            grid-template-columns: 60px 1.5fr 120px 100px 120px 150px;
             padding: 16px 20px;
             border-bottom: 1px solid #f0f0f0;
             align-items: center;
@@ -106,6 +106,13 @@
         .user-level.level-2 { background: #e6f7ff; color: #1890ff; }
         .user-level.level-3 { background: #fff7e6; color: #fa8c16; }
         .user-level.level-4 { background: #f6ffed; color: #52c41a; }
+
+        .user-balance {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .user-balance.balance-positive { color: #52c41a; }
+        .user-balance.balance-zero { color: #999; }
         
         .action-btns {
             display: flex;
@@ -296,7 +303,7 @@
                 
                 <div class="users-container">
                     <div class="search-bar">
-                        <input type="text" class="search-input" id="searchInput" placeholder="输入手机号搜索用户">
+                        <input type="text" class="search-input" id="searchInput" placeholder="输入手机号、昵称或OpenID搜索用户">
                         <button class="search-btn" onclick="searchUsers()">搜索</button>
                     </div>
                     
@@ -305,6 +312,7 @@
                             <div>头像</div>
                             <div>用户信息</div>
                             <div>手机号</div>
+                            <div>余额</div>
                             <div>会员等级</div>
                             <div>操作</div>
                         </div>
@@ -351,7 +359,7 @@
     <!-- Toast提示 -->
     <div class="toast" id="toast"></div>
 
-    <script src="js/app.js"></script>
-    <script src="js/users.js"></script>
+    <script src="js/app.js?v=2"></script>
+    <script src="js/users.js?v=2"></script>
 </body>
 </html>
