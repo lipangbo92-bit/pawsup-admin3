@@ -201,7 +201,7 @@ function renderUsers() {
                 <div class="user-balance ${balanceClass}">¥${balance}</div>
                 <div><span class="user-level ${levelClass}">${levelName}</span></div>
                 <div class="action-btns">
-                    <button class="btn-small primary" onclick="showSendModal('${user._id}', '${escapeHtml(name)}')">发放优惠券</button>
+                    <button class="btn-small primary" onclick="showSendModal('${user.openid || user._id}', '${escapeHtml(name)}')">发放优惠券</button>
                 </div>
             </div>
         `;

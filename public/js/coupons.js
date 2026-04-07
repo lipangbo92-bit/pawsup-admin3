@@ -498,12 +498,12 @@ async function fixCouponStatus() {
     if (!confirm('确定要修复优惠券状态吗？这将为所有没有状态字段的优惠券设置为「生效中」。')) {
         return;
     }
-    
+
     try {
         showToast('正在修复...', 'success');
-        
+
         const result = await callCloudFunction('fixCouponStatus', {});
-        
+
         if (result.success) {
             showToast(result.message, 'success');
             loadCoupons(); // 刷新列表
@@ -512,6 +512,29 @@ async function fixCouponStatus() {
         }
     } catch (error) {
         console.error('修复优惠券状态失败:', error);
+        showToast('修复失败: ' + error.message, 'error');
+    }
+}
+
+// 修复 user_coupons 中的 userId（将 _id 格式改为 openid 格式）
+async function fixUserCouponsUserId() {
+    if (!confirm('确定要修复 userId 吗？这将把所有使用 _id 格式的 userId 改为 openid 格式。')) {
+        return;
+    }
+
+    try {
+        showToast('正在修复...', 'success');
+
+        const result = await callCloudFunction('fixUserCouponsUserId', {});
+
+        if (result.success) {
+            showToast(result.message, 'success');
+            console.log('修复详情:', result.details);
+        } else {
+            showToast(result.error || '修复失败', 'error');
+        }
+    } catch (error) {
+        console.error('修复 userId 失败:', error);
         showToast('修复失败: ' + error.message, 'error');
     }
 }

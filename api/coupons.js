@@ -60,6 +60,8 @@ module.exports = async (req, res) => {
         return await sendCouponToUser(req, res, data);
       case 'fixCouponStatus':
         return await fixCouponStatus(req, res, data);
+      case 'fixUserCouponsUserId':
+        return await fixUserCouponsUserId(req, res, data);
       default:
         res.status(400).json({ success: false, error: 'Unknown action: ' + action });
     }
@@ -351,6 +353,104 @@ async function fixCouponStatus(req, res, data) {
     
   } catch (error) {
     console.error('[fixCouponStatus] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// 修复 user_coupons 中的 userId（将 _id 格式改为 openid 格式）
+async function fixUserCouponsUserId(req, res, data) {
+  // 检查是否有写权限
+  if (!hasCredentials) {
+    return res.status(403).json({
+      success: false,
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY'
+    });
+  }
+
+  try {
+    // 1. 获取所有用户，建立 _id -> openid 的映射
+    const usersResult = await db.collection('users').get();
+    const users = usersResult.data;
+
+    // 建立映射表
+    const userIdMap = {};
+    users.forEach(user => {
+      if (user._id && user.openid) {
+        userIdMap[user._id] = user.openid;
+      }
+    });
+
+    // 2. 获取所有 user_coupons
+    const couponsResult = await db.collection('user_coupons').get();
+    const coupons = couponsResult.data;
+
+    // 3. 检查并修复
+    let fixCount = 0;
+    let skipCount = 0;
+    let errorCount = 0;
+    const details = [];
+
+    for (const coupon of coupons) {
+      const currentUserId = coupon.userId;
+
+      // 如果 currentUserId 在映射表中，说明是 _id 格式，需要修复
+      if (userIdMap[currentUserId]) {
+        const newUserId = userIdMap[currentUserId];
+
+        try {
+          await db.collection('user_coupons').doc(coupon._id).update({
+            userId: newUserId
+          });
+          fixCount++;
+          details.push({
+            couponId: coupon._id,
+            oldUserId: currentUserId,
+            newUserId: newUserId,
+            status: 'fixed'
+          });
+        } catch (err) {
+          errorCount++;
+          details.push({
+            couponId: coupon._id,
+            oldUserId: currentUserId,
+            error: err.message,
+            status: 'error'
+          });
+        }
+      } else {
+        // 检查是否已经是 openid 格式
+        const isOpenidFormat = users.some(u => u.openid === currentUserId);
+        if (isOpenidFormat) {
+          skipCount++;
+          details.push({
+            couponId: coupon._id,
+            userId: currentUserId,
+            status: 'skipped'
+          });
+        } else {
+          errorCount++;
+          details.push({
+            couponId: coupon._id,
+            userId: currentUserId,
+            status: 'not_found'
+          });
+        }
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `修复完成！修复: ${fixCount}, 跳过: ${skipCount}, 错误: ${errorCount}`,
+      fixCount,
+      skipCount,
+      errorCount,
+      totalUsers: users.length,
+      totalCoupons: coupons.length,
+      details
+    });
+
+  } catch (error) {
+    console.error('[fixUserCouponsUserId] Error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 }
