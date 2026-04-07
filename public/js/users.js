@@ -250,6 +250,14 @@ async function confirmSendCoupon() {
         return;
     }
     
+    // 调试信息
+    const selectedCoupon = coupons.find(c => c._id === couponId);
+    console.log('发放优惠券:', {
+        couponId: couponId,
+        userId: userId,
+        selectedCoupon: selectedCoupon
+    });
+    
     try {
         const response = await fetch('/api/coupons', {
             method: 'POST',

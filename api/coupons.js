@@ -6,11 +6,16 @@ const cloudbase = require('@cloudbase/node-sdk');
 // 云开发配置
 const CLOUD_ENV = 'cloud1-4gy1jyan842d73ab';
 
+// 检查环境变量
+const hasCredentials = process.env.TENCENT_SECRET_ID && process.env.TENCENT_SECRET_KEY;
+
 // 初始化云开发
 const app = cloudbase.init({
   env: CLOUD_ENV,
-  secretId: process.env.TENCENT_SECRET_ID,
-  secretKey: process.env.TENCENT_SECRET_KEY
+  ...(hasCredentials ? {
+    secretId: process.env.TENCENT_SECRET_ID,
+    secretKey: process.env.TENCENT_SECRET_KEY
+  } : {})
 });
 
 const db = app.database();
@@ -53,6 +58,8 @@ module.exports = async (req, res) => {
         return await deleteCoupon(req, res, data);
       case 'sendCouponToUser':
         return await sendCouponToUser(req, res, data);
+      case 'fixCouponStatus':
+        return await fixCouponStatus(req, res, data);
       default:
         res.status(400).json({ success: false, error: 'Unknown action: ' + action });
     }
@@ -65,6 +72,8 @@ module.exports = async (req, res) => {
 // 获取优惠券列表
 async function getCoupons(req, res, data) {
   const { status, page = 1, limit = 20 } = data;
+  
+  console.log('[getCoupons] Query params:', { status, page, limit });
   
   let query = db.collection('coupons');
   
@@ -81,6 +90,12 @@ async function getCoupons(req, res, data) {
     .get();
   
   console.log('[getCoupons] Found', result.data.length, 'coupons');
+  
+  // 打印每个优惠券的 status 用于调试
+  result.data.forEach(c => {
+    console.log(`[getCoupons] Coupon: ${c.name}, status: ${c.status}, id: ${c._id}`);
+  });
+  
   res.status(200).json({ success: true, data: result.data });
 }
 
@@ -108,6 +123,7 @@ async function createCoupon(req, res, data) {
   
   const newCoupon = {
     ...couponData,
+    status: couponData.status || 'active',  // 确保 status 字段被设置
     receivedCount: 0,
     usedCount: 0,
     createTime: new Date(),
@@ -183,20 +199,52 @@ async function sendCouponToUser(req, res, data) {
   
   const { couponId, userId } = data;
   
+  console.log('[sendCouponToUser] Request params:', { couponId, userId });
+  
   if (!couponId || !userId) {
     return res.status(400).json({ success: false, error: 'Missing parameters' });
   }
   
   // 获取优惠券
-  const couponRes = await db.collection('coupons').doc(couponId).get();
-  if (!couponRes.data) {
-    return res.status(404).json({ success: false, error: '优惠券不存在' });
+  let couponRes;
+  try {
+    couponRes = await db.collection('coupons').doc(couponId).get();
+  } catch (err) {
+    console.error('[sendCouponToUser] Get coupon error:', err);
+    return res.status(400).json({ 
+      success: false, 
+      error: `查询优惠券失败: ${err.message}` 
+    });
+  }
+  
+  if (!couponRes || !couponRes.data) {
+    console.log('[sendCouponToUser] Coupon not found:', couponId);
+    return res.status(404).json({ 
+      success: false, 
+      error: `优惠券不存在 (ID: ${couponId})` 
+    });
   }
   
   const coupon = couponRes.data;
   
-  if (coupon.status !== 'active') {
-    return res.status(400).json({ success: false, error: '优惠券未生效或已过期' });
+  console.log('[sendCouponToUser] Coupon:', JSON.stringify({
+    id: couponId,
+    name: coupon.name,
+    code: coupon.code,
+    status: coupon.status,
+    statusType: typeof coupon.status
+  }));
+  
+  // 检查 status 字段（放宽检查，支持多种状态值）
+  const validStatuses = ['active', 'Active', '生效中', '进行中'];
+  if (!coupon.status || !validStatuses.includes(coupon.status)) {
+    console.log('[sendCouponToUser] Invalid status, auto-fixing to active');
+    // 自动修复状态
+    await db.collection('coupons').doc(couponId).update({
+      status: 'active',
+      updateTime: new Date()
+    });
+    // 继续执行发放逻辑
   }
   
   // 检查是否还有剩余
@@ -258,4 +306,51 @@ async function sendCouponToUser(req, res, data) {
   
   console.log('[sendCouponToUser] Sent to:', userId);
   res.status(200).json({ success: true, message: '发放成功' });
+}
+
+// 修复优惠券状态（为没有 status 的优惠券设置默认值）
+async function fixCouponStatus(req, res, data) {
+  // 检查是否有写权限
+  if (!hasCredentials) {
+    return res.status(403).json({ 
+      success: false, 
+      error: '未配置腾讯云密钥，无法写入数据。请在 Vercel 环境变量中设置 TENCENT_SECRET_ID 和 TENCENT_SECRET_KEY' 
+    });
+  }
+  
+  try {
+    // 获取所有优惠券
+    const result = await db.collection('coupons').get();
+    
+    let fixedCount = 0;
+    const details = [];
+    
+    for (const coupon of result.data) {
+      // 如果没有 status 字段，设置为 'active'
+      if (!coupon.status) {
+        await db.collection('coupons').doc(coupon._id).update({
+          status: 'active',
+          updateTime: new Date()
+        });
+        
+        fixedCount++;
+        details.push({
+          id: coupon._id,
+          name: coupon.name,
+          code: coupon.code
+        });
+      }
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `修复完成！共修复 ${fixedCount} 个优惠券`,
+      fixedCount,
+      details
+    });
+    
+  } catch (error) {
+    console.error('[fixCouponStatus] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 }

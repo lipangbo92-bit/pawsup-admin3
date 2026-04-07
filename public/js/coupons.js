@@ -492,3 +492,26 @@ function showToast(message, type = 'success') {
         toast.classList.remove('show');
     }, 3000);
 }
+
+// 修复优惠券状态（为没有 status 的优惠券设置默认值）
+async function fixCouponStatus() {
+    if (!confirm('确定要修复优惠券状态吗？这将为所有没有状态字段的优惠券设置为「生效中」。')) {
+        return;
+    }
+    
+    try {
+        showToast('正在修复...', 'success');
+        
+        const result = await callCloudFunction('fixCouponStatus', {});
+        
+        if (result.success) {
+            showToast(result.message, 'success');
+            loadCoupons(); // 刷新列表
+        } else {
+            showToast(result.error || '修复失败', 'error');
+        }
+    } catch (error) {
+        console.error('修复优惠券状态失败:', error);
+        showToast('修复失败: ' + error.message, 'error');
+    }
+}
