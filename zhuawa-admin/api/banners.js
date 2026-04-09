@@ -1,13 +1,23 @@
 // Vercel API Route: /api/banners
 const cloudbase = require('@cloudbase/node-sdk');
 
-const app = cloudbase.init({
-  env: 'cloud1-4gy1jyan842d73ab',
-  secretId: process.env.TENCENT_SECRET_ID,
-  secretKey: process.env.TENCENT_SECRET_KEY
-});
+// 全局缓存 cloudbase 实例，避免重复初始化
+let app = null;
+let db = null;
 
-const db = app.database();
+function getApp() {
+  if (!app) {
+    console.log('[Banners API] Initializing cloudbase...');
+    app = cloudbase.init({
+      env: 'cloud1-4gy1jyan842d73ab',
+      secretId: process.env.TENCENT_SECRET_ID,
+      secretKey: process.env.TENCENT_SECRET_KEY
+    });
+    db = app.database();
+    console.log('[Banners API] Cloudbase initialized');
+  }
+  return { app, db };
+}
 
 module.exports = async (req, res) => {
   // CORS处理
@@ -19,13 +29,20 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
+  console.log(`[Banners API] ${req.method} request received`);
+
   try {
+    // 获取初始化好的实例
+    const { db } = getApp();
+
     switch (req.method) {
       case 'GET':
         // 获取所有banner
+        console.log('[Banners API] Fetching banners...');
         const listResult = await db.collection('banners')
           .orderBy('sort', 'asc')
           .get();
+        console.log(`[Banners API] Fetched ${listResult.data.length} banners`);
         res.status(200).json({ success: true, data: listResult.data });
         break;
         
