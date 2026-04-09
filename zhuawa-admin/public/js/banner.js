@@ -195,15 +195,21 @@ function closeModal() {
 // 上传图片到云存储
 async function uploadImageToCloud(base64Image) {
     console.log('[uploadImageToCloud] Starting upload...');
-    
+
     if (!base64Image) {
         console.log('[uploadImageToCloud] No image provided');
         return '';
     }
-    
+
     if (base64Image.startsWith('http') || base64Image.startsWith('cloud://')) {
         // 如果已经是 URL 或者是空值，直接返回
         console.log('[uploadImageToCloud] Already a URL, skipping upload');
+        return base64Image;
+    }
+
+    // 检查是否是 Base64 格式
+    if (!base64Image.startsWith('data:')) {
+        console.log('[uploadImageToCloud] Not a base64 image:', base64Image.substring(0, 50));
         return base64Image;
     }
     
@@ -263,7 +269,8 @@ async function saveBanner() {
     
     // 如果有新图片，先上传到云存储
     let imageUrl = currentImageBase64;
-    if (currentImageBase64 && currentImageBase64.startsWith('data:image')) {
+    console.log('[saveBanner] currentImageBase64:', currentImageBase64 ? currentImageBase64.substring(0, 50) + '...' : 'empty');
+    if (currentImageBase64 && currentImageBase64.startsWith('data:')) {
         try {
             const uploadBtn = document.querySelector('.modal-footer .btn-primary');
             if (uploadBtn) {
