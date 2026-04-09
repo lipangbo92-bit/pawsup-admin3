@@ -88,31 +88,20 @@ function compressImage(base64, maxWidth = 800, maxHeight = 600, quality = 0.8) {
 }
 
 // 预览图片
-async function previewImage(event) {
+function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     if (file.size > 5 * 1024 * 1024) {
         alert('图片大小不能超过5MB');
         return;
     }
-    
+
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = (e) => {
         let imageData = e.target.result;
-        
-        // 压缩图片（如果大于 500KB）
-        if (file.size > 500 * 1024) {
-            console.log('图片较大，正在压缩...');
-            try {
-                imageData = await compressImage(imageData, 1200, 800, 0.8);
-                console.log('压缩完成');
-            } catch (err) {
-                console.error('压缩失败:', err);
-            }
-        }
-        
         currentImageBase64 = imageData;
+
         const img = document.getElementById('previewImg');
         const placeholder = document.getElementById('uploadPlaceholder');
         if (img) {
@@ -121,6 +110,20 @@ async function previewImage(event) {
         }
         if (placeholder) {
             placeholder.style.display = 'none';
+        }
+
+        // 异步压缩图片（如果大于 500KB）
+        if (file.size > 500 * 1024) {
+            console.log('图片较大，正在压缩...');
+            compressImage(imageData, 1200, 800, 0.8)
+                .then(compressed => {
+                    currentImageBase64 = compressed;
+                    if (img) img.src = compressed;
+                    console.log('压缩完成');
+                })
+                .catch(err => {
+                    console.error('压缩失败:', err);
+                });
         }
     };
     reader.readAsDataURL(file);
