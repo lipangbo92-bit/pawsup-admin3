@@ -145,6 +145,37 @@ function closeModal() {
     editingId = null;
 }
 
+// 上传图片到云存储
+async function uploadImageToCloud(base64Image) {
+    if (!base64Image || base64Image.startsWith('http') || base64Image.startsWith('cloud://')) {
+        // 如果已经是 URL 或者是空值，直接返回
+        return base64Image;
+    }
+    
+    try {
+        const timestamp = Date.now();
+        const res = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'uploadImage',
+                data: base64Image,
+                path: `banners/banner_${timestamp}.jpg`
+            })
+        });
+        
+        const result = await res.json();
+        if (result.success) {
+            return result.url || result.fileID;
+        } else {
+            throw new Error(result.error || '上传失败');
+        }
+    } catch (err) {
+        console.error('上传图片失败:', err);
+        throw err;
+    }
+}
+
 // 保存Banner
 async function saveBanner() {
     const titleInput = document.getElementById('bannerTitle');
@@ -162,12 +193,39 @@ async function saveBanner() {
         return;
     }
     
+    // 如果有新图片，先上传到云存储
+    let imageUrl = currentImageBase64;
+    if (currentImageBase64 && currentImageBase64.startsWith('data:image')) {
+        try {
+            const uploadBtn = document.querySelector('.modal-footer .btn-primary');
+            if (uploadBtn) {
+                uploadBtn.textContent = '上传图片中...';
+                uploadBtn.disabled = true;
+            }
+            
+            imageUrl = await uploadImageToCloud(currentImageBase64);
+            
+            if (uploadBtn) {
+                uploadBtn.textContent = '保存';
+                uploadBtn.disabled = false;
+            }
+        } catch (err) {
+            alert('图片上传失败: ' + err.message);
+            const uploadBtn = document.querySelector('.modal-footer .btn-primary');
+            if (uploadBtn) {
+                uploadBtn.textContent = '保存';
+                uploadBtn.disabled = false;
+            }
+            return;
+        }
+    }
+    
     const bannerData = {
         title,
         subtitle,
         sort,
         status,
-        image: currentImageBase64
+        image: imageUrl
     };
     
     try {
