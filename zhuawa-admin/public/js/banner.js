@@ -56,19 +56,63 @@ function renderBanners() {
     `).join('');
 }
 
+// 压缩图片
+function compressImage(base64, maxWidth = 800, maxHeight = 600, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            
+            // 计算缩放比例
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = Math.floor(width * ratio);
+                height = Math.floor(height * ratio);
+            }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 转换为 JPEG 格式，质量 0.8
+            const compressed = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressed);
+        };
+        img.onerror = reject;
+        img.src = base64;
+    });
+}
+
 // 预览图片
-function previewImage(event) {
+async function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    if (file.size > 2 * 1024 * 1024) {
-        alert('图片大小不能超过2MB');
+    if (file.size > 5 * 1024 * 1024) {
+        alert('图片大小不能超过5MB');
         return;
     }
     
     const reader = new FileReader();
-    reader.onload = (e) => {
-        currentImageBase64 = e.target.result;
+    reader.onload = async (e) => {
+        let imageData = e.target.result;
+        
+        // 压缩图片（如果大于 500KB）
+        if (file.size > 500 * 1024) {
+            console.log('图片较大，正在压缩...');
+            try {
+                imageData = await compressImage(imageData, 1200, 800, 0.8);
+                console.log('压缩完成');
+            } catch (err) {
+                console.error('压缩失败:', err);
+            }
+        }
+        
+        currentImageBase64 = imageData;
         const img = document.getElementById('previewImg');
         const placeholder = document.getElementById('uploadPlaceholder');
         if (img) {
