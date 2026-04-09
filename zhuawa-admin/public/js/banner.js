@@ -191,10 +191,20 @@ function closeModal() {
 
 // 上传图片到云存储
 async function uploadImageToCloud(base64Image) {
-    if (!base64Image || base64Image.startsWith('http') || base64Image.startsWith('cloud://')) {
+    console.log('[uploadImageToCloud] Starting upload...');
+    
+    if (!base64Image) {
+        console.log('[uploadImageToCloud] No image provided');
+        return '';
+    }
+    
+    if (base64Image.startsWith('http') || base64Image.startsWith('cloud://')) {
         // 如果已经是 URL 或者是空值，直接返回
+        console.log('[uploadImageToCloud] Already a URL, skipping upload');
         return base64Image;
     }
+    
+    console.log('[uploadImageToCloud] Uploading to cloud storage...');
     
     try {
         const timestamp = Date.now();
@@ -208,14 +218,25 @@ async function uploadImageToCloud(base64Image) {
             })
         });
         
+        console.log('[uploadImageToCloud] Response status:', res.status);
+        
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('[uploadImageToCloud] HTTP error:', res.status, errorText);
+            throw new Error(`上传失败: HTTP ${res.status}`);
+        }
+        
         const result = await res.json();
+        console.log('[uploadImageToCloud] Response:', result);
+        
         if (result.success) {
+            console.log('[uploadImageToCloud] Success, URL:', result.url || result.fileID);
             return result.url || result.fileID;
         } else {
             throw new Error(result.error || '上传失败');
         }
     } catch (err) {
-        console.error('上传图片失败:', err);
+        console.error('[uploadImageToCloud] Error:', err);
         throw err;
     }
 }
