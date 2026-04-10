@@ -183,13 +183,30 @@ async function saveBanner() {
         return;
     }
 
+    // 检查是否有图片（新增时必须上传图片）
+    if (!editingId && !currentImageBase64) {
+        alert('请上传Banner图片');
+        return;
+    }
+
+    // 编辑时如果没有新图片，保留原图片
+    let imageUrl = currentImageBase64;
+    if (editingId && !currentImageBase64) {
+        const existingBanner = banners.find(b => b._id === editingId);
+        if (existingBanner) {
+            imageUrl = existingBanner.imageUrl || existingBanner.image;
+        }
+    }
+
     const bannerData = {
         title,
         subtitle,
         sort,
         status,
-        image: currentImageBase64
+        image: imageUrl
     };
+
+    console.log('[saveBanner] Saving banner data:', { ...bannerData, image: imageUrl ? '【图片数据】' : '【无图片】' });
 
     try {
         let res;
