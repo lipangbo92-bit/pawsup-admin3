@@ -3,6 +3,7 @@ const API_BASE = '/api';
 let banners = [];
 let currentImageBase64 = '';
 let editingId = null;
+let deleteTargetId = null;
 
 // 加载Banner列表
 async function loadBanners() {
@@ -22,27 +23,46 @@ async function loadBanners() {
     }
 }
 
+// HTML转义函数
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // 渲染Banner列表
 function renderBanners() {
     const tbody = document.getElementById('bannerList');
     if (!tbody) return;
-    
+
+    console.log('[renderBanners] banners data:', banners);
+
     if (banners.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">暂无Banner，点击右上角新增</td></tr>';
         return;
     }
-    
-    tbody.innerHTML = banners.map((banner, index) => `
+
+    tbody.innerHTML = banners.map((banner, index) => {
+        // 优先使用 imageUrl，其次是 image
+        const imageUrl = banner.imageUrl || banner.image;
+        console.log(`[renderBanners] Banner ${index}:`, { id: banner._id, image: banner.image, imageUrl: banner.imageUrl, title: banner.title });
+
+        // 确保标题正确显示
+        const title = banner.title || '未命名Banner';
+        const subtitle = banner.subtitle || '-';
+
+        return `
         <tr>
-            <td>${banner.sort || index + 1}</td>
+            <td>${banner.sort !== undefined ? banner.sort : index + 1}</td>
             <td>
-                ${banner.image ? 
-                    `<img src="${banner.image}" style="height:60px;width:120px;object-fit:cover;border-radius:6px;">` : 
+                ${imageUrl ?
+                    `<img src="${escapeHtml(imageUrl)}" style="height:60px;width:120px;object-fit:cover;border-radius:6px;" onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\'height:60px;width:120px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;\'>加载失败</div>';">` :
                     '<div style="height:60px;width:120px;background:#f3f4f6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;">无图片</div>'
                 }
             </td>
-            <td style="font-weight:500;">${banner.title || '-'}</td>
-            <td style="color:#666;">${banner.subtitle || '-'}</td>
+            <td style="font-weight:500;">${escapeHtml(title)}</td>
+            <td style="color:#666;">${escapeHtml(subtitle)}</td>
             <td>
                 <span class="status-badge ${banner.status === 'active' ? 'status-active' : 'status-inactive'}">
                     ${banner.status === 'active' ? '显示' : '隐藏'}
@@ -50,22 +70,22 @@ function renderBanners() {
             </td>
             <td>
                 <button class="action-btn btn-edit" onclick="editBanner('${banner._id}')">编辑</button>
-                <button class="action-btn btn-delete" onclick="deleteBanner('${banner._id}')">删除</button>
+                <button class="action-btn btn-delete" onclick="showDeleteConfirm('${banner._id}')">删除</button>
             </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 // 预览图片
 function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     if (file.size > 2 * 1024 * 1024) {
         alert('图片大小不能超过2MB');
         return;
     }
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
         currentImageBase64 = e.target.result;
@@ -86,13 +106,13 @@ function previewImage(event) {
 function openModal(bannerId = null) {
     const modal = document.getElementById('modal');
     if (!modal) return;
-    
+
     modal.classList.add('active');
-    
+
     // 重置表单
     editingId = null;
     currentImageBase64 = '';
-    
+
     const titleInput = document.getElementById('bannerTitle');
     const subtitleInput = document.getElementById('bannerSubtitle');
     const sortInput = document.getElementById('bannerSort');
@@ -101,7 +121,7 @@ function openModal(bannerId = null) {
     const previewImg = document.getElementById('previewImg');
     const placeholder = document.getElementById('uploadPlaceholder');
     const modalTitle = document.getElementById('modalTitle');
-    
+
     if (titleInput) titleInput.value = '';
     if (subtitleInput) subtitleInput.value = '';
     if (sortInput) sortInput.value = '0';
@@ -112,7 +132,7 @@ function openModal(bannerId = null) {
         previewImg.classList.add('hidden');
     }
     if (placeholder) placeholder.style.display = 'block';
-    
+
     if (bannerId) {
         const banner = banners.find(b => b._id === bannerId);
         if (banner) {
@@ -122,10 +142,11 @@ function openModal(bannerId = null) {
             if (subtitleInput) subtitleInput.value = banner.subtitle || '';
             if (sortInput) sortInput.value = banner.sort || 0;
             if (statusInput) statusInput.value = banner.status || 'active';
-            if (banner.image) {
-                currentImageBase64 = banner.image;
+            const bannerImage = banner.imageUrl || banner.image;
+            if (bannerImage) {
+                currentImageBase64 = bannerImage;
                 if (previewImg) {
-                    previewImg.src = banner.image;
+                    previewImg.src = bannerImage;
                     previewImg.classList.remove('hidden');
                 }
                 if (placeholder) placeholder.style.display = 'none';
@@ -151,17 +172,17 @@ async function saveBanner() {
     const subtitleInput = document.getElementById('bannerSubtitle');
     const sortInput = document.getElementById('bannerSort');
     const statusInput = document.getElementById('bannerStatus');
-    
+
     const title = titleInput ? titleInput.value.trim() : '';
     const subtitle = subtitleInput ? subtitleInput.value.trim() : '';
     const sort = sortInput ? parseInt(sortInput.value) || 0 : 0;
     const status = statusInput ? statusInput.value : 'active';
-    
+
     if (!title) {
         alert('请输入标题');
         return;
     }
-    
+
     const bannerData = {
         title,
         subtitle,
@@ -169,7 +190,7 @@ async function saveBanner() {
         status,
         image: currentImageBase64
     };
-    
+
     try {
         let res;
         if (editingId) {
@@ -185,9 +206,9 @@ async function saveBanner() {
                 body: JSON.stringify(bannerData)
             });
         }
-        
+
         const result = await res.json();
-        
+
         if (result.success) {
             closeModal();
             await loadBanners();
@@ -206,16 +227,45 @@ function editBanner(id) {
     openModal(id);
 }
 
-// 删除Banner
-async function deleteBanner(id) {
-    if (!confirm('确定要删除这个Banner吗？')) return;
-    
+// 显示删除确认弹窗
+function showDeleteConfirm(id) {
+    deleteTargetId = id;
+    const confirmModal = document.getElementById('deleteConfirmModal');
+    if (confirmModal) {
+        confirmModal.classList.add('active');
+    } else {
+        // 如果没有自定义弹窗，使用原生 confirm
+        if (confirm('确定要删除这个Banner吗？')) {
+            doDelete();
+        }
+    }
+}
+
+// 关闭删除确认弹窗
+function closeDeleteConfirm() {
+    deleteTargetId = null;
+    const confirmModal = document.getElementById('deleteConfirmModal');
+    if (confirmModal) {
+        confirmModal.classList.remove('active');
+    }
+}
+
+// 确认删除
+async function confirmDelete() {
+    await doDelete();
+    closeDeleteConfirm();
+}
+
+// 执行删除
+async function doDelete() {
+    if (!deleteTargetId) return;
+
     try {
-        const res = await fetch(`${API_BASE}/banners?id=${id}`, { 
+        const res = await fetch(`${API_BASE}/banners?id=${deleteTargetId}`, {
             method: 'DELETE'
         });
         const result = await res.json();
-        
+
         if (result.success) {
             await loadBanners();
             alert('删除成功');
