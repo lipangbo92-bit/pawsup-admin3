@@ -12,6 +12,7 @@ async function loadBanners() {
         const data = await res.json();
         if (data.success) {
             banners = data.data || [];
+            console.log('[loadBanners] Loaded banners:', banners);
         } else {
             banners = [];
         }
@@ -46,7 +47,12 @@ function renderBanners() {
     tbody.innerHTML = banners.map((banner, index) => {
         // 优先使用 imageUrl，其次是 image
         const imageUrl = banner.imageUrl || banner.image;
-        console.log(`[renderBanners] Banner ${index}:`, { id: banner._id, image: banner.image, imageUrl: banner.imageUrl, title: banner.title });
+        console.log(`[renderBanners] Banner ${index}:`, { 
+            id: banner._id, 
+            image: banner.image ? '【有图片】' : '【无】', 
+            imageUrl: banner.imageUrl ? '【有图片】' : '【无】', 
+            title: banner.title 
+        });
 
         // 确保标题正确显示
         const title = banner.title || '未命名Banner';
@@ -76,34 +82,92 @@ function renderBanners() {
     `}).join('');
 }
 
-// 预览图片
-function previewImage(event) {
+// 预览图片并上传到云存储
+async function previewImage(event) {
+    console.log('[previewImage] File selected:', event.target.files);
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        console.log('[previewImage] No file selected');
+        return;
+    }
+
+    console.log('[previewImage] File:', file.name, 'Size:', file.size);
 
     if (file.size > 2 * 1024 * 1024) {
         alert('图片大小不能超过2MB');
         return;
     }
 
+    // 先显示本地预览
     const reader = new FileReader();
-    reader.onload = (e) => {
-        currentImageBase64 = e.target.result;
+    reader.onload = async (e) => {
+        const localPreview = e.target.result;
+        
         const img = document.getElementById('previewImg');
         const placeholder = document.getElementById('uploadPlaceholder');
         if (img) {
-            img.src = currentImageBase64;
+            img.src = localPreview;
             img.classList.remove('hidden');
         }
         if (placeholder) {
             placeholder.style.display = 'none';
         }
+
+        // 上传到云存储
+        try {
+            console.log('[previewImage] Uploading to cloud storage...');
+            const result = await uploadToCloudStorage(file);
+            currentImageBase64 = result;
+            console.log('[previewImage] Upload success, URL:', currentImageBase64.substring(0, 100) + '...');
+        } catch (err) {
+            console.error('[previewImage] Upload failed:', err);
+            alert('图片上传失败，请重试');
+            currentImageBase64 = '';
+        }
+    };
+    reader.onerror = (e) => {
+        console.error('[previewImage] FileReader error:', e);
+        alert('图片读取失败');
     };
     reader.readAsDataURL(file);
 }
 
+// 上传文件到云存储
+async function uploadToCloudStorage(file) {
+    return new Promise((resolve, reject) => {
+        // 使用 cloudbase 上传
+        if (typeof cloud === 'undefined') {
+            reject(new Error('Cloud SDK not loaded'));
+            return;
+        }
+
+        const cloudPath = `banners/${Date.now()}_${file.name}`;
+        
+        cloud.uploadFile({
+            cloudPath: cloudPath,
+            filePath: file
+        }).then(result => {
+            console.log('[uploadToCloudStorage] Upload result:', result);
+            // 获取临时链接
+            return cloud.getTempFileURL({
+                fileList: [result.fileID]
+            });
+        }).then(fileResult => {
+            console.log('[uploadToCloudStorage] Get URL result:', fileResult);
+            if (fileResult.fileList && fileResult.fileList[0] && fileResult.fileList[0].tempFileURL) {
+                resolve(fileResult.fileList[0].tempFileURL);
+            } else {
+                reject(new Error('Failed to get file URL'));
+            }
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
 // 打开弹窗
 function openModal(bannerId = null) {
+    console.log('[openModal] Opening modal, bannerId:', bannerId);
     const modal = document.getElementById('modal');
     if (!modal) return;
 
@@ -164,10 +228,13 @@ function closeModal() {
         modal.classList.remove('active');
     }
     editingId = null;
+    currentImageBase64 = '';
 }
 
 // 保存Banner
 async function saveBanner() {
+    console.log('[saveBanner] Starting save, editingId:', editingId);
+    
     const titleInput = document.getElementById('bannerTitle');
     const subtitleInput = document.getElementById('bannerSubtitle');
     const sortInput = document.getElementById('bannerSort');
@@ -177,6 +244,8 @@ async function saveBanner() {
     const subtitle = subtitleInput ? subtitleInput.value.trim() : '';
     const sort = sortInput ? parseInt(sortInput.value) || 0 : 0;
     const status = statusInput ? statusInput.value : 'active';
+
+    console.log('[saveBanner] Form data:', { title, subtitle, sort, status, hasImage: !!currentImageBase64 });
 
     if (!title) {
         alert('请输入标题');
@@ -195,7 +264,13 @@ async function saveBanner() {
         const existingBanner = banners.find(b => b._id === editingId);
         if (existingBanner) {
             imageUrl = existingBanner.imageUrl || existingBanner.image;
+            console.log('[saveBanner] Using existing image');
         }
+    }
+
+    if (!imageUrl) {
+        alert('请上传Banner图片');
+        return;
     }
 
     const bannerData = {
@@ -206,7 +281,7 @@ async function saveBanner() {
         image: imageUrl
     };
 
-    console.log('[saveBanner] Saving banner data:', { ...bannerData, image: imageUrl ? '【图片数据】' : '【无图片】' });
+    console.log('[saveBanner] Sending banner data:', { ...bannerData, image: imageUrl.substring(0, 50) + '...' });
 
     try {
         let res;
@@ -225,6 +300,7 @@ async function saveBanner() {
         }
 
         const result = await res.json();
+        console.log('[saveBanner] Server response:', result);
 
         if (result.success) {
             closeModal();
@@ -297,5 +373,6 @@ async function doDelete() {
 
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[DOMContentLoaded] Banner page loaded');
     loadBanners();
 });
