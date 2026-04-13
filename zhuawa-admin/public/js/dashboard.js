@@ -49,10 +49,25 @@ async function apiCall(endpoint, data) {
 
 // Load dashboard data
 async function loadDashboardData() {
+    console.log('=== [loadDashboardData] 函数被调用 ===');
     try {
         // 获取所有订单数据
-        const ordersResult = await apiCall('orders', { action: 'list' });
-        const orders = ordersResult.data || [];
+        console.log('[loadDashboardData] 开始获取订单数据...');
+        let orders = [];
+        try {
+            const ordersResult = await apiCall('orders', { action: 'list' });
+            console.log('[loadDashboardData] orders API 返回:', ordersResult);
+            orders = ordersResult.data || [];
+        } catch (orderErr) {
+            console.error('[loadDashboardData] 获取订单失败:', orderErr);
+        }
+        
+        console.log('[loadDashboardData] 订单数据条数:', orders.length);
+        if (orders.length > 0) {
+            console.log('[loadDashboardData] 第一条订单:', JSON.stringify(orders[0], null, 2));
+        } else {
+            console.log('[loadDashboardData] 订单数据为空');
+        }
         
         const todayStr = getTodayString();
         
@@ -138,24 +153,70 @@ function extractDate(dateStr) {
 function renderRecentOrders(orders) {
     const container = document.getElementById('recentOrders');
     if (!container) return;
-    
+
+    console.log('[renderRecentOrders] 订单数据:', orders);
+
     if (orders.length === 0) {
         container.innerHTML = '<div class="empty-state">暂无订单</div>';
         return;
     }
-    
-    container.innerHTML = orders.map(order => `
+
+    container.innerHTML = orders.map(order => {
+        // 处理嵌套的数据格式
+        const orderData = order.data || order;
+        console.log('[renderRecentOrders] 处理订单:', orderData);
+
+        // 获取金额 - 尝试所有可能的字段名
+        let amount = 0;
+        const amountFields = ['totalAmount', 'amount', 'price', 'totalPrice', 'finalPrice', 'payAmount', 'actualAmount', 'cost', 'total'];
+        for (const field of amountFields) {
+            if (orderData[field] !== undefined && orderData[field] !== null) {
+                amount = orderData[field];
+                console.log(`[renderRecentOrders] 找到金额字段 ${field}:`, amount);
+                break;
+            }
+        }
+
+        // 如果还是没找到，检查是否有 service 对象里的 price
+        if (amount === 0 && orderData.service && orderData.service.price) {
+            amount = orderData.service.price;
+            console.log('[renderRecentOrders] 从 service.price 获取金额:', amount);
+        }
+
+        // 获取客户名
+        let customerName = '未知客户';
+        if (orderData.petName) customerName = orderData.petName;
+        else if (orderData.customerName) customerName = orderData.customerName;
+        else if (orderData.customer && orderData.customer.name) customerName = orderData.customer.name;
+        else if (orderData.customer && orderData.customer.petName) customerName = orderData.customer.petName;
+
+        // 获取服务名
+        let serviceName = '未知服务';
+        if (orderData.serviceName) serviceName = orderData.serviceName;
+        else if (orderData.service && orderData.service.name) serviceName = orderData.service.name;
+        else if (orderData.serviceType) serviceName = orderData.serviceType;
+        else if (orderData.service && orderData.service.type) serviceName = orderData.service.type;
+
+        // 获取状态
+        const status = orderData.status || 'pending';
+
+        // 获取时间
+        const time = orderData.createdAt || orderData.createTime || orderData.date || orderData.appointmentDate || '';
+        const timeStr = time ? new Date(time).toLocaleString('zh-CN', {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : '';
+
+        return `
         <div class="recent-item">
             <div class="item-info">
-                <span class="item-title">${order.customerName || order.customer || '未知客户'}</span>
-                <span class="item-subtitle">${order.serviceName || order.service || '未知服务'}</span>
+                <span class="item-title">${customerName}</span>
+                <span class="item-subtitle">${serviceName}</span>
+                ${timeStr ? `<span class="item-time">${timeStr}</span>` : ''}
             </div>
             <div class="item-meta">
-                <span class="item-amount">¥${(parseFloat(order.amount) || parseFloat(order.price) || 0).toFixed(2)}</span>
-                <span class="status-badge ${order.status}">${getStatusText(order.status)}</span>
+                <span class="item-amount">¥${(parseFloat(amount) || 0).toFixed(2)}</span>
+                <span class="status-badge ${status}">${getStatusText(status)}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Load top services
