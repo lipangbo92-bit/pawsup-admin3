@@ -23,39 +23,51 @@ module.exports = async (req, res) => {
     switch (req.method) {
       case 'GET':
         // 获取所有banner
+        console.log('[API Banners] GET request');
         const listResult = await db.collection('banners')
           .orderBy('sort', 'asc')
           .get();
+        console.log('[API Banners] Found banners:', listResult.data.length);
+        console.log('[API Banners] First banner:', listResult.data[0] ? JSON.stringify(listResult.data[0], null, 2) : 'none');
         res.status(200).json({ success: true, data: listResult.data });
         break;
         
       case 'POST':
         // 创建新banner
-        const { title, subtitle, image, sort, status } = req.body;
+        console.log('[API Banners] POST request body:', req.body);
+        const { title, subtitle, image, imageUrl, sort, status } = req.body;
+        const imageValue = imageUrl || image || ''; // 优先使用 imageUrl
+        console.log('[API Banners] Image value:', imageValue ? imageValue.substring(0, 50) + '...' : 'empty');
         const addResult = await db.collection('banners').add({
           data: {
             title: title || '',
             subtitle: subtitle || '',
-            image: image || '',
+            image: imageValue,
+            imageUrl: imageValue,
             sort: parseInt(sort) || 0,
             status: status || 'active',
             createTime: new Date()
           }
         });
+        console.log('[API Banners] Created banner with id:', addResult.id);
         res.status(200).json({ success: true, id: addResult.id });
         break;
         
       case 'PUT':
         // 更新banner
-        const { id, ...updateData } = req.body;
+        const { id, image: putImage, imageUrl: putImageUrl, ...otherData } = req.body;
         if (!id) {
           return res.status(400).json({ success: false, error: 'ID is required' });
         }
+        // 处理图片字段，确保 image 和 imageUrl 一致
+        const putImageValue = putImageUrl || putImage || '';
+        const updateData = {
+          ...otherData,
+          ...(putImageValue && { image: putImageValue, imageUrl: putImageValue }),
+          updateTime: new Date()
+        };
         await db.collection('banners').doc(id).update({
-          data: {
-            ...updateData,
-            updateTime: new Date()
-          }
+          data: updateData
         });
         res.status(200).json({ success: true });
         break;

@@ -14,7 +14,8 @@
     { "source": "/admin-appointments", "destination": "/admin-appointments.html" },
     { "source": "/banner", "destination": "/banner.html" },
     { "source": "/membership-levels", "destination": "/membership-levels.html" },
-    { "source": "/coupons", "destination": "/coupons.html" }
+    { "source": "/coupons", "destination": "/coupons.html" },
+    { "source": "/users", "destination": "/users.html" }
   ],
   "functions": {
     "api/*.js": {

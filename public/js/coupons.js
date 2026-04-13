@@ -4,8 +4,8 @@
 let coupons = [];
 let currentStatus = 'all';
 
-// 云函数基础 URL（需要根据实际环境配置）
-const CLOUD_FUNCTION_BASE = 'https://cloud1-4gy1jyan842d73ab.service.tcloudbase.com';
+// API 基础 URL - 使用 Vercel API 代理调用云函数
+const API_BASE = '/api/coupons';
 
 // 页面加载
 document.addEventListener('DOMContentLoaded', function() {
@@ -13,39 +13,39 @@ document.addEventListener('DOMContentLoaded', function() {
     bindEvents();
 });
 
-// 调用云函数的通用方法
-async function callCloudFunction(functionName, data) {
+// 调用 API 的通用方法
+async function callCloudFunction(action, data) {
+    console.log(`[API Call] ${action}`, data);
     try {
-        const response = await fetch(`${CLOUD_FUNCTION_BASE}/${functionName}`, {
+        const response = await fetch(API_BASE, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify({
+                action: action,
+                ...data
+            })
         });
         
+        console.log(`[API Response] ${action} status:`, response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[API Error] ${action} response:`, errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
+        console.log(`[API Result] ${action}:`, result);
         return result;
     } catch (error) {
-        console.error(`调用云函数 ${functionName} 失败:`, error);
-        // 降级：尝试使用 cloud.js
-        if (typeof cloud !== 'undefined') {
-            try {
-                const result = await cloud.callFunction({
-                    name: functionName,
-                    data: data
-                });
-                return result.result;
-            } catch (cloudErr) {
-                console.error('cloud.js 也失败了:', cloudErr);
-                throw cloudErr;
-            }
-        }
-        throw error;
+        console.error(`[API Error] ${action}:`, error);
+        // 返回友好的错误信息
+        return {
+            success: false,
+            error: '网络请求失败: ' + error.message
+        };
     }
 }
 
@@ -74,6 +74,33 @@ function bindEvents() {
             daysGroup.style.display = 'block';
         }
     });
+    
+    // 优惠券卡片按钮事件委托
+    document.getElementById('couponsList').addEventListener('click', function(e) {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const action = btn.dataset.action;
+        const couponId = btn.dataset.id;
+        
+        switch (action) {
+            case 'edit':
+                editCoupon(couponId);
+                break;
+            case 'toggle':
+                toggleStatus(couponId, btn.dataset.status);
+                break;
+            case 'send':
+                sendCoupon(couponId);
+                break;
+            case 'delete':
+                deleteCoupon(couponId);
+                break;
+        }
+    });
 }
 
 // 加载优惠券列表
@@ -81,8 +108,7 @@ async function loadCoupons() {
     try {
         showLoading(true);
         
-        const result = await callCloudFunction('coupons-api', {
-            action: 'getCoupons',
+        const result = await callCloudFunction('getCoupons', {
             status: currentStatus === 'all' ? '' : currentStatus,
             page: 1,
             limit: 100
@@ -92,11 +118,12 @@ async function loadCoupons() {
             coupons = result.data || [];
             renderCoupons();
         } else {
+            console.error('[loadCoupons] 加载失败:', result.error);
             showToast(result.error || '加载失败', 'error');
         }
     } catch (error) {
-        console.error('加载优惠券失败:', error);
-        showToast('加载失败，请检查网络', 'error');
+        console.error('[loadCoupons] 异常:', error);
+        showToast('加载失败: ' + error.message, 'error');
     } finally {
         showLoading(false);
     }
@@ -209,10 +236,10 @@ function renderCoupons() {
                     ${coupon.canStack ? '<div class="coupon-tag">可叠加</div>' : ''}
                 </div>
                 <div class="coupon-footer">
-                    <button class="btn-small" onclick="editCoupon('${coupon._id}')">编辑</button>
-                    <button class="btn-small" onclick="toggleStatus('${coupon._id}', '${coupon.status}')">${coupon.status === 'active' ? '暂停' : '启用'}</button>
-                    <button class="btn-small" onclick="sendCoupon('${coupon._id}')">发放</button>
-                    <button class="btn-small danger" onclick="deleteCoupon('${coupon._id}')">删除</button>
+                    <button class="btn-small" data-action="edit" data-id="${coupon._id}">编辑</button>
+                    <button class="btn-small" data-action="toggle" data-id="${coupon._id}" data-status="${coupon.status}">${coupon.status === 'active' ? '暂停' : '启用'}</button>
+                    <button class="btn-small" data-action="send" data-id="${coupon._id}">发放</button>
+                    <button class="btn-small danger" data-action="delete" data-id="${coupon._id}">删除</button>
                 </div>
             </div>
         `;
@@ -321,7 +348,7 @@ async function saveCoupon() {
             ? { action, couponId, data }
             : { action, data };
         
-        const result = await callCloudFunction('coupons-api', params);
+        const result = await callCloudFunction(action, couponId ? { couponId, data } : { data });
         
         if (result.success) {
             showToast(couponId ? '更新成功' : '创建成功', 'success');
@@ -343,8 +370,7 @@ async function toggleStatus(couponId, currentStatus) {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'updateCoupon',
+        const result = await callCloudFunction('updateCoupon', {
             couponId: couponId,
             data: { status: newStatus }
         });
@@ -366,8 +392,7 @@ async function deleteCoupon(couponId) {
     if (!confirm('确定要删除这个优惠券吗？此操作不可恢复。')) return;
     
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'deleteCoupon',
+        const result = await callCloudFunction('deleteCoupon', {
             couponId: couponId
         });
         
@@ -383,18 +408,36 @@ async function deleteCoupon(couponId) {
     }
 }
 
+// 当前正在发放的优惠券ID
+let currentSendCouponId = null;
+
 // 发放优惠券
 function sendCoupon(couponId) {
     const coupon = coupons.find(c => c._id === couponId);
     if (!coupon) return;
     
-    const userId = prompt(`发放优惠券「${coupon.name}」\n\n请输入用户OpenID（留空则查看发放统计）：`);
-    if (userId === null) return; // 取消
+    currentSendCouponId = couponId;
+    document.getElementById('sendCouponName').textContent = `优惠券：${coupon.name}`;
+    document.getElementById('sendUserId').value = '';
+    document.getElementById('sendModal').classList.add('show');
+}
+
+// 关闭发放模态框
+function closeSendModal() {
+    document.getElementById('sendModal').classList.remove('show');
+    currentSendCouponId = null;
+}
+
+// 确认发放
+function confirmSend() {
+    const userId = document.getElementById('sendUserId').value.trim();
+    const coupon = coupons.find(c => c._id === currentSendCouponId);
     
-    if (userId.trim()) {
-        sendToUser(couponId, userId.trim());
-    } else {
-        // 显示发放统计
+    closeSendModal();
+    
+    if (userId) {
+        sendToUser(currentSendCouponId, userId);
+    } else if (coupon) {
         showSendStats(coupon);
     }
 }
@@ -415,8 +458,7 @@ function showSendStats(coupon) {
 // 发放给指定用户
 async function sendToUser(couponId, userId) {
     try {
-        const result = await callCloudFunction('coupons-api', {
-            action: 'sendCouponToUser',
+        const result = await callCloudFunction('sendCouponToUser', {
             couponId: couponId,
             userId: userId
         });
@@ -449,4 +491,50 @@ function showToast(message, type = 'success') {
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
+}
+
+// 修复优惠券状态（为没有 status 的优惠券设置默认值）
+async function fixCouponStatus() {
+    if (!confirm('确定要修复优惠券状态吗？这将为所有没有状态字段的优惠券设置为「生效中」。')) {
+        return;
+    }
+
+    try {
+        showToast('正在修复...', 'success');
+
+        const result = await callCloudFunction('fixCouponStatus', {});
+
+        if (result.success) {
+            showToast(result.message, 'success');
+            loadCoupons(); // 刷新列表
+        } else {
+            showToast(result.error || '修复失败', 'error');
+        }
+    } catch (error) {
+        console.error('修复优惠券状态失败:', error);
+        showToast('修复失败: ' + error.message, 'error');
+    }
+}
+
+// 修复 user_coupons 中的 userId（将 _id 格式改为 openid 格式）
+async function fixUserCouponsUserId() {
+    if (!confirm('确定要修复 userId 吗？这将把所有使用 _id 格式的 userId 改为 openid 格式。')) {
+        return;
+    }
+
+    try {
+        showToast('正在修复...', 'success');
+
+        const result = await callCloudFunction('fixUserCouponsUserId', {});
+
+        if (result.success) {
+            showToast(result.message, 'success');
+            console.log('修复详情:', result.details);
+        } else {
+            showToast(result.error || '修复失败', 'error');
+        }
+    } catch (error) {
+        console.error('修复 userId 失败:', error);
+        showToast('修复失败: ' + error.message, 'error');
+    }
 }
