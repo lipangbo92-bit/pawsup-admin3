@@ -51,10 +51,17 @@ async function apiCall(endpoint, data) {
 async function loadDashboardData() {
     try {
         // 获取所有订单数据
-        const ordersResult = await apiCall('orders', { action: 'list' });
-        const orders = ordersResult.data || [];
+        console.log('[loadDashboardData] 开始获取订单数据...');
+        let orders = [];
+        try {
+            const ordersResult = await apiCall('orders', { action: 'list' });
+            console.log('[loadDashboardData] orders API 返回:', ordersResult);
+            orders = ordersResult.data || [];
+        } catch (orderErr) {
+            console.error('[loadDashboardData] 获取订单失败:', orderErr);
+        }
         
-        console.log('[loadDashboardData] 订单数据:', orders);
+        console.log('[loadDashboardData] 订单数据条数:', orders.length);
         if (orders.length > 0) {
             console.log('[loadDashboardData] 第一条订单:', JSON.stringify(orders[0], null, 2));
         }
