@@ -2,7 +2,11 @@
 <view class="container">
   <!--Banner-->
   <view class="banner">
-    <view class="banner-placeholder">爪哇宠物店</view>
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500" circular="true">
+      <swiper-item wx:for="{{banner}}" wx:key="id">
+        <image class="banner-image" src="{{item.image}}" mode="aspectFill" bindtap="onBannerTap" data-url="{{item.url}}"/>
+      </swiper-item>
+    </swiper>
   </view>
 
   <!--快捷入口-->
