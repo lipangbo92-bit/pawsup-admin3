@@ -139,23 +139,51 @@ function renderRecentOrders(orders) {
     const container = document.getElementById('recentOrders');
     if (!container) return;
     
+    console.log('[renderRecentOrders] 订单数据:', orders);
+    
     if (orders.length === 0) {
         container.innerHTML = '<div class="empty-state">暂无订单</div>';
         return;
     }
     
-    container.innerHTML = orders.map(order => `
+    container.innerHTML = orders.map(order => {
+        // 处理嵌套的数据格式
+        const orderData = order.data || order;
+        console.log('[renderRecentOrders] 处理订单:', orderData);
+        
+        // 获取金额 - 尝试多个可能的字段名
+        let amount = 0;
+        if (orderData.totalAmount !== undefined) amount = orderData.totalAmount;
+        else if (orderData.amount !== undefined) amount = orderData.amount;
+        else if (orderData.price !== undefined) amount = orderData.price;
+        else if (orderData.totalPrice !== undefined) amount = orderData.totalPrice;
+        
+        // 获取客户名
+        const customerName = orderData.customerName || orderData.customer?.name || orderData.customerName || '未知客户';
+        
+        // 获取服务名
+        const serviceName = orderData.serviceName || orderData.service?.name || orderData.serviceType || '未知服务';
+        
+        // 获取状态
+        const status = orderData.status || 'pending';
+        
+        // 获取时间
+        const time = orderData.createdAt || orderData.createTime || orderData.date || '';
+        const timeStr = time ? new Date(time).toLocaleString('zh-CN', {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'}) : '';
+        
+        return `
         <div class="recent-item">
             <div class="item-info">
-                <span class="item-title">${order.customerName || order.customer || '未知客户'}</span>
-                <span class="item-subtitle">${order.serviceName || order.service || '未知服务'}</span>
+                <span class="item-title">${customerName}</span>
+                <span class="item-subtitle">${serviceName}</span>
+                ${timeStr ? `<span class="item-time">${timeStr}</span>` : ''}
             </div>
             <div class="item-meta">
-                <span class="item-amount">¥${(parseFloat(order.amount) || parseFloat(order.price) || 0).toFixed(2)}</span>
-                <span class="status-badge ${order.status}">${getStatusText(order.status)}</span>
+                <span class="item-amount">¥${(parseFloat(amount) || 0).toFixed(2)}</span>
+                <span class="status-badge ${status}">${getStatusText(status)}</span>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 // Load top services
@@ -163,6 +191,8 @@ async function loadTopServices() {
     try {
         const result = await apiCall('services', { action: 'list' });
         const services = result.data || [];
+        
+        console.log('[loadTopServices] 服务数据:', services);
         
         const container = document.getElementById('topServices');
         if (!container) return;
@@ -172,13 +202,28 @@ async function loadTopServices() {
             return;
         }
         
-        container.innerHTML = services.slice(0, 5).map((service, index) => `
+        // 按销量排序（如果有销量字段）
+        const sortedServices = services.sort((a, b) => {
+            const salesA = a.sales || a.orderCount || 0;
+            const salesB = b.sales || b.orderCount || 0;
+            return salesB - salesA;
+        });
+        
+        container.innerHTML = sortedServices.slice(0, 5).map((service, index) => {
+            // 处理嵌套数据格式
+            const serviceData = service.data || service;
+            const sales = serviceData.sales || serviceData.orderCount || 0;
+            
+            return `
             <div class="rank-item">
                 <span class="rank-number">${index + 1}</span>
-                <span class="rank-name">${service.name}</span>
-                <span class="rank-price">¥${(parseFloat(service.price) || 0).toFixed(2)}</span>
+                <div class="rank-info">
+                    <span class="rank-name">${serviceData.name}</span>
+                    ${sales > 0 ? `<span class="rank-sales">已售 ${sales} 单</span>` : ''}
+                </div>
+                <span class="rank-price">¥${(parseFloat(serviceData.price) || 0).toFixed(2)}<small>/次</small></span>
             </div>
-        `).join('');
+        `}).join('');
     } catch (err) {
         console.error('Load top services error:', err);
         document.getElementById('topServices').innerHTML = '<div class="empty-state">加载失败</div>';
