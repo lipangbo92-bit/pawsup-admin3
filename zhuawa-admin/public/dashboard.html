@@ -80,7 +80,7 @@
                 <div class="dashboard-grid">
                     <div class="dashboard-card">
                         <div class="card-header">
-                            <h3>📋 最近订单</h3>
+                            <h3>📋 今日预约</h3>
                             <a href="orders" class="view-all">查看全部</a>
                         </div>
                         <div class="recent-list" id="recentOrders"></div>
@@ -103,13 +103,22 @@
     <script src="js/app.js?v=4"></script>
     <script src="js/dashboard.js?v=4"></script>
     
-    <!-- 直接内嵌订单加载逻辑，不依赖外部JS -->
+    <!-- 直接内嵌今日订单加载逻辑 -->
     <script>
-        console.log('=== 内嵌订单加载脚本执行 ===');
+        console.log('=== 内嵌今日订单加载脚本执行 ===');
         
-        // 直接加载并显示订单
-        async function loadOrdersDirectly() {
-            console.log('开始直接加载订单...');
+        // 获取今日日期字符串 (YYYY-MM-DD)
+        function getTodayString() {
+            const date = new Date();
+            return date.toISOString().split('T')[0];
+        }
+        
+        // 直接加载并显示今日订单
+        async function loadTodayOrders() {
+            console.log('开始加载今日订单...');
+            const todayStr = getTodayString();
+            console.log('今日日期:', todayStr);
+            
             try {
                 const response = await fetch('/api/orders', {
                     method: 'POST',
@@ -123,35 +132,64 @@
                 
                 if (!result.data || result.data.length === 0) {
                     console.log('没有订单数据');
+                    document.getElementById('recentOrders').innerHTML = '<div class="empty-state">今日暂无预约</div>';
                     return;
                 }
                 
-                console.log('订单数量:', result.data.length);
+                // 过滤今日订单
+                const todayOrders = result.data.filter(order => {
+                    const orderData = order.data || order;
+                    const appointmentDate = orderData.appointmentDate || '';
+                    const createTime = orderData.createTime || '';
+                    // 匹配预约日期或创建日期
+                    return appointmentDate === todayStr || createTime.includes(todayStr);
+                });
                 
-                // 渲染订单列表
+                console.log('今日订单数量:', todayOrders.length);
+                
+                // 更新今日订单统计
+                document.getElementById('todayOrders').textContent = todayOrders.length;
+                
+                // 渲染今日订单列表
                 const container = document.getElementById('recentOrders');
                 if (!container) {
                     console.error('找不到 recentOrders 容器');
                     return;
                 }
                 
-                container.innerHTML = result.data.map(order => {
+                if (todayOrders.length === 0) {
+                    container.innerHTML = '<div class="empty-state">今日暂无预约</div>';
+                    return;
+                }
+                
+                // 按预约时间排序
+                todayOrders.sort((a, b) => {
+                    const timeA = (a.data || a).appointmentTime || '';
+                    const timeB = (b.data || b).appointmentTime || '';
+                    return timeA.localeCompare(timeB);
+                });
+                
+                container.innerHTML = todayOrders.map(order => {
                     const orderData = order.data || order;
                     
-                    // 获取金额 - 使用正确的字段名
-                    let amount = parseFloat(orderData.finalPrice) || parseFloat(orderData.totalPrice) || parseFloat(orderData.servicePrice) || 0;
+                    // 获取宠物名称
+                    const petName = orderData.petName || '未知宠物';
                     
-                    // 获取客户名
-                    let customerName = orderData.petName || orderData.customerName || '未知客户';
+                    // 获取预约时间
+                    const appointmentTime = orderData.appointmentTime || '';
                     
-                    // 获取服务名
-                    let serviceName = orderData.serviceName || '未知服务';
+                    // 获取服务项目
+                    const serviceName = orderData.serviceName || '未知服务';
+                    
+                    // 获取美容师
+                    const technicianName = orderData.technicianName || '待定';
                     
                     // 获取状态
                     const status = orderData.status || 'pending';
                     const statusText = {
                         'pending': '待处理',
                         'confirmed': '已确认',
+                        'in_service': '服务中',
                         'completed': '已完成',
                         'cancelled': '已取消'
                     }[status] || status;
@@ -159,28 +197,28 @@
                     return `
                     <div class="recent-item">
                         <div class="item-info">
-                            <span class="item-title">${customerName}</span>
-                            <span class="item-subtitle">${serviceName}</span>
+                            <span class="item-title">${petName} · ${appointmentTime}</span>
+                            <span class="item-subtitle">${serviceName} · ${technicianName}</span>
                         </div>
                         <div class="item-meta">
-                            <span class="item-amount">¥${amount.toFixed(2)}</span>
                             <span class="status-badge ${status}">${statusText}</span>
                         </div>
                     </div>
                 `}).join('');
                 
-                console.log('订单列表渲染完成');
+                console.log('今日订单列表渲染完成');
                 
             } catch (err) {
-                console.error('加载订单失败:', err);
+                console.error('加载今日订单失败:', err);
+                document.getElementById('recentOrders').innerHTML = '<div class="empty-state">加载失败</div>';
             }
         }
         
         // 页面加载完成后立即执行
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadOrdersDirectly);
+            document.addEventListener('DOMContentLoaded', loadTodayOrders);
         } else {
-            loadOrdersDirectly();
+            loadTodayOrders();
         }
     </script>
 </body>
