@@ -100,75 +100,88 @@
     
 
     <script src="https://res.wx.qq.com/open/js/cloudbase/1.1.0/cloud.js"></script>
-    <script src="js/app.js?v=3"></script>
-    <script src="js/dashboard.js?v=3"></script>
+    <script src="js/app.js?v=4"></script>
+    <script src="js/dashboard.js?v=4"></script>
     
-    <!-- 内嵌修复：确保订单金额正确显示 -->
+    <!-- 直接内嵌订单加载逻辑，不依赖外部JS -->
     <script>
-        // 覆盖 renderRecentOrders 函数，使用正确的金额字段
-        window.renderRecentOrdersFixed = function(orders) {
-            const container = document.getElementById('recentOrders');
-            if (!container) return;
-            
-            if (orders.length === 0) {
-                container.innerHTML = '<div class="empty-state">暂无订单</div>';
-                return;
-            }
-            
-            container.innerHTML = orders.map(order => {
-                // 处理嵌套的数据格式
-                const orderData = order.data || order;
-                
-                // 获取金额 - 使用正确的字段名
-                let amount = parseFloat(orderData.finalPrice) || parseFloat(orderData.totalPrice) || parseFloat(orderData.servicePrice) || 0;
-                
-                // 获取客户名
-                let customerName = orderData.petName || orderData.customerName || '未知客户';
-                
-                // 获取服务名
-                let serviceName = orderData.serviceName || '未知服务';
-                
-                // 获取状态
-                const status = orderData.status || 'pending';
-                const statusText = {
-                    'pending': '待处理',
-                    'confirmed': '已确认',
-                    'completed': '已完成',
-                    'cancelled': '已取消'
-                }[status] || status;
-                
-                return `
-                <div class="recent-item">
-                    <div class="item-info">
-                        <span class="item-title">${customerName}</span>
-                        <span class="item-subtitle">${serviceName}</span>
-                    </div>
-                    <div class="item-meta">
-                        <span class="item-amount">¥${amount.toFixed(2)}</span>
-                        <span class="status-badge ${status}">${statusText}</span>
-                    </div>
-                </div>
-            `}).join('');
-        };
+        console.log('=== 内嵌订单加载脚本执行 ===');
         
-        // 页面加载完成后，使用修复后的函数重新渲染
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                if (window.renderRecentOrdersFixed && typeof window.renderRecentOrdersFixed === 'function') {
-                    console.log('使用修复后的 renderRecentOrdersFixed 渲染订单');
-                    // 如果已经有订单数据，重新渲染
-                    fetch('/api/orders', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({action: 'list'})
-                    }).then(r => r.json()).then(result => {
-                        if (result.data && result.data.length > 0) {
-                            window.renderRecentOrdersFixed(result.data);
-                        }
-                    });
+        // 直接加载并显示订单
+        async function loadOrdersDirectly() {
+            console.log('开始直接加载订单...');
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'list'})
+                });
+                
+                console.log('订单API响应状态:', response.status);
+                const result = await response.json();
+                console.log('订单API返回:', result);
+                
+                if (!result.data || result.data.length === 0) {
+                    console.log('没有订单数据');
+                    return;
                 }
-            }, 1000); // 延迟1秒执行，确保外部JS已加载
-        });
+                
+                console.log('订单数量:', result.data.length);
+                
+                // 渲染订单列表
+                const container = document.getElementById('recentOrders');
+                if (!container) {
+                    console.error('找不到 recentOrders 容器');
+                    return;
+                }
+                
+                container.innerHTML = result.data.map(order => {
+                    const orderData = order.data || order;
+                    
+                    // 获取金额 - 使用正确的字段名
+                    let amount = parseFloat(orderData.finalPrice) || parseFloat(orderData.totalPrice) || parseFloat(orderData.servicePrice) || 0;
+                    
+                    // 获取客户名
+                    let customerName = orderData.petName || orderData.customerName || '未知客户';
+                    
+                    // 获取服务名
+                    let serviceName = orderData.serviceName || '未知服务';
+                    
+                    // 获取状态
+                    const status = orderData.status || 'pending';
+                    const statusText = {
+                        'pending': '待处理',
+                        'confirmed': '已确认',
+                        'completed': '已完成',
+                        'cancelled': '已取消'
+                    }[status] || status;
+                    
+                    return `
+                    <div class="recent-item">
+                        <div class="item-info">
+                            <span class="item-title">${customerName}</span>
+                            <span class="item-subtitle">${serviceName}</span>
+                        </div>
+                        <div class="item-meta">
+                            <span class="item-amount">¥${amount.toFixed(2)}</span>
+                            <span class="status-badge ${status}">${statusText}</span>
+                        </div>
+                    </div>
+                `}).join('');
+                
+                console.log('订单列表渲染完成');
+                
+            } catch (err) {
+                console.error('加载订单失败:', err);
+            }
+        }
+        
+        // 页面加载完成后立即执行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadOrdersDirectly);
+        } else {
+            loadOrdersDirectly();
+        }
     </script>
 </body>
 </html>
