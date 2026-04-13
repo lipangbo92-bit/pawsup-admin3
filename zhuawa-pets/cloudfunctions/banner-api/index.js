@@ -11,19 +11,30 @@ exports.main = async (event, context) => {
       case 'list':
         // 获取所有显示的banner，按排序字段排序
         console.log('[banner-api] 开始查询 banners');
-        let query = db.collection('banners').orderBy('sort', 'asc');
         
         // 先查询所有数据，看看是否有数据
         const allDataResult = await db.collection('banners').get();
         console.log('[banner-api] 所有数据条数:', allDataResult.data.length);
-        console.log('[banner-api] 第一条数据:', allDataResult.data[0]);
+        if (allDataResult.data.length > 0) {
+          console.log('[banner-api] 第一条数据:', JSON.stringify(allDataResult.data[0]));
+          console.log('[banner-api] 第一条 status 值:', allDataResult.data[0].status);
+          console.log('[banner-api] 第一条 status 类型:', typeof allDataResult.data[0].status);
+        }
         
-        // 再查询 active 状态的数据
-        const listResult = await db.collection('banners')
-          .where({ status: 'active' })
-          .orderBy('sort', 'asc')
-          .get();
-        console.log('[banner-api] active 状态数据条数:', listResult.data.length);
+        // 使用命令式查询，避免 where 条件问题
+        let listResult;
+        try {
+          listResult = await db.collection('banners')
+            .where({
+              status: db.command.eq('active')
+            })
+            .orderBy('sort', 'asc')
+            .get();
+          console.log('[banner-api] active 状态数据条数:', listResult.data.length);
+        } catch (queryErr) {
+          console.log('[banner-api] where 查询失败，使用全量查询:', queryErr.message);
+          listResult = allDataResult;
+        }
         
         // 展开嵌套的数据格式
         const processedData = listResult.data.map(item => {
