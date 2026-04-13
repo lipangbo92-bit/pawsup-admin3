@@ -58,8 +58,18 @@ Page({
 
       if (res.result && res.result.success && res.result.data) {
         console.log('[loadBanners] 获取到数据条数:', res.result.data.length);
-        console.log('[loadBanners] 第一条数据:', res.result.data[0]);
-        this.setData({ banners: res.result.data });
+        // 展开嵌套的数据格式
+        const processedData = res.result.data.map(item => {
+          if (item.data && typeof item.data === 'object') {
+            return {
+              _id: item._id,
+              ...item.data
+            };
+          }
+          return item;
+        });
+        console.log('[loadBanners] 处理后的第一条数据:', processedData[0]);
+        this.setData({ banners: processedData });
         console.log('[loadBanners] 已设置 banners 数据');
       } else {
         console.log('[loadBanners] 没有获取到数据:', res.result);
