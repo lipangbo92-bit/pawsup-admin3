@@ -225,6 +225,8 @@ async function loadTopServices() {
         const result = await apiCall('services', { action: 'list' });
         const services = result.data || [];
         
+        console.log('[loadTopServices] 服务数据:', services);
+        
         const container = document.getElementById('topServices');
         if (!container) return;
         
@@ -233,13 +235,28 @@ async function loadTopServices() {
             return;
         }
         
-        container.innerHTML = services.slice(0, 5).map((service, index) => `
+        // 按销量排序（如果有销量字段）
+        const sortedServices = services.sort((a, b) => {
+            const salesA = a.sales || a.orderCount || 0;
+            const salesB = b.sales || b.orderCount || 0;
+            return salesB - salesA;
+        });
+        
+        container.innerHTML = sortedServices.slice(0, 5).map((service, index) => {
+            // 处理嵌套数据格式
+            const serviceData = service.data || service;
+            const sales = serviceData.sales || serviceData.orderCount || 0;
+            
+            return `
             <div class="rank-item">
                 <span class="rank-number">${index + 1}</span>
-                <span class="rank-name">${service.name}</span>
-                <span class="rank-price">¥${(parseFloat(service.price) || 0).toFixed(2)}</span>
+                <div class="rank-info">
+                    <span class="rank-name">${serviceData.name}</span>
+                    ${sales > 0 ? `<span class="rank-sales">已售 ${sales} 单</span>` : ''}
+                </div>
+                <span class="rank-price">¥${(parseFloat(serviceData.price) || 0).toFixed(2)}<small>/次</small></span>
             </div>
-        `).join('');
+        `}).join('');
     } catch (err) {
         console.error('Load top services error:', err);
         document.getElementById('topServices').innerHTML = '<div class="empty-state">加载失败</div>';

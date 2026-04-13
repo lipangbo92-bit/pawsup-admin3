@@ -502,6 +502,12 @@ body {
     margin-top: 2px;
 }
 
+.item-time {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 4px;
+}
+
 .item-meta {
     display: flex;
     align-items: center;
@@ -558,16 +564,37 @@ body {
 .rank-item:nth-child(2) .rank-number { background: #9CA3AF; }
 .rank-item:nth-child(3) .rank-number { background: #D97706; }
 
-.rank-name {
+.rank-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rank-name {
     font-size: 14px;
     color: var(--gray-800);
+    line-height: 1.4;
+}
+
+.rank-sales {
+    font-size: 11px;
+    color: var(--gray-400);
+    margin-top: 2px;
 }
 
 .rank-price {
     font-weight: 600;
     color: var(--primary-color);
     font-size: 14px;
+    white-space: nowrap;
+}
+
+.rank-price small {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--gray-400);
+    margin-left: 2px;
 }
 
 /* ==================== Filter Bar ==================== */
