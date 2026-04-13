@@ -151,6 +151,12 @@ exports.main = async (event, context) => {
           
           slot.availableCount = reallyAvailable.length
           
+          // 如果已经标记为过期或太晚，不要覆盖状态
+          if (slot.status === '已过期' || slot.status === '不可约') {
+            // 保持原来的 disabled 和 status
+            return
+          }
+          
           // 根据可约数量设置状态
           if (reallyAvailable.length === 0) {
             slot.disabled = true
@@ -252,6 +258,12 @@ exports.main = async (event, context) => {
             }
             return conflict
           })
+          
+          // 如果已经标记为过期或太晚，不要覆盖状态
+          if (slot.status === '已过期' || slot.status === '不可约') {
+            // 保持原来的 disabled 和 status
+            return
+          }
           
           if (isRestDay) {
             slot.disabled = true
