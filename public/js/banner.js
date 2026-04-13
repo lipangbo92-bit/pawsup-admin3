@@ -48,11 +48,13 @@ function renderBanners() {
     tbody.innerHTML = banners.map((banner, index) => {
         // 优先使用 imageUrl，其次是 image
         const imageUrl = banner.imageUrl || banner.image;
-        console.log(`[renderBanners] Banner ${index}:`, { 
+        console.log(`[renderBanners] Banner ${index} full data:`, JSON.stringify(banner, null, 2));
+        console.log(`[renderBanners] Banner ${index} processed:`, { 
             id: banner._id, 
-            image: banner.image ? '【有图片】' : '【无】', 
-            imageUrl: banner.imageUrl ? '【有图片】' : '【无】', 
-            title: banner.title 
+            image: banner.image ? banner.image.substring(0, 50) + '...' : '【无】', 
+            imageUrl: banner.imageUrl ? banner.imageUrl.substring(0, 50) + '...' : '【无】', 
+            title: banner.title,
+            subtitle: banner.subtitle
         });
 
         // 确保标题正确显示
