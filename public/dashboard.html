@@ -137,12 +137,16 @@
                 }
                 
                 // 过滤今日订单
+                console.log('开始过滤今日订单，今日日期:', todayStr);
                 const todayOrders = result.data.filter(order => {
                     const orderData = order.data || order;
                     const appointmentDate = orderData.appointmentDate || '';
                     const createTime = orderData.createTime || '';
+                    console.log('检查订单:', orderData.petName, 'appointmentDate:', appointmentDate, 'createTime:', createTime);
                     // 匹配预约日期或创建日期
-                    return appointmentDate === todayStr || createTime.includes(todayStr);
+                    const isToday = appointmentDate === todayStr || createTime.includes(todayStr);
+                    console.log('  是否今日:', isToday);
+                    return isToday;
                 });
                 
                 console.log('今日订单数量:', todayOrders.length);
