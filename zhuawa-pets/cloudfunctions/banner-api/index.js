@@ -14,7 +14,17 @@ exports.main = async (event, context) => {
           .where({ status: 'active' })
           .orderBy('sort', 'asc')
           .get();
-        return { success: true, data: listResult.data };
+        // 展开嵌套的数据格式
+        const processedData = listResult.data.map(item => {
+          if (item.data && typeof item.data === 'object') {
+            return {
+              _id: item._id,
+              ...item.data
+            };
+          }
+          return item;
+        });
+        return { success: true, data: processedData };
         
       case 'listAll':
         // 管理端获取所有banner

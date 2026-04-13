@@ -12,7 +12,7 @@
   <view class="banner-section">
     <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" wx:if="{{banners.length > 0}}">
       <swiper-item wx:for="{{banners}}" wx:key="_id" class="banner-item" style="background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);">
-        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="banner-bg-image"/>
+        <image wx:if="{{item.imageUrl || item.image}}" src="{{item.imageUrl || item.image}}" mode="aspectFill" class="banner-bg-image"/>
         <view class="banner-text-wrapper">
           <text class="banner-title">{{item.title}}</text>
           <text class="banner-subtitle">{{item.subtitle}}</text>
