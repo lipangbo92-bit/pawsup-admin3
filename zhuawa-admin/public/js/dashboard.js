@@ -49,6 +49,7 @@ async function apiCall(endpoint, data) {
 
 // Load dashboard data
 async function loadDashboardData() {
+    console.log('=== [loadDashboardData] 函数被调用 ===');
     try {
         // 获取所有订单数据
         console.log('[loadDashboardData] 开始获取订单数据...');
@@ -64,6 +65,8 @@ async function loadDashboardData() {
         console.log('[loadDashboardData] 订单数据条数:', orders.length);
         if (orders.length > 0) {
             console.log('[loadDashboardData] 第一条订单:', JSON.stringify(orders[0], null, 2));
+        } else {
+            console.log('[loadDashboardData] 订单数据为空');
         }
         
         const todayStr = getTodayString();
