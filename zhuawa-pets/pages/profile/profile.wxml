@@ -81,6 +81,11 @@
           <text class="menu-text">联系我们</text>
           <text class="menu-arrow">></text>
         </view>
+        <view class="menu-item" bindtap="onShowOpenId">
+          <text class="menu-icon">🔑</text>
+          <text class="menu-text">我的ID</text>
+          <text class="menu-arrow">></text>
+        </view>
         <view class="menu-item" bindtap="onSettings">
           <text class="menu-icon">⚙️</text>
           <text class="menu-text">设置</text>

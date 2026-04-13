@@ -10,12 +10,24 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'list':
         // 获取所有显示的banner，按排序字段排序
-        const listResult = await db.collection('banners')
-          .where({ status: 'active' })
-          .orderBy('sort', 'asc')
-          .get();
-        // 展开嵌套的数据格式
-        const processedData = listResult.data.map(item => {
+        console.log('[banner-api] 开始查询 banners');
+        
+        // 查询所有数据（不过滤）
+        const allDataResult = await db.collection('banners').get();
+        console.log('[banner-api] 查询结果条数:', allDataResult.data.length);
+        
+        // 手动过滤 active 状态的数据
+        const filteredData = allDataResult.data.filter(item => {
+          // 处理嵌套的数据格式
+          const itemData = item.data || item;
+          const status = itemData.status;
+          console.log('[banner-api] 检查 item status:', status, '类型:', typeof status);
+          return status === 'active' || status === '显示';
+        });
+        console.log('[banner-api] 过滤后条数:', filteredData.length);
+        
+        // 展开嵌套的数据格式并排序
+        const processedData = filteredData.map(item => {
           if (item.data && typeof item.data === 'object') {
             return {
               _id: item._id,
@@ -23,7 +35,8 @@ exports.main = async (event, context) => {
             };
           }
           return item;
-        });
+        }).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        
         return { success: true, data: processedData };
         
       case 'listAll':
