@@ -3,8 +3,13 @@ const API_BASE = '/api';
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
-    setCurrentDate();
+    console.log('=== DOMContentLoaded 事件触发 ===');
+    try {
+        loadDashboardData();
+        setCurrentDate();
+    } catch (err) {
+        console.error('初始化失败:', err);
+    }
 });
 
 // Set current date
@@ -50,6 +55,22 @@ async function apiCall(endpoint, data) {
 // Load dashboard data
 async function loadDashboardData() {
     console.log('=== [loadDashboardData] 函数被调用 ===');
+    
+    // 先测试直接 fetch 看 API 是否可访问
+    console.log('[loadDashboardData] 测试 API 连接...');
+    try {
+        const testResponse = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'list' })
+        });
+        console.log('[loadDashboardData] API 响应状态:', testResponse.status);
+        const testData = await testResponse.json();
+        console.log('[loadDashboardData] API 原始返回:', testData);
+    } catch (testErr) {
+        console.error('[loadDashboardData] API 测试失败:', testErr);
+    }
+    
     try {
         // 获取所有订单数据
         console.log('[loadDashboardData] 开始获取订单数据...');
