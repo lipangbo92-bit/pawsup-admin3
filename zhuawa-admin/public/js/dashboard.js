@@ -1,4 +1,6 @@
 // Dashboard Module - 使用 API 方式连接数据库
+// 版本: v3 - 修复订单金额显示
+console.log('=== Dashboard JS v3 加载 ===');
 const API_BASE = '/api';
 
 // Initialize dashboard
