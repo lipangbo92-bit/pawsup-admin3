@@ -12,32 +12,22 @@ exports.main = async (event, context) => {
         // 获取所有显示的banner，按排序字段排序
         console.log('[banner-api] 开始查询 banners');
         
-        // 先查询所有数据，看看是否有数据
+        // 查询所有数据（不过滤）
         const allDataResult = await db.collection('banners').get();
-        console.log('[banner-api] 所有数据条数:', allDataResult.data.length);
-        if (allDataResult.data.length > 0) {
-          console.log('[banner-api] 第一条数据:', JSON.stringify(allDataResult.data[0]));
-          console.log('[banner-api] 第一条 status 值:', allDataResult.data[0].status);
-          console.log('[banner-api] 第一条 status 类型:', typeof allDataResult.data[0].status);
-        }
+        console.log('[banner-api] 查询结果条数:', allDataResult.data.length);
         
-        // 使用命令式查询，避免 where 条件问题
-        let listResult;
-        try {
-          listResult = await db.collection('banners')
-            .where({
-              status: db.command.eq('active')
-            })
-            .orderBy('sort', 'asc')
-            .get();
-          console.log('[banner-api] active 状态数据条数:', listResult.data.length);
-        } catch (queryErr) {
-          console.log('[banner-api] where 查询失败，使用全量查询:', queryErr.message);
-          listResult = allDataResult;
-        }
+        // 手动过滤 active 状态的数据
+        const filteredData = allDataResult.data.filter(item => {
+          // 处理嵌套的数据格式
+          const itemData = item.data || item;
+          const status = itemData.status;
+          console.log('[banner-api] 检查 item status:', status, '类型:', typeof status);
+          return status === 'active' || status === '显示';
+        });
+        console.log('[banner-api] 过滤后条数:', filteredData.length);
         
-        // 展开嵌套的数据格式
-        const processedData = listResult.data.map(item => {
+        // 展开嵌套的数据格式并排序
+        const processedData = filteredData.map(item => {
           if (item.data && typeof item.data === 'object') {
             return {
               _id: item._id,
@@ -45,7 +35,8 @@ exports.main = async (event, context) => {
             };
           }
           return item;
-        });
+        }).sort((a, b) => (a.sort || 0) - (b.sort || 0));
+        
         return { success: true, data: processedData };
         
       case 'listAll':
