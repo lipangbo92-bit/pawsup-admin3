@@ -49,16 +49,23 @@ Page({
   // 加载Banner
   async loadBanners() {
     try {
+      console.log('[loadBanners] 开始调用云函数');
       const res = await wx.cloud.callFunction({
         name: 'banner-api',
         data: { action: 'list' }
       });
+      console.log('[loadBanners] 云函数返回:', res);
 
       if (res.result && res.result.success && res.result.data) {
+        console.log('[loadBanners] 获取到数据条数:', res.result.data.length);
+        console.log('[loadBanners] 第一条数据:', res.result.data[0]);
         this.setData({ banners: res.result.data });
+        console.log('[loadBanners] 已设置 banners 数据');
+      } else {
+        console.log('[loadBanners] 没有获取到数据:', res.result);
       }
     } catch (err) {
-      console.error('加载Banner失败:', err);
+      console.error('[loadBanners] 加载Banner失败:', err);
     }
   },
 
