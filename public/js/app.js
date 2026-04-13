@@ -2,12 +2,22 @@
 
 // Initialize Cloud Base
 function initCloud() {
-    if (typeof wx !== 'undefined' && wx.cloud) {
+    // 浏览器环境使用 cloudbase SDK
+    if (typeof cloud !== 'undefined') {
+        cloud.init({
+            env: 'cloud1-4gy1jyan842d73ab',
+            traceUser: true
+        });
+        console.log('[initCloud] Cloudbase initialized in browser');
+    } else if (typeof wx !== 'undefined' && wx.cloud) {
+        // 微信小程序环境
         wx.cloud.init({
             env: 'cloud1-4gy1jyan842d73ab',
             traceUser: true
         });
-        console.log('Cloud initialized');
+        console.log('[initCloud] Wx cloud initialized');
+    } else {
+        console.warn('[initCloud] No cloud SDK found');
     }
 }
 
