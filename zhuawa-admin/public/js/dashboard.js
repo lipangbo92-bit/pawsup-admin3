@@ -110,9 +110,12 @@ async function loadDashboardData() {
         const todayRevenue = todayOrders
             .filter(o => {
                 const status = (o.status || '').toLowerCase();
-                return status === 'completed' || status === '已完成';
+                return status === 'completed' || status === '已完成' || status === 'confirmed' || status === '已确认';
             })
-            .reduce((sum, o) => sum + (parseFloat(o.amount) || parseFloat(o.price) || 0), 0);
+            .reduce((sum, o) => {
+                const price = parseFloat(o.finalPrice) || parseFloat(o.totalPrice) || parseFloat(o.servicePrice) || parseFloat(o.amount) || parseFloat(o.price) || 0;
+                return sum + price;
+            }, 0);
         document.getElementById('todayRevenue').textContent = '¥' + todayRevenue.toFixed(2);
         
         // 获取美容师数量
@@ -187,21 +190,15 @@ function renderRecentOrders(orders) {
         const orderData = order.data || order;
         console.log('[renderRecentOrders] 处理订单:', orderData);
 
-        // 获取金额 - 尝试所有可能的字段名
+        // 获取金额 - 尝试所有可能的字段名（根据实际订单数据结构）
         let amount = 0;
-        const amountFields = ['totalAmount', 'amount', 'price', 'totalPrice', 'finalPrice', 'payAmount', 'actualAmount', 'cost', 'total'];
+        const amountFields = ['finalPrice', 'totalPrice', 'servicePrice', 'amount', 'price', 'totalAmount', 'payAmount', 'actualAmount'];
         for (const field of amountFields) {
             if (orderData[field] !== undefined && orderData[field] !== null) {
                 amount = orderData[field];
                 console.log(`[renderRecentOrders] 找到金额字段 ${field}:`, amount);
                 break;
             }
-        }
-
-        // 如果还是没找到，检查是否有 service 对象里的 price
-        if (amount === 0 && orderData.service && orderData.service.price) {
-            amount = orderData.service.price;
-            console.log('[renderRecentOrders] 从 service.price 获取金额:', amount);
         }
 
         // 获取客户名
