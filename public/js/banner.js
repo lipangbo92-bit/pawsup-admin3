@@ -167,36 +167,59 @@ function updateUploadUI(uploading) {
     }
 }
 
-// 上传文件到云存储
+// 上传文件到云存储（通过后端API）
 async function uploadToCloudStorage(file) {
-    return new Promise((resolve, reject) => {
-        // 使用 cloudbase 上传
-        if (typeof cloud === 'undefined') {
-            reject(new Error('Cloud SDK not loaded'));
-            return;
-        }
-
-        const cloudPath = `banners/${Date.now()}_${file.name}`;
+    try {
+        // 使用 FormData 上传文件到后端 API
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'banners');
         
-        cloud.uploadFile({
-            cloudPath: cloudPath,
-            filePath: file
-        }).then(result => {
-            console.log('[uploadToCloudStorage] Upload result:', result);
-            // 获取临时链接
-            return cloud.getTempFileURL({
-                fileList: [result.fileID]
-            });
-        }).then(fileResult => {
-            console.log('[uploadToCloudStorage] Get URL result:', fileResult);
-            if (fileResult.fileList && fileResult.fileList[0] && fileResult.fileList[0].tempFileURL) {
-                resolve(fileResult.fileList[0].tempFileURL);
-            } else {
-                reject(new Error('Failed to get file URL'));
-            }
-        }).catch(err => {
-            reject(err);
+        console.log('[uploadToCloudStorage] Uploading via API...');
+        
+        const response = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            body: formData
         });
+        
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[uploadToCloudStorage] API response:', result);
+        
+        if (result.success && result.data && result.data.url) {
+            return result.data.url;
+        } else {
+            throw new Error(result.error || 'Failed to get file URL');
+        }
+    } catch (err) {
+        console.error('[uploadToCloudStorage] Error:', err);
+        // 如果API上传失败，尝试使用 base64 作为备选方案
+        return await uploadAsBase64(file);
+    }
+}
+
+// 备选方案：使用 base64 编码上传
+async function uploadAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const base64 = e.target.result;
+                // 如果文件太大，拒绝上传
+                if (base64.length > 500 * 1024) {
+                    reject(new Error('图片太大，请选择小于 300KB 的图片'));
+                    return;
+                }
+                resolve(base64);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = (e) => reject(new Error('文件读取失败'));
+        reader.readAsDataURL(file);
     });
 }
 

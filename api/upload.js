@@ -14,30 +14,132 @@ function base64ToBuffer(base64) {
   return Buffer.from(base64Data, 'base64');
 }
 
+// 解析 multipart/form-data
+async function parseFormData(req) {
+  return new Promise((resolve, reject) => {
+    let data = Buffer.alloc(0);
+    
+    req.on('data', chunk => {
+      data = Buffer.concat([data, chunk]);
+    });
+    
+    req.on('end', () => {
+      resolve(data);
+    });
+    
+    req.on('error', reject);
+  });
+}
+
+// 从 multipart 数据中提取文件
+function extractFileFromMultipart(data, contentType) {
+  const boundary = contentType.split('boundary=')[1];
+  if (!boundary) return null;
+  
+  const boundaryBuffer = Buffer.from(`--${boundary}`);
+  const parts = [];
+  let start = 0;
+  
+  while ((start = data.indexOf(boundaryBuffer, start)) !== -1) {
+    const end = data.indexOf(boundaryBuffer, start + boundaryBuffer.length);
+    if (end === -1) break;
+    
+    const part = data.slice(start + boundaryBuffer.length, end);
+    parts.push(part);
+    start = end;
+  }
+  
+  for (const part of parts) {
+    const headerEnd = part.indexOf('\r\n\r\n');
+    if (headerEnd === -1) continue;
+    
+    const header = part.slice(0, headerEnd).toString();
+    const content = part.slice(headerEnd + 4);
+    
+    // 移除末尾的 \r\n
+    const fileData = content.slice(0, content.length - 2);
+    
+    if (header.includes('filename=')) {
+      const filenameMatch = header.match(/filename="([^"]+)"/);
+      const filename = filenameMatch ? filenameMatch[1] : 'unknown';
+      return { filename, data: fileData };
+    }
+  }
+  
+  return null;
+}
+
 module.exports = async (req, res) => {
   // 处理 CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
-  const { action, data, path } = req.body || {};
-  console.log(`[API Upload] Action: ${action}`);
-
   try {
+    const contentType = req.headers['content-type'] || '';
+    console.log(`[API Upload] Content-Type: ${contentType}`);
+    
+    // 处理 multipart/form-data 上传（文件上传）
+    if (contentType.includes('multipart/form-data')) {
+      const rawData = await parseFormData(req);
+      const file = extractFileFromMultipart(rawData, contentType);
+      
+      if (!file) {
+        return res.status(400).json({ success: false, error: 'No file found' });
+      }
+      
+      const timestamp = Date.now();
+      const fileName = `banners/${timestamp}_${file.filename}`;
+      
+      console.log('[API Upload] Uploading file:', fileName, 'Size:', file.data.length);
+      
+      const uploadResult = await app.uploadFile({
+        cloudPath: fileName,
+        fileContent: file.data
+      });
+      
+      console.log('[API Upload] Upload result:', uploadResult);
+      
+      const fileID = uploadResult.fileID;
+      let fileUrl = fileID;
+      
+      try {
+        const urlResult = await app.getTempFileURL({
+          fileList: [fileID]
+        });
+        
+        if (urlResult.fileList && urlResult.fileList[0] && urlResult.fileList[0].tempFileURL) {
+          fileUrl = urlResult.fileList[0].tempFileURL;
+        }
+      } catch (urlErr) {
+        console.error('[API Upload] Get temp URL error:', urlErr);
+      }
+      
+      return res.json({
+        success: true,
+        data: {
+          fileID: fileID,
+          url: fileUrl
+        }
+      });
+    }
+    
+    // 处理 JSON 请求（base64 上传）
+    const { action, data, path } = req.body || {};
+    console.log(`[API Upload] Action: ${action}`);
+
     if (action === 'uploadImage') {
-      // 上传图片到云存储
       const buffer = base64ToBuffer(data);
       
-      // 生成文件名
       const timestamp = Date.now();
       const fileName = path || `avatars/${timestamp}.jpg`;
       
       console.log('[API Upload] Uploading to:', fileName);
       
-      // 上传到云存储
       const uploadResult = await app.uploadFile({
         cloudPath: fileName,
         fileContent: buffer
@@ -45,28 +147,20 @@ module.exports = async (req, res) => {
       
       console.log('[API Upload] Upload result:', uploadResult);
       
-      // 获取临时访问链接（HTTPS URL）
-      // fileID 格式: cloud://env-id.bucket/avatars/xxx.jpg
       const fileID = uploadResult.fileID;
-      
-      // 获取 HTTPS URL
       let fileUrl = fileID;
+      
       try {
         const urlResult = await app.getTempFileURL({
           fileList: [fileID]
         });
-        console.log('[API Upload] Temp URL result:', urlResult);
         
         if (urlResult.fileList && urlResult.fileList[0] && urlResult.fileList[0].tempFileURL) {
           fileUrl = urlResult.fileList[0].tempFileURL;
         }
       } catch (urlErr) {
         console.error('[API Upload] Get temp URL error:', urlErr);
-        // 如果获取临时链接失败，使用 fileID，小程序可以直接用 cloud:// 协议
-        fileUrl = fileID;
       }
-      
-      console.log('[API Upload] Success, URL:', fileUrl);
       
       return res.json({
         success: true,
@@ -75,7 +169,7 @@ module.exports = async (req, res) => {
       });
     }
     
-    return res.status(400).json({ success: false, error: 'Unknown action' });
+    return res.status(400).json({ success: false, error: 'Unknown action or content type' });
   } catch (error) {
     console.error('[API Upload] Error:', error);
     return res.status(500).json({ success: false, error: error.message });
