@@ -4,6 +4,7 @@ let banners = [];
 let currentImageBase64 = '';
 let editingId = null;
 let deleteTargetId = null;
+let isUploading = false; // 上传状态标记
 
 // 加载Banner列表
 async function loadBanners() {
@@ -98,6 +99,10 @@ async function previewImage(event) {
         return;
     }
 
+    // 设置上传中状态
+    isUploading = true;
+    updateUploadUI(true);
+
     // 先显示本地预览
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -123,13 +128,43 @@ async function previewImage(event) {
             console.error('[previewImage] Upload failed:', err);
             alert('图片上传失败，请重试');
             currentImageBase64 = '';
+            // 重置预览
+            if (img) {
+                img.src = '';
+                img.classList.add('hidden');
+            }
+            if (placeholder) {
+                placeholder.style.display = 'block';
+            }
+        } finally {
+            // 重置上传状态
+            isUploading = false;
+            updateUploadUI(false);
         }
     };
     reader.onerror = (e) => {
         console.error('[previewImage] FileReader error:', e);
         alert('图片读取失败');
+        isUploading = false;
+        updateUploadUI(false);
     };
     reader.readAsDataURL(file);
+}
+
+// 更新上传状态UI
+function updateUploadUI(uploading) {
+    const saveBtn = document.querySelector('#modal .btn-primary');
+    const uploadArea = document.querySelector('.image-upload');
+    
+    if (saveBtn) {
+        saveBtn.disabled = uploading;
+        saveBtn.textContent = uploading ? '图片上传中...' : '保存';
+    }
+    
+    if (uploadArea) {
+        uploadArea.style.pointerEvents = uploading ? 'none' : '';
+        uploadArea.style.opacity = uploading ? '0.6' : '';
+    }
 }
 
 // 上传文件到云存储
@@ -234,6 +269,12 @@ function closeModal() {
 // 保存Banner
 async function saveBanner() {
     console.log('[saveBanner] Starting save, editingId:', editingId);
+    
+    // 检查是否正在上传图片
+    if (isUploading) {
+        alert('图片正在上传中，请稍候...');
+        return;
+    }
     
     const titleInput = document.getElementById('bannerTitle');
     const subtitleInput = document.getElementById('bannerSubtitle');
