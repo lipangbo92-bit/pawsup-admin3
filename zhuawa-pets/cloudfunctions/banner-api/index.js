@@ -10,10 +10,21 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'list':
         // 获取所有显示的banner，按排序字段排序
+        console.log('[banner-api] 开始查询 banners');
+        let query = db.collection('banners').orderBy('sort', 'asc');
+        
+        // 先查询所有数据，看看是否有数据
+        const allDataResult = await db.collection('banners').get();
+        console.log('[banner-api] 所有数据条数:', allDataResult.data.length);
+        console.log('[banner-api] 第一条数据:', allDataResult.data[0]);
+        
+        // 再查询 active 状态的数据
         const listResult = await db.collection('banners')
           .where({ status: 'active' })
           .orderBy('sort', 'asc')
           .get();
+        console.log('[banner-api] active 状态数据条数:', listResult.data.length);
+        
         // 展开嵌套的数据格式
         const processedData = listResult.data.map(item => {
           if (item.data && typeof item.data === 'object') {
