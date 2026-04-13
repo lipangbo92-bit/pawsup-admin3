@@ -101,6 +101,9 @@ async function loadDashboardStatsOnly() {
         // 不渲染订单列表，由内嵌脚本处理
         console.log('统计数据加载完成，订单列表由内嵌脚本渲染');
         
+        // 加载热门服务
+        loadTopServices();
+        
     } catch (err) {
         console.error('Load dashboard stats error:', err);
     }
