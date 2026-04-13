@@ -17,6 +17,19 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+## Project Path Checklist ⚠️
+
+**涉及项目路径的操作，必须执行以下检查：**
+
+- [ ] **查 PROJECT.md** - 读取 `memory/oc_e27b62c5219baf7d60c247ab3dfd62cd/PROJECT.md`
+- [ ] **确认 /code/ 目录** - 路径必须包含 `/code/`，不是 `/kimi/`
+- [ ] **验证标志文件** - 确认 `project.config.json` 或 `app.json` 存在
+- [ ] **核对 MEMORY.md** - 读取 `MEMORY.md` 中的项目路径部分
+
+**正确路径：**
+- 小程序: `/Users/themachine/.openclaw/workspaces/code/zhuawa-pets/`
+- 管理端: `/Users/themachine/.openclaw/workspaces/code/zhuawa-admin/`
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:

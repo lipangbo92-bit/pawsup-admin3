@@ -49,11 +49,28 @@
 
 ---
 
+## ⚠️ 项目路径（重要！每次修改前必须确认）
+
+**正确路径（在 `/code/` 目录下）：**
+- 小程序端: `/Users/themachine/.openclaw/workspaces/code/zhuawa-pets/`
+- 管理端: `/Users/themachine/.openclaw/workspaces/code/zhuawa-admin/`
+
+**错误路径（请勿使用）：**
+- `/Users/themachine/.openclaw/workspaces/kimi/zhuawa-pets/` ❌
+- `/Users/themachine/.openclaw/workspaces/kimi/zhuawa-admin/` ❌
+- 任何嵌套多层 `zhuawa-admin/` 的路径 ❌
+
+**验证方法：**
+```bash
+ls /Users/themachine/.openclaw/workspaces/code/zhuawa-pets/project.config.json
+```
+
 ## 工作原则
 
 1. 代码修改必须让老八（kimi-agent）做
 2. 检查后反馈
 3. 设计原则：浅色底用深色字，深色底用浅色字
+4. **强制查文档** - 涉及项目路径时，必须先查 `memory/oc_e27b62c5219baf7d60c247ab3dfd62cd/PROJECT.md`
 
 ---
 
