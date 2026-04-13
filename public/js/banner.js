@@ -12,7 +12,17 @@ async function loadBanners() {
         const res = await fetch(`${API_BASE}/banners`);
         const data = await res.json();
         if (data.success) {
-            banners = data.data || [];
+            // 处理云开发返回的数据格式（数据可能在 data 字段中嵌套）
+            banners = (data.data || []).map(item => {
+                // 如果 item.data 存在，说明是嵌套格式，需要展开
+                if (item.data && typeof item.data === 'object') {
+                    return {
+                        _id: item._id,
+                        ...item.data
+                    };
+                }
+                return item;
+            });
             console.log('[loadBanners] Loaded banners:', banners);
         } else {
             banners = [];
