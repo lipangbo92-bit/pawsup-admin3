@@ -342,10 +342,18 @@ async function saveBanner() {
         subtitle,
         sort,
         status,
-        image: imageUrl
+        image: imageUrl,
+        imageUrl: imageUrl  // 同时保存 imageUrl 字段，确保兼容性
     };
 
-    console.log('[saveBanner] Sending banner data:', { ...bannerData, image: imageUrl.substring(0, 50) + '...' });
+    console.log('[saveBanner] Sending banner data:', { 
+        title, 
+        subtitle, 
+        sort, 
+        status, 
+        image: imageUrl ? imageUrl.substring(0, 50) + '...' : 'empty',
+        imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'empty'
+    });
 
     try {
         let res;
