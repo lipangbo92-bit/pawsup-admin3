@@ -126,9 +126,10 @@ function isTimeAvailable(techId, time) {
     
     if (schedule?.timeSlots?.length > 0) {
         const slot = schedule.timeSlots.find(s => s.time === time);
-        return slot ? slot.available !== false : true;
+        return slot ? slot.available !== false : false;
     }
-    return true;
+    // 没有排班数据的技师，默认不可预约
+    return false;
 }
 
 function renderTimeSlots() {
