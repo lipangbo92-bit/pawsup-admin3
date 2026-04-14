@@ -85,7 +85,7 @@ async function createSchedule(data) {
     return { success: false, error: 'Missing fields' };
   }
 
-  const existing = await db.collection('schedules').where({ technicianId, date }).get();
+  const existing = await db.collection('schedules').where({ technicianId, date }).orderBy('updatedAt', 'desc').get();
   const scheduleData = {
     technicianId, technicianName, date,
     timeSlots: timeSlots || [],
