@@ -1,16 +1,21 @@
 // Schedule Management Module - 排班管理
+// 调用 Vercel API Routes 访问云数据库
+
 const API_BASE = '/api';
+
 let currentDate = '';
 let techniciansList = [];
 let schedulesData = {};
 let currentTechId = null;
 
+// 半小时时间段（从 08:00 到 22:00）
 const TIME_SLOTS = [];
 for (let h = 8; h <= 22; h++) {
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
     if (h < 22) TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
 }
 
+// Initialize
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('scheduleDate');
@@ -18,52 +23,41 @@ document.addEventListener('DOMContentLoaded', function() {
         dateInput.value = today;
         currentDate = today;
     }
-    loadTechnicians();
+    loadActiveTechnicians();
 });
 
+// API 调用封装
 async function apiCall(endpoint, data) {
-    try {
-        const response = await fetch(`${API_BASE}/${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return await response.json();
-    } catch (e) {
-        console.error('API Error:', e);
-        throw e;
+    const response = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
     }
+    return await response.json();
 }
 
-async function loadTechnicians() {
+// 加载在职技师列表
+async function loadActiveTechnicians() {
     const container = document.getElementById('techList');
-    if (container) container.innerHTML = '<div class="loading">加载美容师列表...</div>';
+    if (container) container.innerHTML = '<div class="loading">加载技师列表...</div>';
     
     try {
-        let result = await apiCall('technicians', { action: 'listActive' });
-        let techs = result.data || [];
+        const result = await apiCall('technicians', { action: 'listActive' });
+        if (!result.success) throw new Error(result.error);
         
-        if (techs.length === 0) {
-            result = await apiCall('technicians', { action: 'list' });
-            techs = result.data || [];
-        }
-        
-        techniciansList = techs.map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
+        techniciansList = (result.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'}));
         
         if (techniciansList.length === 0) {
-            if (container) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div style="font-size:32px; margin-bottom:8px;">👥</div>
-                        <div>暂无美容师</div>
-                        <div style="font-size:12px; color:#999; margin-top:8px;">
-                            请先在<a href="groomers" style="color:var(--primary);">美容师管理</a>中添加
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('scheduleGrid').innerHTML = '<div class="empty-state">请先添加美容师</div>';
+            const allResult = await apiCall('technicians', { action: 'list' });
+            techniciansList = (allResult.data || []).map(t => ({...t, _id: t._id || t.id, name: t.name || '未命名'})).filter(t => t.status !== 'inactive');
+        }
+        
+        if (techniciansList.length === 0) {
+            if (container) container.innerHTML = '<div class="empty-state"><div>暂无在职技师</div></div>';
             return;
         }
         
@@ -78,25 +72,12 @@ async function loadTechnicians() {
 function renderTechList() {
     const container = document.getElementById('techList');
     if (!container) return;
-    
-    const html = techniciansList.map(tech => {
-        const isActive = tech.status !== 'inactive';
-        return `
-        <div class="tech-item ${tech._id === currentTechId ? 'active' : ''}" 
-             onclick="selectTech('${tech._id}')"
-             style="${!isActive ? 'opacity:0.6;' : ''}">
-            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20; position:relative;">
-                ${tech.avatarUrl ? `<img src="${tech.avatarUrl}">` : '👤'}
-                ${!isActive ? '<span style="position:absolute;bottom:0;right:0;background:#999;color:white;font-size:10px;padding:1px 4px;border-radius:4px;">离</span>' : ''}
-            </div>
-            <div class="tech-info">
-                <div class="tech-name">${tech.name}</div>
-                <div class="tech-status">${isActive ? '在职' : '已离职'}</div>
-            </div>
+    container.innerHTML = techniciansList.map(tech => `
+        <div class="tech-item ${tech._id === currentTechId ? 'active' : ''}" onclick="selectTech('${tech._id}')">
+            <div class="tech-avatar" style="background: ${getTechColor(tech._id)}20;">${tech.avatarUrl ? `<img src="${tech.avatarUrl}">` : '👤'}</div>
+            <div class="tech-info"><div class="tech-name">${tech.name}</div><div class="tech-status">在职</div></div>
         </div>
-    `}).join('');
-    
-    container.innerHTML = html;
+    `).join('');
 }
 
 function selectTech(techId) {
@@ -127,6 +108,8 @@ async function loadSchedule() {
     
     try {
         const result = await apiCall('schedules', { action: 'list', date: currentDate, technicianId: currentTechId });
+        if (!result.success) throw new Error(result.error);
+        
         schedulesData = {};
         (result.data || []).forEach(s => { schedulesData[s.technicianId] = s; });
         renderScheduleGrid();
@@ -138,13 +121,11 @@ async function loadSchedule() {
 function renderScheduleGrid() {
     const container = document.getElementById('scheduleGrid');
     if (!container) return;
-    
     const currentTech = techniciansList.find(t => t._id === currentTechId);
     if (!currentTech) {
-        container.innerHTML = '<div class="empty-state">请先选择美容师</div>';
+        container.innerHTML = '<div class="empty-state">请先选择技师</div>';
         return;
     }
-    
     const schedule = schedulesData[currentTechId];
     const timeSlots = schedule ? (schedule.timeSlots || []) : [];
     const slotMap = {};
@@ -159,7 +140,7 @@ function renderScheduleGrid() {
             </div>
             <div class="quick-actions">
                 <button class="btn-sm ${isRestDay ? 'active' : ''}" onclick="toggleRestDay()">${isRestDay ? '✓ 休息日' : '设为休息日'}</button>
-                <button class="btn-sm" onclick="setWorkHours()">快速设置 10:00-21:00</button>
+                <button class="btn-sm" onclick="setWorkHours()">快速设置工时</button>
             </div>
         </div>`;
     
@@ -168,10 +149,9 @@ function renderScheduleGrid() {
     } else {
         html += `<div class="time-slots-container"><div class="slots-grid">` +
             TIME_SLOTS.map(time => {
-                const slot = slotMap[time];
-                // 修改：未设置的时间段默认为可预约（available: true）
-                const isAvailable = slot ? slot.available !== false : true;
-                const isBooked = slot && slot.orderId ? true : false;
+                const slot = slotMap[time] || {};
+                const isAvailable = slot.available !== false;
+                const isBooked = slot.orderId ? true : false;
                 let slotClass = 'time-slot';
                 if (isBooked) slotClass += ' booked';
                 else if (isAvailable) slotClass += ' available';
@@ -204,7 +184,6 @@ async function toggleSlot(time) {
         if (timeSlots[slotIndex].orderId) return;
         timeSlots[slotIndex].available = !timeSlots[slotIndex].available;
     } else {
-        // 新时间段，默认为关闭（因为当前显示的是可预约，点击后应该关闭）
         timeSlots.push({ time: time, available: false });
     }
     
@@ -232,10 +211,21 @@ async function toggleRestDay() {
     } catch (error) { alert('保存失败: ' + error.message); }
 }
 
-// 快速设置工时为 10:00-21:00
-async function setWorkHours() {
-    const startTime = '10:00';
-    const endTime = '21:00';
+function setWorkHours() {
+    const modal = document.getElementById('workHoursModal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeWorkHoursModal() {
+    const modal = document.getElementById('workHoursModal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function saveWorkHours() {
+    const startTime = document.getElementById('workStart').value;
+    const endTime = document.getElementById('workEnd').value;
+    if (!startTime || !endTime) { alert('请选择上班时间'); return; }
+    if (startTime >= endTime) { alert('上班时间必须早于下班时间'); return; }
     
     const currentTech = techniciansList.find(t => t._id === currentTechId);
     if (!currentTech) return;
@@ -244,7 +234,9 @@ async function setWorkHours() {
     let isInRange = false;
     for (const time of TIME_SLOTS) {
         if (time === startTime) isInRange = true;
-        timeSlots.push({ time: time, available: isInRange });
+        // endTime 本身不可预约（如 21:00 开始会超出营业时间）
+        const available = isInRange && (time !== endTime);
+        timeSlots.push({ time: time, available: available });
         if (time === endTime) isInRange = false;
     }
     
@@ -253,8 +245,8 @@ async function setWorkHours() {
             action: 'create',
             data: { technicianId: currentTechId, technicianName: currentTech.name, date: currentDate, timeSlots: timeSlots, isRestDay: false, workStart: startTime, workEnd: endTime }
         });
+        closeWorkHoursModal();
         loadSchedule();
-        alert('已设置 10:00-21:00 为工作时间');
     } catch (error) { alert('保存失败: ' + error.message); }
 }
 
