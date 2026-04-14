@@ -246,6 +246,7 @@ async function saveWorkHours() {
             data: { technicianId: currentTechId, technicianName: currentTech.name, date: currentDate, timeSlots: timeSlots, isRestDay: false, workStart: startTime, workEnd: endTime }
         });
         closeWorkHoursModal();
+        alert('保存成功');
         loadSchedule();
     } catch (error) { alert('保存失败: ' + error.message); }
 }
