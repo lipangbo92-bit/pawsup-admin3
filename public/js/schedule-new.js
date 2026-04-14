@@ -201,12 +201,13 @@ async function toggleRestDay() {
     if (!currentTech) return;
     let schedule = schedulesData[currentTechId];
     const isRestDay = schedule ? !schedule.isRestDay : true;
-    
+
     try {
         await apiCall('schedules', {
             action: 'create',
             data: { technicianId: currentTechId, technicianName: currentTech.name, date: currentDate, timeSlots: [], isRestDay: isRestDay }
         });
+        alert(`保存成功: ${currentTech.name} ${currentDate} 已${isRestDay ? '设为休息日' : '取消休息日'}`);
         loadSchedule();
     } catch (error) { alert('保存失败: ' + error.message); }
 }
