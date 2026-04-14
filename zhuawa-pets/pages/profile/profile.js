@@ -167,7 +167,7 @@ Page({
   // 点击统计项 - 我的宠物
   onMyPets() {
     wx.navigateTo({
-      url: '/pages/pet-select/pet-select'
+      url: '/pages/pets/pets'
     });
   },
 
@@ -189,7 +189,7 @@ Page({
   // 我的宠物
   onMyPets() {
     wx.navigateTo({
-      url: '/pages/pet-select/pet-select'
+      url: '/pages/pets/pets'
     });
   },
 
@@ -229,6 +229,33 @@ Page({
   onSettings() {
     wx.navigateTo({
       url: '/pages/settings/settings'
+    });
+  },
+
+  // 显示用户 OpenID
+  onShowOpenId() {
+    const userInfo = wx.getStorageSync('userInfo');
+    const openid = userInfo ? userInfo.openid : '';
+    
+    if (!openid) {
+      wx.showToast({ title: '获取ID失败', icon: 'none' });
+      return;
+    }
+    
+    wx.showModal({
+      title: '我的用户ID',
+      content: `${openid}\n\n点击确定复制`,
+      confirmText: '复制',
+      success: (res) => {
+        if (res.confirm) {
+          wx.setClipboardData({
+            data: openid,
+            success: () => {
+              wx.showToast({ title: '已复制', icon: 'success' });
+            }
+          });
+        }
+      }
     });
   },
 

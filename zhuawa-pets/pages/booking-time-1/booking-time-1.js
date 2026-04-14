@@ -209,7 +209,10 @@ Page({
     ];
 
     const selectedDate = this.data.dateList[this.data.selectedDateIndex];
-    const isToday = selectedDate && selectedDate.fullDate === new Date().toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isToday = selectedDate && selectedDate.fullDate === todayStr;
+    
+    console.log('生成时段 - 选中日期:', selectedDate?.fullDate, '今天:', todayStr, '是否今天:', isToday);
 
     // 获取服务时长（分钟）
     const serviceDuration = this.data.selectedService?.duration || 60;
@@ -328,7 +331,10 @@ Page({
     // 预约时间必须晚于当前时间（至少提前30分钟）
     const minBookingTime = new Date(now.getTime() + 30 * 60 * 1000);
     
-    return bookingDate >= minBookingTime;
+    const isValid = bookingDate >= minBookingTime;
+    console.log('时间校验:', timeStr, '预约时间:', bookingDate, '最早可约:', minBookingTime, '是否有效:', isValid);
+    
+    return isValid;
   },
 
   resetTimeSelection() {

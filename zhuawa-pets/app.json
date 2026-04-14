@@ -18,7 +18,8 @@
     "pages/order-detail/order-detail",
     "pages/profile/profile",
     "pages/membership/membership",
-    "pages/recharge/recharge"
+    "pages/recharge/recharge",
+    "pages/pets/pets"
   ],
   "window": {
     "backgroundTextStyle": "light",

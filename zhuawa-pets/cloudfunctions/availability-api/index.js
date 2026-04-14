@@ -23,7 +23,7 @@ function hasTimeConflict(slotTime, bookedTime, bookedDuration) {
 }
 
 // 生成时间段
-function generateTimeSlots() {
+function generateTimeSlots(date, duration = 60) {
   const slots = []
   // 正确定义时段：上午9-12，下午12-18，晚上18-21
   const periods = [
@@ -31,6 +31,19 @@ function generateTimeSlots() {
     { name: '下午', start: 12, end: 18 }, // 12:00 - 18:00
     { name: '晚上', start: 18, end: 21 }  // 18:00 - 21:00
   ]
+  
+  // 获取北京时间（UTC+8）
+  const now = new Date()
+  const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+  const todayStr = beijingTime.toISOString().split('T')[0]
+  const isToday = date === todayStr
+  
+  console.log('生成时段 - 日期:', date, '今天:', todayStr, '是否今天:', isToday, '当前北京时间:', beijingTime.toISOString())
+  
+  // 计算最晚可预约时间（21:00 - 服务时长）
+  const latestHour = 21
+  const latestStartHour = latestHour - Math.ceil(duration / 60)
+  const latestStartMinute = (60 - (duration % 60)) % 60
 
   periods.forEach((period, periodIndex) => {
     const times = []
@@ -50,7 +63,30 @@ function generateTimeSlots() {
         if (h === 21) return
 
         const timeStr = h.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0')
-        times.push({ time: timeStr, selected: false, disabled: true, status: '约满' })
+        
+        // 判断是否为今天且时间已过期（至少提前30分钟）- 使用北京时间
+        let isExpired = false
+        if (isToday) {
+          const [hours, mins] = timeStr.split(':').map(Number)
+          // 构建预约时间的北京时间
+          const bookingTime = new Date(beijingTime)
+          bookingTime.setHours(hours, mins, 0, 0)
+          // 最早可预约时间 = 当前时间 + 30分钟
+          const minBookingTime = new Date(beijingTime.getTime() + 30 * 60 * 1000)
+          isExpired = bookingTime < minBookingTime
+          console.log('时间检查:', timeStr, '预约时间:', bookingTime.toISOString(), '最早可约:', minBookingTime.toISOString(), '是否过期:', isExpired)
+        }
+        
+        // 判断是否在可预约范围内（考虑服务时长）
+        let isTooLate = false
+        if (h > latestStartHour || (h === latestStartHour && minute > latestStartMinute)) {
+          isTooLate = true
+        }
+        
+        const disabled = isExpired || isTooLate
+        const status = isExpired ? '已过期' : (isTooLate ? '不可约' : '约满')
+        
+        times.push({ time: timeStr, selected: false, disabled: disabled, status: status })
       })
     }
     slots.push({ period: period.name, times })
@@ -96,8 +132,8 @@ exports.main = async (event, context) => {
       
       console.log('Booked orders:', ordersRes.data.length)
       
-      // 生成时段并标记可用性
-      const timeSections = generateTimeSlots()
+      // 生成时段并标记可用性（传入日期和时长）
+      const timeSections = generateTimeSlots(date, duration)
       timeSections.forEach(section => {
         section.times.forEach(slot => {
           // 获取该时段可约的美容师列表
@@ -114,6 +150,12 @@ exports.main = async (event, context) => {
           const reallyAvailable = availableTechs.filter(id => !bookedTechs.includes(id))
           
           slot.availableCount = reallyAvailable.length
+          
+          // 如果已经标记为过期或太晚，不要覆盖状态
+          if (slot.status === '已过期' || slot.status === '不可约') {
+            // 保持原来的 disabled 和 status
+            return
+          }
           
           // 根据可约数量设置状态
           if (reallyAvailable.length === 0) {
@@ -167,7 +209,7 @@ exports.main = async (event, context) => {
         console.log('No schedule found for tech:', technicianId)
         return {
           success: true,
-          data: { date, technicianId, timeSections: generateTimeSlots() }
+          data: { date, technicianId, timeSections: generateTimeSlots(date, duration) }
         }
       }
       
@@ -200,8 +242,8 @@ exports.main = async (event, context) => {
       
       console.log('Booked orders for this tech:', bookedOrders.length)
       
-      // 生成所有时段并标记可用性
-      const timeSections = generateTimeSlots()
+      // 生成所有时段并标记可用性（传入日期和时长）
+      const timeSections = generateTimeSlots(date, duration)
       timeSections.forEach(section => {
         section.times.forEach(slot => {
           // 检查是否在排班中且未被预约
@@ -216,6 +258,12 @@ exports.main = async (event, context) => {
             }
             return conflict
           })
+          
+          // 如果已经标记为过期或太晚，不要覆盖状态
+          if (slot.status === '已过期' || slot.status === '不可约') {
+            // 保持原来的 disabled 和 status
+            return
+          }
           
           if (isRestDay) {
             slot.disabled = true

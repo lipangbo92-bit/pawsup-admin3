@@ -4,6 +4,7 @@ let banners = [];
 let currentImageBase64 = '';
 let editingId = null;
 let deleteTargetId = null;
+let isUploading = false; // 上传状态标记
 
 // 加载Banner列表
 async function loadBanners() {
@@ -11,7 +12,17 @@ async function loadBanners() {
         const res = await fetch(`${API_BASE}/banners`);
         const data = await res.json();
         if (data.success) {
-            banners = data.data || [];
+            // 处理云开发返回的数据格式（数据可能在 data 字段中嵌套）
+            banners = (data.data || []).map(item => {
+                // 如果 item.data 存在，说明是嵌套格式，需要展开
+                if (item.data && typeof item.data === 'object') {
+                    return {
+                        _id: item._id,
+                        ...item.data
+                    };
+                }
+                return item;
+            });
             console.log('[loadBanners] Loaded banners:', banners);
         } else {
             banners = [];
@@ -47,11 +58,13 @@ function renderBanners() {
     tbody.innerHTML = banners.map((banner, index) => {
         // 优先使用 imageUrl，其次是 image
         const imageUrl = banner.imageUrl || banner.image;
-        console.log(`[renderBanners] Banner ${index}:`, { 
+        console.log(`[renderBanners] Banner ${index} full data:`, JSON.stringify(banner, null, 2));
+        console.log(`[renderBanners] Banner ${index} processed:`, { 
             id: banner._id, 
-            image: banner.image ? '【有图片】' : '【无】', 
-            imageUrl: banner.imageUrl ? '【有图片】' : '【无】', 
-            title: banner.title 
+            image: banner.image ? banner.image.substring(0, 50) + '...' : '【无】', 
+            imageUrl: banner.imageUrl ? banner.imageUrl.substring(0, 50) + '...' : '【无】', 
+            title: banner.title,
+            subtitle: banner.subtitle
         });
 
         // 确保标题正确显示
@@ -98,6 +111,10 @@ async function previewImage(event) {
         return;
     }
 
+    // 设置上传中状态
+    isUploading = true;
+    updateUploadUI(true);
+
     // 先显示本地预览
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -123,45 +140,98 @@ async function previewImage(event) {
             console.error('[previewImage] Upload failed:', err);
             alert('图片上传失败，请重试');
             currentImageBase64 = '';
+            // 重置预览
+            if (img) {
+                img.src = '';
+                img.classList.add('hidden');
+            }
+            if (placeholder) {
+                placeholder.style.display = 'block';
+            }
+        } finally {
+            // 重置上传状态
+            isUploading = false;
+            updateUploadUI(false);
         }
     };
     reader.onerror = (e) => {
         console.error('[previewImage] FileReader error:', e);
         alert('图片读取失败');
+        isUploading = false;
+        updateUploadUI(false);
     };
     reader.readAsDataURL(file);
 }
 
-// 上传文件到云存储
-async function uploadToCloudStorage(file) {
-    return new Promise((resolve, reject) => {
-        // 使用 cloudbase 上传
-        if (typeof cloud === 'undefined') {
-            reject(new Error('Cloud SDK not loaded'));
-            return;
-        }
+// 更新上传状态UI
+function updateUploadUI(uploading) {
+    const saveBtn = document.querySelector('#modal .btn-primary');
+    const uploadArea = document.querySelector('.image-upload');
+    
+    if (saveBtn) {
+        saveBtn.disabled = uploading;
+        saveBtn.textContent = uploading ? '图片上传中...' : '保存';
+    }
+    
+    if (uploadArea) {
+        uploadArea.style.pointerEvents = uploading ? 'none' : '';
+        uploadArea.style.opacity = uploading ? '0.6' : '';
+    }
+}
 
-        const cloudPath = `banners/${Date.now()}_${file.name}`;
+// 上传文件到云存储（通过后端API）
+async function uploadToCloudStorage(file) {
+    try {
+        // 使用 FormData 上传文件到后端 API
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'banners');
         
-        cloud.uploadFile({
-            cloudPath: cloudPath,
-            filePath: file
-        }).then(result => {
-            console.log('[uploadToCloudStorage] Upload result:', result);
-            // 获取临时链接
-            return cloud.getTempFileURL({
-                fileList: [result.fileID]
-            });
-        }).then(fileResult => {
-            console.log('[uploadToCloudStorage] Get URL result:', fileResult);
-            if (fileResult.fileList && fileResult.fileList[0] && fileResult.fileList[0].tempFileURL) {
-                resolve(fileResult.fileList[0].tempFileURL);
-            } else {
-                reject(new Error('Failed to get file URL'));
-            }
-        }).catch(err => {
-            reject(err);
+        console.log('[uploadToCloudStorage] Uploading via API...');
+        
+        const response = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            body: formData
         });
+        
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[uploadToCloudStorage] API response:', result);
+        
+        if (result.success && result.data && result.data.url) {
+            return result.data.url;
+        } else {
+            throw new Error(result.error || 'Failed to get file URL');
+        }
+    } catch (err) {
+        console.error('[uploadToCloudStorage] Error:', err);
+        // 如果API上传失败，尝试使用 base64 作为备选方案
+        return await uploadAsBase64(file);
+    }
+}
+
+// 备选方案：使用 base64 编码上传
+async function uploadAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const base64 = e.target.result;
+                // 如果文件太大，拒绝上传
+                if (base64.length > 500 * 1024) {
+                    reject(new Error('图片太大，请选择小于 300KB 的图片'));
+                    return;
+                }
+                resolve(base64);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = (e) => reject(new Error('文件读取失败'));
+        reader.readAsDataURL(file);
     });
 }
 
@@ -235,6 +305,12 @@ function closeModal() {
 async function saveBanner() {
     console.log('[saveBanner] Starting save, editingId:', editingId);
     
+    // 检查是否正在上传图片
+    if (isUploading) {
+        alert('图片正在上传中，请稍候...');
+        return;
+    }
+    
     const titleInput = document.getElementById('bannerTitle');
     const subtitleInput = document.getElementById('bannerSubtitle');
     const sortInput = document.getElementById('bannerSort');
@@ -278,10 +354,18 @@ async function saveBanner() {
         subtitle,
         sort,
         status,
-        image: imageUrl
+        image: imageUrl,
+        imageUrl: imageUrl  // 同时保存 imageUrl 字段，确保兼容性
     };
 
-    console.log('[saveBanner] Sending banner data:', { ...bannerData, image: imageUrl.substring(0, 50) + '...' });
+    console.log('[saveBanner] Sending banner data:', { 
+        title, 
+        subtitle, 
+        sort, 
+        status, 
+        image: imageUrl ? imageUrl.substring(0, 50) + '...' : 'empty',
+        imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'empty'
+    });
 
     try {
         let res;

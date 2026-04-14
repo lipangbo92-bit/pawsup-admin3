@@ -3,7 +3,14 @@ const API_BASE = '/api';
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
+    // 检查是否有内嵌的今日预约加载脚本
+    if (document.querySelector('script[src*="dashboard.js"]')) {
+        console.log('外部 dashboard.js 加载，但订单渲染由内嵌脚本处理');
+        // 只加载统计数据，不渲染订单列表
+        loadDashboardStatsOnly();
+    } else {
+        loadDashboardData();
+    }
     setCurrentDate();
 });
 
@@ -44,6 +51,61 @@ async function apiCall(endpoint, data) {
     } catch (err) {
         console.error('API call error:', err);
         throw err;
+    }
+}
+
+// 仅加载统计数据（不渲染订单列表，由内嵌脚本处理）
+async function loadDashboardStatsOnly() {
+    try {
+        // 获取所有订单数据
+        const ordersResult = await apiCall('orders', { action: 'list' });
+        const orders = ordersResult.data || [];
+        
+        const todayStr = getTodayString();
+        
+        // 今日订单数
+        const todayOrders = orders.filter(o => {
+            const orderDate = extractDate(o.createdAt || o.createTime || o.date || o.appointmentDate);
+            return orderDate === todayStr;
+        });
+        document.getElementById('todayOrders').textContent = todayOrders.length;
+        
+        // 待处理订单数
+        const pendingOrders = orders.filter(o => {
+            const status = (o.status || '').toLowerCase();
+            return status === 'pending' || status === '待处理' || status === '待确认';
+        });
+        document.getElementById('pendingOrders').textContent = pendingOrders.length;
+        
+        // 今日收入
+        const todayRevenue = todayOrders
+            .filter(o => {
+                const status = (o.status || '').toLowerCase();
+                return status === 'completed' || status === '已完成';
+            })
+            .reduce((sum, o) => sum + (parseFloat(o.finalPrice) || parseFloat(o.totalPrice) || parseFloat(o.servicePrice) || 0), 0);
+        document.getElementById('todayRevenue').textContent = '¥' + todayRevenue.toFixed(2);
+        
+        // 获取美容师数量
+        const techsResult = await apiCall('technicians', { action: 'list' });
+        const technicians = techsResult.data || [];
+        
+        const activeTechs = technicians.filter(t => {
+            const status = t.status || '';
+            const active = t.active;
+            return status === 'active' || status === '在职' || active === true;
+        });
+        
+        document.getElementById('activeTechs').textContent = activeTechs.length;
+        
+        // 不渲染订单列表，由内嵌脚本处理
+        console.log('统计数据加载完成，订单列表由内嵌脚本渲染');
+        
+        // 加载热门服务
+        loadTopServices();
+        
+    } catch (err) {
+        console.error('Load dashboard stats error:', err);
     }
 }
 
