@@ -107,13 +107,17 @@ async function loadSchedule() {
     if (container) container.innerHTML = '<div class="loading">加载排班数据...</div>';
     
     try {
+        console.log('[loadSchedule] Query:', { date: currentDate, technicianId: currentTechId });
         const result = await apiCall('schedules', { action: 'list', date: currentDate, technicianId: currentTechId });
+        console.log('[loadSchedule] Result:', result);
         if (!result.success) throw new Error(result.error);
         
         schedulesData = {};
         (result.data || []).forEach(s => { schedulesData[s.technicianId] = s; });
+        console.log('[loadSchedule] schedulesData:', schedulesData);
         renderScheduleGrid();
     } catch (error) {
+        console.error('[loadSchedule] Error:', error);
         if (container) container.innerHTML = `<div class="empty-state">加载失败: ${error.message}</div>`;
     }
 }
