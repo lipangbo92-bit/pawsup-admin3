@@ -65,8 +65,18 @@ async function getSchedules(date, technicianId) {
   let query = db.collection('schedules');
   if (date) query = query.where({ date });
   if (technicianId) query = query.where({ technicianId });
+  // 按更新时间倒序，确保获取最新记录
+  query = query.orderBy('updatedAt', 'desc');
   const result = await query.get();
-  return { success: true, data: result.data || [] };
+  // 如果有重复记录，只返回最新的一条
+  const uniqueMap = new Map();
+  (result.data || []).forEach(item => {
+    const key = `${item.technicianId}_${item.date}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, item);
+    }
+  });
+  return { success: true, data: Array.from(uniqueMap.values()) };
 }
 
 async function createSchedule(data) {
@@ -74,7 +84,7 @@ async function createSchedule(data) {
   if (!technicianId || !date) {
     return { success: false, error: 'Missing fields' };
   }
-  
+
   const existing = await db.collection('schedules').where({ technicianId, date }).get();
   const scheduleData = {
     technicianId, technicianName, date,
@@ -84,10 +94,19 @@ async function createSchedule(data) {
   };
 
   if (existing.data.length > 0) {
+    // 更新第一条记录
     await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
+    // 如果有重复记录，删除其余的旧记录
+    for (let i = 1; i < existing.data.length; i++) {
+      try {
+        await db.collection('schedules').doc(existing.data[i]._id).remove();
+      } catch (e) {
+        console.error('删除重复排班记录失败:', e);
+      }
+    }
     return { success: true, message: 'Schedule updated' };
   }
-  
+
   const result = await db.collection('schedules').add({ ...scheduleData, createdAt: new Date() });
   return { success: true, id: result.id };
 }
