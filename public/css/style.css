@@ -752,6 +752,10 @@ body {
     padding: 20px;
 }
 
+.modal.active {
+    display: flex;
+}
+
 .modal-content {
     background: var(--white);
     border-radius: var(--radius-lg);
