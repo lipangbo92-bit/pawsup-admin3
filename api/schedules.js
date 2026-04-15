@@ -9,25 +9,6 @@ const app = cloudbase.init({
 
 const db = app.database();
 
-// 确保集合存在
-async function ensureCollection() {
-  try {
-    // 尝试获取集合信息，如果不存在会报错
-    await db.collection('schedules').where({}).limit(1).get();
-  } catch (e) {
-    if (e.message && e.message.includes('not exist')) {
-      console.log('[API] Collection schedules does not exist, creating...');
-      // 创建集合并添加一个空文档
-      try {
-        await db.createCollection('schedules');
-        console.log('[API] Collection schedules created');
-      } catch (createErr) {
-        console.error('[API] Failed to create collection:', createErr);
-      }
-    }
-  }
-}
-
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,12 +18,9 @@ module.exports = async (req, res) => {
   }
 
   const { action = 'list', data, date, technicianId } = req.body || {};
-  console.log(`[API Schedules] Action: ${action}`);
+  console.log(`[API Schedules] Action: ${action}`, { date, technicianId });
 
   try {
-    // 确保集合存在
-    await ensureCollection();
-    
     let result;
     switch (action) {
       case 'list':
@@ -63,8 +41,12 @@ module.exports = async (req, res) => {
 
 async function getSchedules(date, technicianId) {
   let query = db.collection('schedules');
-  if (date) query = query.where({ date });
-  if (technicianId) query = query.where({ technicianId });
+  const conditions = {};
+  if (date) conditions.date = date;
+  if (technicianId) conditions.technicianId = technicianId;
+  if (Object.keys(conditions).length > 0) {
+    query = query.where(conditions);
+  }
   // 按更新时间倒序，确保获取最新记录
   query = query.orderBy('updatedAt', 'desc');
   const result = await query.get();
@@ -85,7 +67,6 @@ async function createSchedule(data) {
     return { success: false, error: 'Missing fields' };
   }
 
-  const existing = await db.collection('schedules').where({ technicianId, date }).orderBy('updatedAt', 'desc').get();
   const scheduleData = {
     technicianId, technicianName, date,
     timeSlots: timeSlots || [],
@@ -93,18 +74,24 @@ async function createSchedule(data) {
     updatedAt: new Date()
   };
 
-  if (existing.data.length > 0) {
-    // 更新第一条记录
-    await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
-    // 如果有重复记录，删除其余的旧记录
-    for (let i = 1; i < existing.data.length; i++) {
-      try {
-        await db.collection('schedules').doc(existing.data[i]._id).remove();
-      } catch (e) {
-        console.error('删除重复排班记录失败:', e);
+  try {
+    const existing = await db.collection('schedules').where({ technicianId, date }).orderBy('updatedAt', 'desc').get();
+
+    if (existing.data.length > 0) {
+      // 更新第一条记录
+      await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
+      // 如果有重复记录，删除其余的旧记录
+      for (let i = 1; i < existing.data.length; i++) {
+        try {
+          await db.collection('schedules').doc(existing.data[i]._id).remove();
+        } catch (e) {
+          console.error('删除重复排班记录失败:', e);
+        }
       }
+      return { success: true, message: 'Schedule updated' };
     }
-    return { success: true, message: 'Schedule updated' };
+  } catch (e) {
+    console.error('[createSchedule] query existing failed:', e);
   }
 
   const result = await db.collection('schedules').add({ ...scheduleData, createdAt: new Date() });
