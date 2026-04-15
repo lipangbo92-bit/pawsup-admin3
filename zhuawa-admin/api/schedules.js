@@ -70,11 +70,11 @@ async function getSchedules(date, technicianId) {
 }
 
 async function createSchedule(data) {
-  const { technicianId, technicianName, date, timeSlots, isRestDay } = data;
+  const { technicianId, technicianName, date, timeSlots, isRestDay, workStart, workEnd } = data;
   if (!technicianId || !date) {
     return { success: false, error: 'Missing fields' };
   }
-  
+
   const existing = await db.collection('schedules').where({ technicianId, date }).get();
   const scheduleData = {
     technicianId, technicianName, date,
@@ -83,11 +83,14 @@ async function createSchedule(data) {
     updatedAt: new Date()
   };
 
+  if (workStart) scheduleData.workStart = workStart;
+  if (workEnd) scheduleData.workEnd = workEnd;
+
   if (existing.data.length > 0) {
     await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
     return { success: true, message: 'Schedule updated' };
   }
-  
+
   const result = await db.collection('schedules').add({ ...scheduleData, createdAt: new Date() });
   return { success: true, id: result.id };
 }
