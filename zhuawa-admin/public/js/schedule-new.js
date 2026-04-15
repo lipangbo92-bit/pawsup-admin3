@@ -244,8 +244,9 @@ async function setWorkHours() {
     let isInRange = false;
     for (const time of TIME_SLOTS) {
         if (time === startTime) isInRange = true;
-        timeSlots.push({ time: time, available: isInRange });
+        // 遇到 endTime 时先关闭范围，再判断该时段
         if (time === endTime) isInRange = false;
+        timeSlots.push({ time: time, available: isInRange });
     }
     
     try {

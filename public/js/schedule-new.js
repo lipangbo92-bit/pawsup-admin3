@@ -239,10 +239,11 @@ async function saveWorkHours() {
     let isInRange = false;
     for (const time of TIME_SLOTS) {
         if (time === startTime) isInRange = true;
-        // endTime 本身不可预约（如 21:00 开始会超出营业时间）
-        const available = isInRange && (time !== endTime);
-        timeSlots.push({ time: time, available: available });
+        // 遇到 endTime 时先关闭范围，再判断该时段
         if (time === endTime) isInRange = false;
+        // endTime 及之后的时间都不可预约
+        const available = isInRange;
+        timeSlots.push({ time: time, available: available });
     }
     
     try {
