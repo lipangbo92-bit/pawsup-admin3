@@ -372,6 +372,7 @@ Page({
         date: selectedDate.fullDate,
         time: this.data.selectedTime,
         technicians: this.data.technicians,
+        serviceCategory: this.data.selectedService?.name || '',
         duration: this.data.selectedService?.duration || 60
       }
     }).then(res => {
