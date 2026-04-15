@@ -62,7 +62,7 @@ async function getSchedules(date, technicianId) {
 }
 
 async function createSchedule(data) {
-  const { technicianId, technicianName, date, timeSlots, isRestDay } = data;
+  const { technicianId, technicianName, date, timeSlots, isRestDay, workStart, workEnd } = data;
   if (!technicianId || !date) {
     return { success: false, error: 'Missing fields' };
   }
@@ -73,6 +73,9 @@ async function createSchedule(data) {
     isRestDay: isRestDay || false,
     updatedAt: new Date()
   };
+
+  if (workStart) scheduleData.workStart = workStart;
+  if (workEnd) scheduleData.workEnd = workEnd;
 
   try {
     const existing = await db.collection('schedules').where({ technicianId, date }).orderBy('updatedAt', 'desc').get();
