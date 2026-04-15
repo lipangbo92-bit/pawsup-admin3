@@ -183,11 +183,13 @@ exports.main = async (event, context) => {
           const availableTechIds = slotAvailability[slot.time] || []
 
           // 过滤掉不能做该服务的技师（洗护师不能做造型项目）
-          const serviceCapableTechIds = availableTechIds.filter(id => {
-            const tech = technicians.find(t => t.id === id || t._id === id || String(t.id) === String(id) || String(t._id) === String(id))
-            if (!tech) return false
-            return canTechnicianHandleService(tech, serviceCategory)
-          })
+          const serviceCapableTechIds = technicians.length > 0
+            ? availableTechIds.filter(id => {
+                const tech = technicians.find(t => t.id === id || t._id === id || String(t.id) === String(id) || String(t._id) === String(id))
+                if (!tech) return false
+                return canTechnicianHandleService(tech, serviceCategory)
+              })
+            : availableTechIds
 
           // 额外过滤：服务时长不能超过该技师的下班时间
           const durationCapableTechIds = serviceCapableTechIds.filter(id => {
@@ -395,8 +397,8 @@ exports.main = async (event, context) => {
 
         console.log('Checking tech:', tech.name, 'id:', techId, 'position:', tech.position)
 
-        // 检查服务范围：洗护师不能做造型项目
-        if (!canTechnicianHandleService(tech, serviceCategory)) {
+        // 检查服务范围：洗护师不能做造型项目（仅在传了 technicians 时检查）
+        if (technicians.length > 0 && !canTechnicianHandleService(tech, serviceCategory)) {
           console.log('Tech cannot handle this service:', tech.name, 'position:', tech.position, 'service:', serviceCategory)
           return false
         }
