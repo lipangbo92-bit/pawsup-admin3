@@ -183,7 +183,10 @@ Page({
       name: 'availability-api',
       data: {
         action: 'getAllSlotsAvailability',
-        date: date
+        date: date,
+        technicians: this.data.technicians,
+        serviceCategory: this.data.selectedService?.name || '',
+        duration: this.data.selectedService?.duration || 60
       }
     }).then(res => {
       this.setData({ loadingTimeSlots: false });

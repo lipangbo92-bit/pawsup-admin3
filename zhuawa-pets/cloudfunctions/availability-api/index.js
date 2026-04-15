@@ -161,16 +161,8 @@ exports.main = async (event, context) => {
 
       console.log('Booked orders:', ordersRes.data.length)
 
-      // 收集所有有排班的美容师的下班时间（取最小值作为全局最晚可约时间）
-      let globalWorkEnd = '21:00'
-      schedulesRes.data.forEach(s => {
-        if (s.workEnd && parseTime(s.workEnd) < parseTime(globalWorkEnd)) {
-          globalWorkEnd = s.workEnd
-        }
-      })
-
-      // 生成时段并标记可用性（传入日期、时长、全局下班时间）
-      const timeSections = generateTimeSlots(date, duration, globalWorkEnd)
+      // 生成时段并标记可用性（使用默认最大下班时间 21:00，按技师各自 workEnd 在后续过滤）
+      const timeSections = generateTimeSlots(date, duration, '21:00')
       timeSections.forEach(section => {
         section.times.forEach(slot => {
           // 如果已经标记为过期或太晚，直接跳过
@@ -182,17 +174,12 @@ exports.main = async (event, context) => {
           // 获取该时段可约的美容师列表
           const availableTechIds = slotAvailability[slot.time] || []
 
-          // 过滤掉不能做该服务的技师（洗护师不能做造型项目）
-          const serviceCapableTechIds = technicians.length > 0
-            ? availableTechIds.filter(id => {
-                const tech = technicians.find(t => t.id === id || t._id === id || String(t.id) === String(id) || String(t._id) === String(id))
-                if (!tech) return false
-                return canTechnicianHandleService(tech, serviceCategory)
-              })
-            : availableTechIds
-
-          // 额外过滤：服务时长不能超过该技师的下班时间
-          const durationCapableTechIds = serviceCapableTechIds.filter(id => {
+          // 过滤掉不能做该服务的技师（洗护师不能做造型项目），同时检查服务时长不能超过该技师的下班时间
+          const capableTechIds = availableTechIds.filter(id => {
+            const tech = technicians.find(t => t.id === id || t._id === id || String(t.id) === String(id) || String(t._id) === String(id))
+            if (tech && !canTechnicianHandleService(tech, serviceCategory)) {
+              return false
+            }
             const schedule = schedulesRes.data.find(s =>
               s.technicianId === id || s.technicianId === String(id) || String(s.technicianId) === String(id)
             )
@@ -210,7 +197,7 @@ exports.main = async (event, context) => {
             })
             .map(o => o.technicianId)
 
-          const reallyAvailable = durationCapableTechIds.filter(id => !bookedTechIds.includes(id))
+          const reallyAvailable = capableTechIds.filter(id => !bookedTechIds.includes(id))
 
           slot.availableCount = reallyAvailable.length
 
@@ -397,8 +384,8 @@ exports.main = async (event, context) => {
 
         console.log('Checking tech:', tech.name, 'id:', techId, 'position:', tech.position)
 
-        // 检查服务范围：洗护师不能做造型项目（仅在传了 technicians 时检查）
-        if (technicians.length > 0 && !canTechnicianHandleService(tech, serviceCategory)) {
+        // 检查服务范围：洗护师不能做造型项目
+        if (!canTechnicianHandleService(tech, serviceCategory)) {
           console.log('Tech cannot handle this service:', tech.name, 'position:', tech.position, 'service:', serviceCategory)
           return false
         }
