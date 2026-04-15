@@ -14,6 +14,7 @@ Page({
     
     // 技师选择弹窗
     showTechnicianModal: false,
+    modalTechnicians: [],
     selectedTechnician: null,
     loadingTechnicians: false,
     loadingTimeSlots: false
@@ -385,7 +386,7 @@ Page({
         }
         // 只显示可约的美容师，如果没有则不显示任何美容师
         this.setData({
-          technicians: availableTechs,
+          modalTechnicians: availableTechs,
           showTechnicianModal: true
         });
       } else {

@@ -123,7 +123,7 @@
     <!-- 美容师列表 -->
     <scroll-view class="technician-list" scroll-y="true">
       <view class="technician-item {{selectedTechnician && selectedTechnician.id === item.id ? 'selected' : ''}}" 
-            wx:for="{{technicians}}" 
+            wx:for="{{modalTechnicians}}" 
             wx:key="id"
             bindtap="onTechnicianSelect"
             data-id="{{item.id}}">
