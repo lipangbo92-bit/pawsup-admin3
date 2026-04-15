@@ -129,13 +129,16 @@ exports.main = async (event, context) => {
     try {
       const { technicians = [], serviceCategory = '' } = event
 
-      // 从schedules集合查询该日期所有美容师的排班
+      // 从schedules集合查询该日期所有美容师的排班（按更新时间倒序，确保拿到最新记录）
       const schedulesRes = await db.collection('schedules').where({
         date: date,
         isRestDay: false
-      }).get()
+      }).orderBy('updatedAt', 'desc').get()
 
       console.log('Available schedules:', schedulesRes.data.length, 'technicians:', technicians.length, 'service:', serviceCategory)
+      schedulesRes.data.forEach(s => {
+        console.log('Schedule:', s.technicianId, s.technicianName, 'workEnd:', s.workEnd, 'updatedAt:', s.updatedAt)
+      })
 
       // 按时段分组统计可约美容师
       const slotAvailability = {}
@@ -234,13 +237,16 @@ exports.main = async (event, context) => {
       // 支持多种ID格式
       const techIdStr = String(technicianId)
 
-      // 从schedules查询该美容师该日期的排班
+      // 从schedules查询该美容师该日期的排班（按更新时间倒序）
       const scheduleRes = await db.collection('schedules').where({
         date: date,
         isRestDay: false
-      }).get()
+      }).orderBy('updatedAt', 'desc').get()
 
       console.log('Schedules found:', scheduleRes.data.length)
+      scheduleRes.data.forEach(s => {
+        console.log('Schedule:', s.technicianId, s.technicianName, 'workEnd:', s.workEnd, 'updatedAt:', s.updatedAt)
+      })
 
       // 找到匹配的美容师排班（支持多种ID格式）
       const schedule = scheduleRes.data.find(s =>
@@ -357,13 +363,16 @@ exports.main = async (event, context) => {
 
       console.log('getAvailableTechnicians called:', { date, time, techniciansCount: technicians.length, serviceCategory, duration })
 
-      // 从schedules查询该时段可约的美容师
+      // 从schedules查询该时段可约的美容师（按更新时间倒序）
       const schedulesRes = await db.collection('schedules').where({
         date: date,
         isRestDay: false
-      }).get()
+      }).orderBy('updatedAt', 'desc').get()
 
       console.log('Schedules found:', schedulesRes.data.length)
+      schedulesRes.data.forEach(s => {
+        console.log('Schedule:', s.technicianId, s.technicianName, 'workEnd:', s.workEnd, 'updatedAt:', s.updatedAt)
+      })
 
       // 查询该日期所有预约
       const ordersRes = await db.collection('orders').where({
