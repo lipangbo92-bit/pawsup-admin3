@@ -76,9 +76,9 @@ async function loadOrders(page = 1) {
             customerName: order.customerName || '未知',
             customerPhone: order.customerPhone || '',
             serviceName: order.serviceName || '未知服务',
-            amount: order.price || order.amount || 0,
-            appointmentDate: order.appointmentDate || '',
-            appointmentTime: order.appointmentTime || ''
+            amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
+            appointmentDate: order.appointmentDate || order.serviceDate || '',
+            appointmentTime: order.appointmentTime || order.serviceTime || ''
         }));
         
         renderOrdersTable(currentOrders);
