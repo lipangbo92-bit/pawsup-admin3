@@ -141,9 +141,12 @@ function renderOrdersTable(orders) {
     
     tbody.innerHTML = orders.map(order => {
         // 安全格式化金额
-        const amount = order.amount !== undefined && order.amount !== null 
+        const amount = order.amount !== undefined && order.amount !== null && order.amount !== 0
             ? parseFloat(order.amount).toFixed(2) 
-            : '0.00';
+            : (order.finalPrice || order.totalPrice || order.servicePrice || 0).toFixed(2);
+        
+        // 调试信息
+        console.log('[Render] Order:', order.orderNo, 'Amount:', amount, 'Raw:', order.amount, 'finalPrice:', order.finalPrice);
         
         return `
             <tr>
