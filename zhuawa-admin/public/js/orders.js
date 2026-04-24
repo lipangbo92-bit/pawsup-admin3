@@ -79,8 +79,10 @@ async function loadOrders(page = 1) {
 
             // 安全地获取金额
             let amount = 0;
+            console.log('[Orders] Raw finalPrice:', order.finalPrice, 'type:', typeof order.finalPrice);
             if (order.finalPrice !== undefined && order.finalPrice !== null && order.finalPrice !== '') {
                 amount = parseFloat(order.finalPrice);
+                console.log('[Orders] Parsed finalPrice:', amount);
             } else if (order.totalPrice !== undefined && order.totalPrice !== null && order.totalPrice !== '') {
                 amount = parseFloat(order.totalPrice);
             } else if (order.price !== undefined && order.price !== null && order.price !== '') {
@@ -91,6 +93,7 @@ async function loadOrders(page = 1) {
             
             // 确保金额是有效数字
             if (isNaN(amount)) amount = 0;
+            console.log('[Orders] Final amount:', amount);
 
             return {
                 ...order,
