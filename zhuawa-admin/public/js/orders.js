@@ -138,34 +138,39 @@ function renderOrdersTable(orders) {
         return;
     }
 
-    tbody.innerHTML = orders.map(order => `
-        <tr>
-            <td><span class="order-no">${order.orderNo}</span></td>
-            <td>
-                <div class="customer-info">
-                    <span class="customer-name">${order.customerName}</span>
-                    <span class="customer-phone">${order.customerPhone}</span>
-                </div>
-            </td>
-            <td>${order.petName || '-'}</td>
-            <td>${order.serviceName}</td>
-            <td>${order.technicianName || '不指定'}</td>
-            <td>
-                <div class="appointment-time">
-                    <span class="date">${order.appointmentDate}</span>
-                    <span class="time">${order.appointmentTime}</span>
-                </div>
-            </td>
-            <td><span class="amount">¥${order.amount.toFixed(2)}</span></td>
-            <td><span class="status-tag ${order.status}">${getStatusText(order.status)}</span></td>
-            <td>
-                <div class="action-btns">
-                    <button class="btn-icon" onclick="viewOrder('${order._id}')" title="查看">👁</button>
-                    ${getActionButtons(order)}
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = orders.map(order => {
+        // 调试信息
+        console.log('[Render] Order:', order.orderNo, 'Amount:', order.amount, 'finalPrice:', order.finalPrice);
+        
+        return `
+            <tr>
+                <td><span class="order-no">${order.orderNo}</span></td>
+                <td>
+                    <div class="customer-info">
+                        <span class="customer-name">${order.customerName}</span>
+                        <span class="customer-phone">${order.customerPhone}</span>
+                    </div>
+                </td>
+                <td>${order.petName || '-'}</td>
+                <td>${order.serviceName}</td>
+                <td>${order.technicianName || '不指定'}</td>
+                <td>
+                    <div class="appointment-time">
+                        <span class="date">${order.appointmentDate}</span>
+                        <span class="time">${order.appointmentTime}</span>
+                    </div>
+                </td>
+                <td><span class="amount">¥${order.amount.toFixed(2)}</span></td>
+                <td><span class="status-tag ${order.status}">${getStatusText(order.status)}</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-icon" onclick="viewOrder('${order._id}')" title="查看">👁</button>
+                        ${getActionButtons(order)}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Get status text
