@@ -62,29 +62,98 @@ module.exports = async (req, res) => {
 
 // 获取订单列表
 async function getOrders(status, date) {
-  let query = db.collection('orders');
-  
-  if (status) {
-    query = query.where({ status });
+  try {
+    let query = db.collection('orders');
+    
+    if (status) {
+      query = query.where({ status });
+    }
+    
+    // 先获取所有数据，看看有哪些字段
+    const result = await query.limit(100).get();
+    
+    console.log('[API Orders] Total orders found:', result.data.length);
+    
+    if (result.data.length > 0) {
+      // 打印第一条数据的字段，用于调试
+      const firstOrder = result.data[0];
+      console.log('[API Orders] First order fields:', Object.keys(firstOrder));
+      console.log('[API Orders] First order:', JSON.stringify(firstOrder, null, 2));
+    }
+    
+    // 处理数据，确保金额字段正确
+    const processedData = result.data.map(order => {
+      // 确保金额字段存在
+      const amount = order.finalPrice || order.totalPrice || order.price || order.amount || 0;
+      
+      return {
+        ...order,
+        // 统一字段名
+        amount: amount,
+        finalPrice: order.finalPrice || amount,
+        totalPrice: order.totalPrice || amount,
+        // 统一时间字段
+        createdAt: order.createdAt || order.createTime || order.createAt,
+        // 统一日期字段
+        appointmentDate: order.appointmentDate || order.serviceDate || order.checkinDate || '',
+        appointmentTime: order.appointmentTime || order.serviceTime || ''
+      };
+    });
+    
+    // 按时间排序（降序）
+    processedData.sort((a, b) => {
+      const timeA = new Date(a.createdAt || 0);
+      const timeB = new Date(b.createdAt || 0);
+      return timeB - timeA;
+    });
+    
+    return {
+      success: true,
+      data: processedData
+    };
+  } catch (error) {
+    console.error('[API Orders] getOrders error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  if (date) {
-    query = query.where({ appointmentDate: date });
-  }
-  
-  const result = await query.orderBy('createdAt', 'desc').get();
-  return {
-    success: true,
-    data: result.data
-  };
 }
 
 // 获取单个订单
 async function getOrderById(id) {
-  const result = await db.collection('orders').doc(id).get();
-  return {
-    success: true,
-    data: result.data
-  };
+  try {
+    const result = await db.collection('orders').doc(id).get();
+    
+    if (!result.data) {
+      return {
+        success: false,
+        error: '订单不存在'
+      };
+    }
+    
+    const order = result.data;
+    const amount = order.finalPrice || order.totalPrice || order.price || order.amount || 0;
+    
+    return {
+      success: true,
+      data: {
+        ...order,
+        amount: amount,
+        finalPrice: order.finalPrice || amount,
+        totalPrice: order.totalPrice || amount,
+        createdAt: order.createdAt || order.createTime || order.createAt,
+        appointmentDate: order.appointmentDate || order.serviceDate || order.checkinDate || '',
+        appointmentTime: order.appointmentTime || order.serviceTime || ''
+      }
+    };
+  } catch (error) {
+    console.error('[API Orders] getOrderById error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }
 
 // 创建订单
@@ -124,7 +193,7 @@ async function createOrder(data) {
     technicianName: technicianName || '',
     appointmentDate,
     appointmentTime,
-    status: 'pending', // pending, confirmed, in_service, completed, cancelled
+    status: 'pending',
     price: price || 0,
     address: address || '',
     remark: remark || '',
@@ -132,23 +201,30 @@ async function createOrder(data) {
     updatedAt: new Date()
   };
   
-  const result = await db.collection('orders').add(orderData);
-  
-  // 如果指定了技师和时间，锁定排班
-  if (technicianId && appointmentDate && appointmentTime) {
-    try {
-      await bookScheduleSlot(appointmentDate, technicianId, appointmentTime, result.id);
-    } catch (err) {
-      console.error('Failed to book schedule slot:', err);
-      // 订单创建成功但排班锁定失败，可以后续手动处理
+  try {
+    const result = await db.collection('orders').add(orderData);
+    
+    // 如果指定了技师和时间，锁定排班
+    if (technicianId && appointmentDate && appointmentTime) {
+      try {
+        await bookScheduleSlot(appointmentDate, technicianId, appointmentTime, result.id);
+      } catch (err) {
+        console.error('Failed to book schedule slot:', err);
+      }
     }
+    
+    return {
+      success: true,
+      id: result.id,
+      orderNo
+    };
+  } catch (error) {
+    console.error('[API Orders] createOrder error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  return {
-    success: true,
-    id: result.id,
-    orderNo
-  };
 }
 
 // 锁定排班时间段
@@ -184,13 +260,21 @@ async function bookScheduleSlot(date, technicianId, time, orderId) {
 
 // 更新订单
 async function updateOrder(id, data) {
-  await db.collection('orders').doc(id).update({
-    ...data,
-    updatedAt: new Date()
-  });
-  return {
-    success: true
-  };
+  try {
+    await db.collection('orders').doc(id).update({
+      ...data,
+      updatedAt: new Date()
+    });
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('[API Orders] updateOrder error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }
 
 // 更新订单状态
@@ -200,33 +284,41 @@ async function updateOrderStatus(id, status) {
     return { success: false, error: 'Invalid status' };
   }
   
-  const order = await db.collection('orders').doc(id).get();
-  const oldStatus = order.data?.status;
-  
-  await db.collection('orders').doc(id).update({
-    status,
-    updatedAt: new Date()
-  });
-  
-  // 如果取消订单，释放排班
-  if (status === 'cancelled' && oldStatus !== 'cancelled') {
-    try {
-      const orderData = order.data;
-      if (orderData.technicianId && orderData.appointmentDate && orderData.appointmentTime) {
-        await releaseScheduleSlot(
-          orderData.appointmentDate,
-          orderData.technicianId,
-          orderData.appointmentTime
-        );
+  try {
+    const order = await db.collection('orders').doc(id).get();
+    const oldStatus = order.data?.status;
+    
+    await db.collection('orders').doc(id).update({
+      status,
+      updatedAt: new Date()
+    });
+    
+    // 如果取消订单，释放排班
+    if (status === 'cancelled' && oldStatus !== 'cancelled') {
+      try {
+        const orderData = order.data;
+        if (orderData.technicianId && orderData.appointmentDate && orderData.appointmentTime) {
+          await releaseScheduleSlot(
+            orderData.appointmentDate,
+            orderData.technicianId,
+            orderData.appointmentTime
+          );
+        }
+      } catch (err) {
+        console.error('Failed to release schedule slot:', err);
       }
-    } catch (err) {
-      console.error('Failed to release schedule slot:', err);
     }
+    
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('[API Orders] updateOrderStatus error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  return {
-    success: true
-  };
 }
 
 // 释放排班时间段
@@ -254,25 +346,33 @@ async function releaseScheduleSlot(date, technicianId, time) {
 
 // 删除订单
 async function deleteOrder(id) {
-  // 先获取订单信息，释放排班
-  const order = await db.collection('orders').doc(id).get();
-  if (order.data) {
-    const orderData = order.data;
-    if (orderData.technicianId && orderData.appointmentDate && orderData.appointmentTime) {
-      try {
-        await releaseScheduleSlot(
-          orderData.appointmentDate,
-          orderData.technicianId,
-          orderData.appointmentTime
-        );
-      } catch (err) {
-        console.error('Failed to release schedule slot:', err);
+  try {
+    // 先获取订单信息，释放排班
+    const order = await db.collection('orders').doc(id).get();
+    if (order.data) {
+      const orderData = order.data;
+      if (orderData.technicianId && orderData.appointmentDate && orderData.appointmentTime) {
+        try {
+          await releaseScheduleSlot(
+            orderData.appointmentDate,
+            orderData.technicianId,
+            orderData.appointmentTime
+          );
+        } catch (err) {
+          console.error('Failed to release schedule slot:', err);
+        }
       }
     }
+    
+    await db.collection('orders').doc(id).remove();
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('[API Orders] deleteOrder error:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  await db.collection('orders').doc(id).remove();
-  return {
-    success: true
-  };
 }
