@@ -215,9 +215,9 @@ function viewOrder(orderId) {
     if (!content) return;
     
     // 安全格式化金额
-    const amount = selectedOrder.amount !== undefined && selectedOrder.amount !== null 
+    const amount = selectedOrder.amount !== undefined && selectedOrder.amount !== null && selectedOrder.amount !== 0
         ? parseFloat(selectedOrder.amount).toFixed(2) 
-        : '0.00';
+        : (selectedOrder.finalPrice || selectedOrder.totalPrice || selectedOrder.servicePrice || 0).toFixed(2);
     
     content.innerHTML = `
         <div class="detail-section">
