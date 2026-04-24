@@ -69,29 +69,58 @@ async function loadOrders(page = 1) {
             throw new Error(result.error);
         }
         
-        currentOrders = (result.data || []).map(order => ({
-            ...order,
-            _id: order._id || order.id,
-            orderNo: order.orderNo || order._id,
-            customerName: order.customerName || '未知',
-            customerPhone: order.customerPhone || '',
-            serviceName: order.serviceName || '未知服务',
-            amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
-            appointmentDate: order.appointmentDate || order.serviceDate || '',
-            appointmentTime: order.appointmentTime || order.serviceTime || ''
-        }));
+        // 确保数据是数组
+        const rawData = Array.isArray(result.data) ? result.data : [];
+        
+        console.log('[Orders] Raw data count:', rawData.length);
+        if (rawData.length > 0) {
+            console.log('[Orders] First order:', rawData[0]);
+        }
+        
+        currentOrders = rawData.map(order => {
+            // 安全地获取金额
+            let amount = 0;
+            if (order.finalPrice !== undefined && order.finalPrice !== null) {
+                amount = parseFloat(order.finalPrice);
+            } else if (order.totalPrice !== undefined && order.totalPrice !== null) {
+                amount = parseFloat(order.totalPrice);
+            } else if (order.price !== undefined && order.price !== null) {
+                amount = parseFloat(order.price);
+            } else if (order.amount !== undefined && order.amount !== null) {
+                amount = parseFloat(order.amount);
+            }
+            
+            // 确保金额是有效数字
+            if (isNaN(amount)) amount = 0;
+            
+            return {
+                ...order,
+                _id: order._id || order.id || '',
+                orderNo: order.orderNo || order._id || '未知',
+                customerName: order.customerName || order.contactName || '未知',
+                customerPhone: order.customerPhone || order.contactPhone || '',
+                serviceName: order.serviceName || '未知服务',
+                amount: amount,
+                appointmentDate: order.appointmentDate || order.serviceDate || order.checkinDate || '',
+                appointmentTime: order.appointmentTime || order.serviceTime || '',
+                status: order.status || 'pending'
+            };
+        });
         
         renderOrdersTable(currentOrders);
         renderPagination();
         
     } catch (err) {
         console.error('Load orders error:', err);
-        document.getElementById('ordersTableBody').innerHTML = `
-            <tr><td colspan="7" class="empty-cell">
-                加载失败: ${err.message}<br>
-                <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
-            </td></tr>
-        `;
+        const tbody = document.getElementById('ordersTableBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr><td colspan="7" class="empty-cell">
+                    加载失败: ${err.message}<br>
+                    <button onclick="loadOrders()" style="margin-top:8px; padding:6px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">重试</button>
+                </td></tr>
+            `;
+        }
     }
 }
 
@@ -104,37 +133,41 @@ function renderOrdersTable(orders) {
         return;
     }
     
-    if (orders.length === 0) {
+    if (!Array.isArray(orders) || orders.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">暂无订单</td></tr>';
         return;
     }
     
-    tbody.innerHTML = orders.map(order => `
-        <tr>
-            <td><span class="order-no">${order.orderNo}</span></td>
-            <td>
-                <div class="customer-info">
-                    <span class="customer-name">${order.customerName}</span>
-                    <span class="customer-phone">${order.customerPhone}</span>
-                </div>
-            </td>
-            <td>${order.serviceName}</td>
-            <td>
-                <div class="appointment-time">
-                    <span class="date">${order.appointmentDate}</span>
-                    <span class="time">${order.appointmentTime}</span>
-                </div>
-            </td>
-            <td><span class="amount">¥${order.amount.toFixed(2)}</span></td>
-            <td><span class="status-tag ${order.status}">${getStatusText(order.status)}</span></td>
-            <td>
-                <div class="action-btns">
-                    <button class="btn-icon" onclick="viewOrder('${order._id}')" title="查看">👁</button>
-                    ${getActionButtons(order)}
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = orders.map(order => {
+        const amount = typeof order.amount === 'number' ? order.amount.toFixed(2) : '0.00';
+        
+        return `
+            <tr>
+                <td><span class="order-no">${order.orderNo || '-'}</span></td>
+                <td>
+                    <div class="customer-info">
+                        <span class="customer-name">${order.customerName || '未知'}</span>
+                        <span class="customer-phone">${order.customerPhone || ''}</span>
+                    </div>
+                </td>
+                <td>${order.serviceName || '未知服务'}</td>
+                <td>
+                    <div class="appointment-time">
+                        <span class="date">${order.appointmentDate || ''}</span>
+                        <span class="time">${order.appointmentTime || ''}</span>
+                    </div>
+                </td>
+                <td><span class="amount">¥${amount}</span></td>
+                <td><span class="status-tag ${order.status || 'pending'}">${getStatusText(order.status)}</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-icon" onclick="viewOrder('${order._id}')" title="查看">👁</button>
+                        ${getActionButtons(order)}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Get status text
@@ -146,19 +179,20 @@ function getStatusText(status) {
         'completed': '已完成',
         'cancelled': '已取消'
     };
-    return statusMap[status] || status;
+    return statusMap[status] || status || '未知';
 }
 
 // Get action buttons based on status
 function getActionButtons(order) {
     const buttons = [];
+    const status = order.status || 'pending';
     
-    if (order.status === 'pending') {
+    if (status === 'pending') {
         buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'confirmed', event)" title="确认">✓</button>`);
         buttons.push(`<button class="btn-icon danger" onclick="cancelOrder('${order._id}', event)" title="取消">✕</button>`);
-    } else if (order.status === 'confirmed') {
+    } else if (status === 'confirmed') {
         buttons.push(`<button class="btn-icon primary" onclick="updateOrderStatus('${order._id}', 'in_service', event)" title="开始服务">▶</button>`);
-    } else if (order.status === 'in_service') {
+    } else if (status === 'in_service') {
         buttons.push(`<button class="btn-icon success" onclick="updateOrderStatus('${order._id}', 'completed', event)" title="完成">✓</button>`);
     }
     
@@ -173,27 +207,29 @@ function viewOrder(orderId) {
     const content = document.getElementById('orderDetailContent');
     if (!content) return;
     
+    const amount = typeof selectedOrder.amount === 'number' ? selectedOrder.amount.toFixed(2) : '0.00';
+    
     content.innerHTML = `
         <div class="detail-section">
             <h4>订单信息</h4>
             <div class="detail-row">
                 <span class="label">订单号：</span>
-                <span class="value">${selectedOrder.orderNo}</span>
+                <span class="value">${selectedOrder.orderNo || '-'}</span>
             </div>
             <div class="detail-row">
                 <span class="label">创建时间：</span>
-                <span class="value">${selectedOrder.createdAt || '-'}</span>
+                <span class="value">${selectedOrder.createdAt || selectedOrder.createTime || '-'}</span>
             </div>
             <div class="detail-row">
                 <span class="label">订单状态：</span>
-                <span class="value"><span class="status-tag ${selectedOrder.status}">${getStatusText(selectedOrder.status)}</span></span>
+                <span class="value"><span class="status-tag ${selectedOrder.status || 'pending'}">${getStatusText(selectedOrder.status)}</span></span>
             </div>
         </div>
         <div class="detail-section">
             <h4>客户信息</h4>
             <div class="detail-row">
                 <span class="label">客户姓名：</span>
-                <span class="value">${selectedOrder.customerName}</span>
+                <span class="value">${selectedOrder.customerName || '未知'}</span>
             </div>
             <div class="detail-row">
                 <span class="label">联系电话：</span>
@@ -204,11 +240,11 @@ function viewOrder(orderId) {
             <h4>服务信息</h4>
             <div class="detail-row">
                 <span class="label">服务项目：</span>
-                <span class="value">${selectedOrder.serviceName}</span>
+                <span class="value">${selectedOrder.serviceName || '未知服务'}</span>
             </div>
             <div class="detail-row">
                 <span class="label">预约时间：</span>
-                <span class="value">${selectedOrder.appointmentDate} ${selectedOrder.appointmentTime}</span>
+                <span class="value">${selectedOrder.appointmentDate || ''} ${selectedOrder.appointmentTime || ''}</span>
             </div>
             <div class="detail-row">
                 <span class="label">指定美容师：</span>
@@ -216,7 +252,7 @@ function viewOrder(orderId) {
             </div>
             <div class="detail-row">
                 <span class="label">订单金额：</span>
-                <span class="value highlight">¥${selectedOrder.amount.toFixed(2)}</span>
+                <span class="value highlight">¥${amount}</span>
             </div>
         </div>
         ${selectedOrder.address ? `
@@ -248,13 +284,14 @@ function viewOrder(orderId) {
 // Get modal action buttons
 function getModalActionButtons(order) {
     const buttons = ['<button class="btn-secondary" onclick="closeModal()">关闭</button>'];
+    const status = order.status || 'pending';
     
-    if (order.status === 'pending') {
+    if (status === 'pending') {
         buttons.push(`<button class="btn-primary" onclick="updateOrderStatus('${order._id}', 'confirmed'); closeModal();">确认订单</button>`);
         buttons.push(`<button class="btn-danger" onclick="cancelOrder('${order._id}'); closeModal();">取消订单</button>`);
-    } else if (order.status === 'confirmed') {
+    } else if (status === 'confirmed') {
         buttons.push(`<button class="btn-primary" onclick="updateOrderStatus('${order._id}', 'in_service'); closeModal();">开始服务</button>`);
-    } else if (order.status === 'in_service') {
+    } else if (status === 'in_service') {
         buttons.push(`<button class="btn-success" onclick="updateOrderStatus('${order._id}', 'completed'); closeModal();">完成服务</button>`);
     }
     
