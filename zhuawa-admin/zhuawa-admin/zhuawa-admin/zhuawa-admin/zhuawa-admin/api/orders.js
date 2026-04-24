@@ -62,55 +62,19 @@ module.exports = async (req, res) => {
 
 // 获取订单列表
 async function getOrders(status, date) {
-  // 同时查询 orders 和 appointments 两个集合
-  let ordersQuery = db.collection('orders');
-  let appointmentsQuery = db.collection('appointments');
+  let query = db.collection('orders');
   
   if (status) {
-    ordersQuery = ordersQuery.where({ status });
-    appointmentsQuery = appointmentsQuery.where({ status });
+    query = query.where({ status });
   }
   if (date) {
-    ordersQuery = ordersQuery.where({ appointmentDate: date });
-    appointmentsQuery = appointmentsQuery.where({ appointmentDate: date });
+    query = query.where({ appointmentDate: date });
   }
   
-  const [ordersResult, appointmentsResult] = await Promise.all([
-    ordersQuery.orderBy('createdAt', 'desc').get(),
-    appointmentsQuery.orderBy('createdAt', 'desc').get()
-  ]);
-  
-  // 合并两个集合的数据
-  const ordersData = ordersResult.data || [];
-  const appointmentsData = appointmentsResult.data || [];
-  
-  // 为 appointments 数据添加兼容性字段
-  const normalizedAppointments = appointmentsData.map(order => ({
-    ...order,
-    finalPrice: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
-    totalPrice: order.totalPrice || order.price || order.amount || 0,
-    orderNo: order.orderNo || order._id,
-    customerName: order.customerName || order.contactName || '未知',
-    customerPhone: order.customerPhone || order.contactPhone || '',
-    serviceName: order.serviceName || '未知服务'
-  }));
-  
-  // 合并并去重（根据 _id）
-  const allOrders = [...ordersData, ...normalizedAppointments];
-  const uniqueOrders = allOrders.filter((order, index, self) => 
-    index === self.findIndex(o => o._id === order._id)
-  );
-  
-  // 按时间排序
-  uniqueOrders.sort((a, b) => {
-    const timeA = a.createdAt || a.createTime || 0;
-    const timeB = b.createdAt || b.createTime || 0;
-    return new Date(timeB) - new Date(timeA);
-  });
-  
+  const result = await query.orderBy('createdAt', 'desc').get();
   return {
     success: true,
-    data: uniqueOrders
+    data: result.data
   };
 }
 
