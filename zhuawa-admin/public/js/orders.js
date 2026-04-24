@@ -103,7 +103,7 @@ async function loadOrders(page = 1) {
                 customerPhone: order.customerPhone || '',
                 serviceName: order.serviceName || '未知服务',
                 // 金额字段：优先使用 finalPrice（实付金额），然后是 totalPrice（订单金额）
-                amount: amount,
+                amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
                 appointmentDate: order.appointmentDate || '',
                 appointmentTime: order.appointmentTime || '',
                 // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
