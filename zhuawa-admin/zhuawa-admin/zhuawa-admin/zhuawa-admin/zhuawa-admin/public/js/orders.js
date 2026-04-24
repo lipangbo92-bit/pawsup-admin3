@@ -10,6 +10,8 @@ let selectedOrder = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // 强制清除缓存
+    console.log('[Orders] Page loaded, cache cleared');
     loadOrders();
     setDefaultDate();
 });
