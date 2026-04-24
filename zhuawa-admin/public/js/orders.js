@@ -77,6 +77,21 @@ async function loadOrders(page = 1) {
             // 调试日志
             console.log('[Orders] Processing order:', order.orderNo, 'petName:', order.petName, 'totalPrice:', order.totalPrice, 'finalPrice:', order.finalPrice);
 
+            // 安全地获取金额
+            let amount = 0;
+            if (order.finalPrice !== undefined && order.finalPrice !== null && order.finalPrice !== '') {
+                amount = parseFloat(order.finalPrice);
+            } else if (order.totalPrice !== undefined && order.totalPrice !== null && order.totalPrice !== '') {
+                amount = parseFloat(order.totalPrice);
+            } else if (order.price !== undefined && order.price !== null && order.price !== '') {
+                amount = parseFloat(order.price);
+            } else if (order.amount !== undefined && order.amount !== null && order.amount !== '') {
+                amount = parseFloat(order.amount);
+            }
+            
+            // 确保金额是有效数字
+            if (isNaN(amount)) amount = 0;
+
             return {
                 ...order,
                 _id: order._id || order.id,
@@ -85,7 +100,7 @@ async function loadOrders(page = 1) {
                 customerPhone: order.customerPhone || '',
                 serviceName: order.serviceName || '未知服务',
                 // 金额字段：优先使用 finalPrice（实付金额），然后是 totalPrice（订单金额）
-                amount: order.finalPrice || order.totalPrice || order.price || order.amount || 0,
+                amount: amount,
                 appointmentDate: order.appointmentDate || '',
                 appointmentTime: order.appointmentTime || '',
                 // 兼容两种数据结构：优先使用 petName，否则尝试 petInfo.name
