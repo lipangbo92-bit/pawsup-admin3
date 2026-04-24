@@ -78,20 +78,19 @@ async function loadOrders(page = 1) {
         }
         
         currentOrders = rawData.map(order => {
-            // 安全地获取金额
+            // 安全地获取金额 - 处理字符串和数字
             let amount = 0;
-            if (order.finalPrice !== undefined && order.finalPrice !== null) {
-                amount = parseFloat(order.finalPrice);
-            } else if (order.totalPrice !== undefined && order.totalPrice !== null) {
-                amount = parseFloat(order.totalPrice);
-            } else if (order.price !== undefined && order.price !== null) {
-                amount = parseFloat(order.price);
-            } else if (order.amount !== undefined && order.amount !== null) {
-                amount = parseFloat(order.amount);
-            }
+            const priceFields = ['finalPrice', 'totalPrice', 'price', 'amount', 'servicePrice'];
             
-            // 确保金额是有效数字
-            if (isNaN(amount)) amount = 0;
+            for (const field of priceFields) {
+                if (order[field] !== undefined && order[field] !== null && order[field] !== '') {
+                    const val = parseFloat(order[field]);
+                    if (!isNaN(val) && val > 0) {
+                        amount = val;
+                        break;
+                    }
+                }
+            }
             
             return {
                 ...order,
@@ -139,7 +138,10 @@ function renderOrdersTable(orders) {
     }
     
     tbody.innerHTML = orders.map(order => {
-        const amount = typeof order.amount === 'number' ? order.amount.toFixed(2) : '0.00';
+        // 安全格式化金额
+        const amount = order.amount !== undefined && order.amount !== null 
+            ? parseFloat(order.amount).toFixed(2) 
+            : '0.00';
         
         return `
             <tr>
@@ -207,7 +209,10 @@ function viewOrder(orderId) {
     const content = document.getElementById('orderDetailContent');
     if (!content) return;
     
-    const amount = typeof selectedOrder.amount === 'number' ? selectedOrder.amount.toFixed(2) : '0.00';
+    // 安全格式化金额
+    const amount = selectedOrder.amount !== undefined && selectedOrder.amount !== null 
+        ? parseFloat(selectedOrder.amount).toFixed(2) 
+        : '0.00';
     
     content.innerHTML = `
         <div class="detail-section">
