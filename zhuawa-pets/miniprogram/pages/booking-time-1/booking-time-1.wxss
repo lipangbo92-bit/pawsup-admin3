@@ -1,0 +1,41 @@
+.container {
+  min-height: 100vh;
+  background: var(--bg, #FDF2F8);
+  padding: 16px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text, #1F2937);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.date-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.date-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.1);
+}
+
+.date-day {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #1F2937);
+  display: block;
+}
+
+.date-week {
+  font-size: 12px;
+  color: var(--text-secondary, #6B7280);
+  margin-top: 4px;
+  display: block;
+}

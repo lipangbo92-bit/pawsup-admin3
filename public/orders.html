@@ -27,10 +27,16 @@
             <nav class="sidebar">
                 <ul class="nav-menu">
                     <li><a href="dashboard">📊 仪表盘</a></li>
-                    <li class="active"><a href="orders">📋 订单管理</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
                     <li><a href="services">🛁 服务管理</a></li>
-                    <li><a href="technicians">👨‍🔧 技师管理</a></li>
-                    <li><a href="schedule">📅 排班管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
+                    <li><a href="membership-levels">💎 会员档位</a></li>
+                    <li><a href="coupons">🎫 优惠券</a></li>
+                    <li><a href="users">👥 用户管理</a></li>
                     <li><a href="statistics">📈 数据统计</a></li>
                 </ul>
             </nav>
@@ -39,6 +45,12 @@
                 <div class="page-header">
                     <h2>订单管理</h2>
                     <div class="filter-bar">
+                        <select id="orderTypeFilter" onchange="filterOrders()">
+                            <option value="">全部类型</option>
+                            <option value="service">洗护美容</option>
+                            <option value="boarding">寄养日托</option>
+                            <option value="visiting">上门服务</option>
+                        </select>
                         <select id="statusFilter" onchange="filterOrders()">
                             <option value="">全部状态</option>
                             <option value="pending">待处理</option>

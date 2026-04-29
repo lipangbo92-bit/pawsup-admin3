@@ -1,0 +1,74 @@
+<!--pages/orders/orders.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-placeholder"></view>
+      <text class="nav-title">我的订单</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 标签切换栏 -->
+  <view class="tab-bar">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="tab-item {{activeTab === item.key ? 'active' : ''}}"
+      data-tab="{{item.key}}"
+      bindtap="onTabChange"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <!-- 加载中 -->
+    <view wx:if="{{loading}}" class="loading-state">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 订单卡片 -->
+    <view
+      wx:for="{{orders}}"
+      wx:key="id"
+      class="order-card"
+      data-id="{{item.id}}"
+      data-type="{{item.orderType}}"
+      bindtap="onOrderClick"
+      wx:if="{{!loading}}"
+    >
+      <!-- 订单头部：编号 + 状态 -->
+      <view class="order-header">
+        <text class="order-no">订单号：{{item.orderNo}}</text>
+        <view class="status-tag {{item.status === 'cancelled' ? 'status-cancelled' : (item.paymentStatus === 'unpaid' ? 'status-pending' : (item.status === 'completed' ? 'status-completed' : 'status-confirmed'))}}">
+          {{item.status === 'cancelled' ? '已取消' : (item.paymentStatus === 'unpaid' ? '待支付' : (item.status === 'completed' ? '已完成' : '待服务'))}}
+        </view>
+      </view>
+
+      <!-- 订单内容 -->
+      <view class="order-body">
+        <view class="order-info">
+          <text class="service-name">{{item.serviceName}}</text>
+          <view class="meta-info">
+            <text class="meta-item">{{item.date}} {{item.time}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 订单底部：价格 -->
+      <view class="order-footer">
+        <text class="price-label">实付金额：</text>
+        <text class="price-value">¥{{item.finalPrice || item.totalPrice}}</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{orders.length === 0 && !loading}}" class="empty-state">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无订单</text>
+    </view>
+  </view>
+</view>

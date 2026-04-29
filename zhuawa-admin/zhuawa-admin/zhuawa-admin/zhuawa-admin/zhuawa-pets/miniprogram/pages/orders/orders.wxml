@@ -1,0 +1,54 @@
+<!--订单列表页-->
+<view class="container">
+  <!--状态筛选-->
+  <view class="status-tabs">
+    <view 
+      wx:for="{{statusList}}" 
+      wx:key="key"
+      class="tab-item {{status === item.key ? 'active' : ''}}"
+      data-status="{{item.key}}"
+      bindtap="switchStatus"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!--订单列表-->
+  <view class="order-list">
+    <view 
+      wx:for="{{orders}}" 
+      wx:key="_id"
+      class="order-card"
+      data-id="{{item._id}}"
+      bindtap="goToDetail"
+    >
+      <view class="order-header">
+        <text class="order-no">{{item.orderNo || item._id}}</text>
+        <text class="order-status {{getStatusClass(item.status)}}">{{getStatusText(item.status)}}</text>
+      </view>
+      
+      <view class="order-body">
+        <view class="service-name">{{item.serviceName}}</view>
+        <view class="order-info">
+          <text>{{item.petName}}</text>
+          <text>{{item.date}} {{item.time}}</text>
+        </view>
+      </view>
+      
+      <view class="order-footer">
+        <text class="price">¥{{item.servicePrice}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <!--空状态-->
+    <view class="empty" wx:if="{{orders.length === 0 && !loading}}">
+      <text>暂无订单</text>
+    </view>
+
+    <!--加载中-->
+    <view class="loading" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+  </view>
+</view>

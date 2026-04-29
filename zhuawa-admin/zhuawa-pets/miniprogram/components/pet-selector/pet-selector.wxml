@@ -1,0 +1,60 @@
+<view class="pet-selector-mask" wx:if="{{visible}}" bindtap="onMaskTap">
+  <view class="pet-selector-popup" catchtap="onPopupTap">
+    <!-- 标题栏 -->
+    <view class="selector-header">
+      <text class="selector-title">选择宠物</text>
+      <text class="selector-close" bindtap="onClose">×</text>
+    </view>
+    
+    <!-- 宠物列表 -->
+    <scroll-view class="pet-list" scroll-y wx:if="{{pets.length > 0}}">
+      <view 
+        wx:for="{{pets}}" 
+        wx:key="_id"
+        class="pet-card {{selectedPet && selectedPet._id === item._id ? 'selected' : ''}}"
+        data-index="{{index}}"
+        bindtap="onSelectPet"
+      >
+        <view class="pet-avatar">
+          <image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill"/>
+          <text wx:else class="pet-emoji">{{item.type === 'cat' ? '🐱' : '🐶'}}</text>
+        </view>
+        <view class="pet-info">
+          <text class="pet-name">{{item.name}}</text>
+          <text class="pet-meta">{{item.breed}} · {{item.age}}岁</text>
+        </view>
+        <view class="check-icon" wx:if="{{selectedPet && selectedPet._id === item._id}}">✓</view>
+      </view>
+      
+      <!-- 添加新宠物 -->
+      <view class="add-pet-card" bindtap="onAddPet">
+        <text class="add-icon">+</text>
+        <text class="add-text">添加新宠物</text>
+      </view>
+    </scroll-view>
+    
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{!loading}}">
+      <text class="empty-icon">🐾</text>
+      <text class="empty-text">还没有添加宠物</text>
+      <text class="empty-subtext">请先添加您的爱宠信息</text>
+      <button class="add-btn" bindtap="onAddPet">添加宠物</button>
+    </view>
+    
+    <!-- 加载中 -->
+    <view class="loading-state" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    
+    <!-- 底部按钮 -->
+    <view class="selector-footer" wx:if="{{pets.length > 0}}">
+      <button 
+        class="confirm-btn {{selectedPet ? 'active' : 'disabled'}}" 
+        bindtap="onConfirm"
+        disabled="{{!selectedPet}}"
+      >
+        下一步
+      </button>
+    </view>
+  </view>
+</view>

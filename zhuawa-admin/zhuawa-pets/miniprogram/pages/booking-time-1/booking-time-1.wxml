@@ -1,0 +1,17 @@
+<!--选择时间1 - 选择日期-->
+<view class="container">
+  <view class="title">选择预约日期</view>
+  
+  <view class="date-list">
+    <view 
+      wx:for="{{dates}}" 
+      wx:key="fullDate"
+      class="date-item"
+      data-index="{{index}}"
+      bindtap="selectDate"
+    >
+      <text class="date-day">{{item.date}}</text>
+      <text class="date-week">周{{item.weekday}}</text>
+    </view>
+  </view>
+</view>

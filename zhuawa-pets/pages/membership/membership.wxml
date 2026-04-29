@@ -1,0 +1,109 @@
+<!--pages/membership/membership.wxml-->
+<view class="page-container">
+  <!-- 会员卡片 -->
+  <view class="membership-card" style="background: linear-gradient(135deg, {{membershipColor}} 0%, {{membershipColorDark}} 100%);">
+    <view class="membership-header">
+      <view class="level-badge">
+        <view class="level-icon">
+          <image wx:if="{{isCustomIcon}}" src="{{membershipIcon}}" mode="aspectFit" class="custom-icon"></image>
+          <text wx:else>{{membershipIcon}}</text>
+        </view>
+        <text class="level-name">{{membership.levelName}}</text>
+      </view>
+    </view>
+    
+    <view class="progress-section" wx:if="{{nextLevel}}">
+      <view class="progress-text">
+        <text>再充值{{nextLevelDiff}}元升级{{nextLevel.name}}</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progressPercent}}%;"></view>
+      </view>
+      <view class="progress-range">
+        <text>{{currentLevel.minRecharge / 100}}元</text>
+        <text>{{nextLevel.minRecharge / 100}}元</text>
+      </view>
+    </view>
+    
+    <view class="max-level-tip" wx:if="{{!nextLevel}}">
+      <text>🎉 您已达到最高等级</text>
+    </view>
+  </view>
+
+  <!-- 资产卡片 -->
+  <view class="assets-card">
+    <view class="asset-item" bindtap="goToRecharge">
+      <view class="asset-value">
+        <text class="currency">¥</text>
+        <text class="amount">{{balance}}</text>
+      </view>
+      <text class="asset-label">余额</text>
+      <view class="asset-action">
+        <text class="action-text">去充值</text>
+        <text class="action-arrow">></text>
+      </view>
+    </view>
+    
+    <view class="asset-divider"></view>
+    
+    <view class="asset-item">
+      <view class="asset-value">
+        <text class="amount">{{membership.points}}</text>
+      </view>
+      <text class="asset-label">积分</text>
+      <view class="asset-action" bindtap="showPointsTip">
+        <text class="action-text">说明</text>
+        <text class="action-arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 权益列表 -->
+  <view class="benefits-section">
+    <view class="section-title">我的权益</view>
+    <view class="benefits-list">
+      <!-- 使用管理端配置的权益 -->
+      <view class="benefit-item" wx:for="{{currentLevel.benefits}}" wx:key="*this">
+        <view class="benefit-dot"></view>
+        <view class="benefit-info">
+          <text class="benefit-name">{{item}}</text>
+        </view>
+      </view>
+      <!-- 如果没有配置权益，显示默认权益 -->
+      <view wx:if="{{!currentLevel.benefits || currentLevel.benefits.length === 0}}">
+        <view class="benefit-item">
+          <view class="benefit-dot"></view>
+          <view class="benefit-info">
+            <text class="benefit-name">专属折扣</text>
+            <text class="benefit-desc">{{discountText === '无折扣' ? discountText : discountText + '优惠'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 明细入口 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="goToBalanceRecords">
+      <text class="menu-icon">💳</text>
+      <text class="menu-text">余额明细</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="goToPointsRecords">
+      <text class="menu-icon">🎯</text>
+      <text class="menu-text">积分明细</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="goToCoupons">
+      <text class="menu-icon">🎫</text>
+      <text class="menu-text">我的优惠券</text>
+      <text class="menu-arrow">></text>
+    </view>
+    <view class="menu-item" bindtap="showLevelInfo">
+      <text class="menu-icon">📋</text>
+      <text class="menu-text">会员等级说明</text>
+      <text class="menu-arrow">></text>
+    </view>
+  </view>
+
+</view>

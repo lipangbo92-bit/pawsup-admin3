@@ -1,0 +1,288 @@
+<!--pages/visiting/visiting.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="nav-title">上门服务预约</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}} {{currentStep > 1 ? 'completed' : ''}}">
+      <view class="step-dot">
+        <text class="step-number" wx:if="{{currentStep <= 1}}">1</text>
+        <text class="step-check" wx:else>✓</text>
+      </view>
+      <text class="step-text">选择服务</text>
+    </view>
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}} {{currentStep > 2 ? 'completed' : ''}}">
+      <view class="step-dot">
+        <text class="step-number" wx:if="{{currentStep <= 2}}">2</text>
+        <text class="step-check" wx:else>✓</text>
+      </view>
+      <text class="step-text">选择时间</text>
+    </view>
+    <view class="step-line {{currentStep >= 3 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 3 ? 'active' : ''}} {{currentStep > 3 ? 'completed' : ''}}">
+      <view class="step-dot">
+        <text class="step-number" wx:if="{{currentStep <= 3}}">3</text>
+        <text class="step-check" wx:else>✓</text>
+      </view>
+      <text class="step-text">填写地址</text>
+    </view>
+    <view class="step-line {{currentStep >= 4 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 4 ? 'active' : ''}} {{currentStep > 4 ? 'completed' : ''}}">
+      <view class="step-dot">
+        <text class="step-number" wx:if="{{currentStep <= 4}}">4</text>
+        <text class="step-check" wx:else>✓</text>
+      </view>
+      <text class="step-text">服务需求</text>
+    </view>
+    <view class="step-line {{currentStep >= 5 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 5 ? 'active' : ''}}">
+      <view class="step-dot">
+        <text class="step-number">5</text>
+      </view>
+      <text class="step-text">确认预约</text>
+    </view>
+  </view>
+
+  <!-- 步骤1：选择服务项目 -->
+  <view class="step-content" wx:if="{{currentStep === 1}}">
+    <view class="section-title">
+      <text class="title-icon">🐾</text>
+      <text>选择上门喂养服务</text>
+    </view>
+    <view class="service-list">
+      <view class="service-card {{selectedService.id === item.id ? 'selected' : ''}}" 
+            wx:for="{{serviceList}}" 
+            wx:key="id"
+            bindtap="selectService"
+            data-id="{{item.id}}">
+        <view class="service-icon-wrapper {{item.iconClass}}">
+          <text class="icon-text">{{item.icon}}</text>
+        </view>
+        <view class="service-info">
+          <text class="service-name">{{item.name}}</text>
+          <text class="service-desc">{{item.desc}}</text>
+          <view class="service-bottom">
+            <view class="price-wrapper">
+              <text class="price-symbol">¥</text>
+              <text class="price-value">{{item.price}}</text>
+              <text class="price-unit">{{item.unit}}</text>
+            </view>
+            <view class="select-btn {{selectedService.id === item.id ? 'selected' : ''}}">
+              <text class="select-icon" wx:if="{{selectedService.id === item.id}}">✓</text>
+              <text class="select-icon" wx:else>+</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤2：选择日期时间 -->
+  <view class="step-content" wx:if="{{currentStep === 2}}">
+    <view class="section-card">
+      <view class="card-title">
+        <text class="title-icon">📅</text>
+        <text>选择服务日期</text>
+      </view>
+      <scroll-view class="date-scroll" scroll-x="true" show-scrollbar="false">
+        <view class="date-list">
+          <view class="date-item {{selectedDateIndex === index ? 'active' : ''}} {{!item.available ? 'disabled' : ''}}" 
+                wx:for="{{dateList}}" 
+                wx:key="index"
+                bindtap="onDateSelect"
+                data-index="{{index}}">
+            <text class="date-week">{{item.week}}</text>
+            <text class="date-day">{{item.day}}</text>
+            <text class="date-status" wx:if="{{!item.available}}">已满</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section-card">
+      <view class="card-title">
+        <text class="title-icon">⏰</text>
+        <text>选择服务时间</text>
+      </view>
+      <view class="time-grid">
+        <view class="time-item {{selectedTime === item.time ? 'active' : ''}} {{!item.available ? 'disabled' : ''}}" 
+              wx:for="{{timeList}}" 
+              wx:key="time"
+              bindtap="onTimeSelect"
+              data-time="{{item.time}}">
+          <text class="time-text">{{item.time}}</text>
+          <text class="time-status" wx:if="{{!item.available}}">已满</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤3：填写地址 -->
+  <view class="step-content" wx:if="{{currentStep === 3}}">
+    <view class="section-card address-card">
+      <view class="card-title">
+        <text class="title-icon">📍</text>
+        <text>联系人信息</text>
+      </view>
+      <view class="form-list">
+        <view class="form-item">
+          <text class="form-label">联系人</text>
+          <input class="form-input" placeholder="请输入联系人姓名" value="{{addressInfo.contactName}}" bindinput="onInputChange" data-field="contactName"/>
+        </view>
+        <view class="form-item">
+          <text class="form-label">联系电话</text>
+          <input class="form-input" type="number" placeholder="请输入手机号码" value="{{addressInfo.contactPhone}}" bindinput="onInputChange" data-field="contactPhone"/>
+        </view>
+        <view class="form-item address-item">
+          <text class="form-label">服务地址</text>
+          <textarea class="form-textarea" placeholder="请输入详细地址（小区、楼栋、门牌号）" value="{{addressInfo.address}}" bindinput="onInputChange" data-field="address"/>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤4：填写服务需求 -->
+  <view class="step-content" wx:if="{{currentStep === 4}}">
+    <!-- 已选宠物信息展示 -->
+    <view class="section-card" wx:if="{{selectedPet.name}}">
+      <view class="card-title">
+        <text class="title-icon">🐱</text>
+        <text>已选宠物</text>
+      </view>
+      <view class="selected-pet-info">
+        <view class="pet-avatar">
+          <image wx:if="{{selectedPet.avatar}}" src="{{selectedPet.avatar}}" mode="aspectFill"/>
+          <text wx:else class="pet-emoji">{{selectedPet && selectedPet.type === 'cat' ? '🐱' : '🐶'}}</text>
+        </view>
+        <view class="pet-detail">
+          <text class="pet-name">{{selectedPet.name}}</text>
+          <text class="pet-breed" wx:if="{{selectedPet && selectedPet.breed}}">{{selectedPet.breed}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-card">
+      <view class="card-title">
+        <text class="title-icon">📝</text>
+        <text>服务需求备注</text>
+      </view>
+      <view class="remark-section-full">
+        <textarea class="remark-textarea-full" placeholder="请填写您的服务需求，如：&#10;- 宠物性格和习惯&#10;- 喂食量和时间&#10;- 特殊注意事项&#10;- 钥匙存放位置等" value="{{remark}}" bindinput="onRemarkInput" maxlength="500"/>
+        <text class="remark-count">{{remark.length}}/500</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤5：确认预约 -->
+  <view class="step-content" wx:if="{{currentStep === 5}}">
+    <!-- 服务信息卡片 -->
+    <view class="confirm-card">
+      <view class="card-header">
+        <text class="header-icon">📋</text>
+        <text class="header-title">预约信息</text>
+      </view>
+      <view class="card-body">
+        <view class="info-row">
+          <text class="info-label">服务项目</text>
+          <view class="info-value">
+            <text class="value-icon">{{selectedService.icon}}</text>
+            <text class="value-text">{{selectedService.name}}</text>
+          </view>
+        </view>
+        <view class="info-row">
+          <text class="info-label">服务时间</text>
+          <view class="info-value">
+            <text class="value-text highlight">{{selectedDateStr}} {{selectedTime}}</text>
+          </view>
+        </view>
+        <view class="info-row">
+          <text class="info-label">联系人</text>
+          <view class="info-value">
+            <text class="value-text">{{addressInfo.contactName}} {{addressInfo.contactPhone}}</text>
+          </view>
+        </view>
+        <view class="info-row">
+          <text class="info-label">服务地址</text>
+          <view class="info-value">
+            <text class="value-text">{{addressInfo.address}}</text>
+          </view>
+        </view>
+        <view class="info-row" wx:if="{{selectedPet.name}}">
+          <text class="info-label">宠物信息</text>
+          <view class="info-value">
+            <text class="value-text">{{selectedPet.name}}<text wx:if="{{selectedPet && selectedPet.breed}}"> ({{selectedPet.breed}})</text></text>
+          </view>
+        </view>
+        <view class="info-row last-row" wx:if="{{remark}}">
+          <text class="info-label">服务需求</text>
+          <view class="info-value">
+            <text class="value-text">{{remark}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 价格卡片 -->
+    <view class="price-card">
+      <text class="price-label">应付金额</text>
+      <view class="price-content">
+        <text class="price-symbol">¥</text>
+        <text class="price-number">{{totalPrice}}</text>
+      </view>
+    </view>
+
+    <!-- 提示信息 -->
+    <view class="notice-box">
+      <text class="notice-icon">⚠️</text>
+      <text class="notice-text">取消政策：预约时间前24小时可免费取消；24小时内取消将收取50%费用。</text>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view class="bottom-space"></view>
+</view>
+
+<!-- 底部按钮栏 -->
+<view class="bottom-bar">
+  <view class="btn-group">
+    <button class="prev-btn" wx:if="{{currentStep > 1}}" bindtap="goBack">上一步</button>
+    <button class="next-btn {{canProceed ? 'active' : ''}}" bindtap="nextStep" disabled="{{!canProceed}}">
+      {{currentStep === 5 ? '确认支付' : '下一步'}}
+    </button>
+  </view>
+</view>
+
+<!-- 底部 TabBar -->
+<view class="tab-bar">
+  <view class="tab-item {{activeTab === 'home' ? 'active' : ''}}" bindtap="switchTab" data-page="home">
+    <image wx:if="{{activeTab === 'home'}}" class="tab-icon" src="/images/home-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/home.png" mode="aspectFit"/>
+    <text class="tab-text">首页</text>
+  </view>
+  <view class="tab-item {{activeTab === 'service' ? 'active' : ''}}" bindtap="switchTab" data-page="service">
+    <image wx:if="{{activeTab === 'service'}}" class="tab-icon" src="/images/service-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/service.png" mode="aspectFit"/>
+    <text class="tab-text">服务</text>
+  </view>
+  <view class="tab-item {{activeTab === 'orders' ? 'active' : ''}}" bindtap="switchTab" data-page="orders">
+    <image wx:if="{{activeTab === 'orders'}}" class="tab-icon" src="/images/order-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/order.png" mode="aspectFit"/>
+    <text class="tab-text">订单</text>
+  </view>
+  <view class="tab-item {{activeTab === 'profile' ? 'active' : ''}}" bindtap="switchTab" data-page="profile">
+    <image wx:if="{{activeTab === 'profile'}}" class="tab-icon" src="/images/profile-active.png" mode="aspectFit"/>
+    <image wx:else class="tab-icon" src="/images/profile.png" mode="aspectFit"/>
+    <text class="tab-text">我的</text>
+  </view>
+</view>

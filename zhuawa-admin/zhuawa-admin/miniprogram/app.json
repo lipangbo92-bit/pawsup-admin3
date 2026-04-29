@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/technician/technician",
+    "pages/booking-time/booking-time",
+    "pages/pet-select/pet-select",
+    "pages/pet-edit/pet-edit",
+    "pages/booking-confirm/booking-confirm",
+    "pages/booking-success/booking-success",
+    "pages/orders/orders",
+    "pages/order-detail/order-detail",
+    "pages/profile/profile",
+    "pages/admin/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#EC4899",
+    "navigationBarTitleText": "栖游记",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#EC4899",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单",
+        "iconPath": "assets/icons/order.png",
+        "selectedIconPath": "assets/icons/order-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "assets/icons/profile.png",
+        "selectedIconPath": "assets/icons/profile-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json"
+}

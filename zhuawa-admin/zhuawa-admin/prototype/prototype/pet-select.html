@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择宠物 - 栖游记</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px; }
+        
+        .header {
+            background: var(--white);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back { font-size: 20px; cursor: pointer; }
+        .title { font-family: 'Varela Round', sans-serif; font-size: 18px; }
+        
+        .section { padding: 20px 16px; }
+        
+        .pet-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        .pet-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .pet-card:active { transform: scale(0.98); }
+        .pet-card.selected { border-color: var(--primary); background: var(--gray-100); }
+        
+        .pet-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gray-200) 0%, var(--primary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .pet-info { flex: 1; }
+        .pet-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .pet-meta { font-size: 13px; color: #6B7280; }
+        
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 14px;
+        }
+        .pet-card.selected .check-icon {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .add-pet {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px dashed var(--gray-200);
+            transition: all 0.2s;
+        }
+        .add-pet:active { border-color: var(--primary); }
+        .add-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--gray-100);
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+        }
+        .add-text { color: var(--primary); font-weight: 600; }
+        
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 16px 20px 30px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        }
+        .next-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="back">←</div>
+        <div class="title">选择宠物</div>
+    </div>
+    
+    <div class="section">
+        <div class="pet-list">
+            <div class="pet-card selected">
+                <div class="pet-avatar">🐕</div>
+                <div class="pet-info">
+                    <div class="pet-name">豆豆</div>
+                    <div class="pet-meta">金毛 · 2岁 · 30kg</div>
+                </div>
+                <div class="check-icon">✓</div>
+            </div>
+            
+            <div class="pet-card">
+                <div class="pet-avatar">🐈</div>
+                <div class="pet-info">
+                    <div class="pet-name">咪咪</div>
+                    <div class="pet-meta">英短 · 1岁 · 4kg</div>
+                </div>
+                <div class="check-icon"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="add-pet">
+            <div class="add-icon">+</div>
+            <div class="add-text">添加新宠物</div>
+        </div>
+    </div>
+    
+    <div class="fixed-bottom">
+        <button class="next-btn">下一步</button>
+    </div>
+</body>
+</html>

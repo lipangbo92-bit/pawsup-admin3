@@ -1,0 +1,71 @@
+<!--pages/booking-confirm/booking-confirm.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="back" bindtap="goBack">←</view>
+    <view class="title">确认预约</view>
+    <view class="placeholder"></view>
+  </view>
+  
+  <!-- 预约信息卡片 -->
+  <view class="card">
+    <view class="card-title">预约信息</view>
+    
+    <view class="info-row">
+      <text class="label">服务项目</text>
+      <text class="value">{{service.name}}</text>
+    </view>
+    
+    <view class="info-row" wx:if="{{technician}}">
+      <text class="label">服务技师</text>
+      <text class="value">{{technician.name}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">预约宠物</text>
+      <text class="value">{{pet.name}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="label">预约时间</text>
+      <text class="value highlight">{{date}} {{time}}</text>
+    </view>
+  </view>
+  
+  <!-- 备注 -->
+  <view class="card">
+    <view class="card-title">备注</view>
+    <textarea 
+      class="remark-input" 
+      placeholder="如有特殊需求请填写"
+      bindinput="onRemarkChange"
+    ></textarea>
+  </view>
+  
+  <!-- 费用说明 -->
+  <view class="card">
+    <view class="card-title">费用说明</view>
+    <view class="info-row">
+      <text class="label">服务费用</text>
+      <text class="value">¥{{service.price}}</text>
+    </view>
+    <view class="info-row">
+      <text class="label">支付方式</text>
+      <text class="value">微信支付</text>
+    </view>
+    <view class="info-row">
+      <text class="label">取消政策</text>
+      <text class="value">提前3小时取消全额退款</text>
+    </view>
+  </view>
+  
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <view class="price">
+      <text class="label">合计</text>
+      <text class="amount">¥{{service.price}}</text>
+    </view>
+    <view class="submit-btn" bindtap="submitOrder">
+      立即支付
+    </view>
+  </view>
+</view>

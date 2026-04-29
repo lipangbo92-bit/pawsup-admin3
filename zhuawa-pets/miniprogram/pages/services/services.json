@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "pet-selector": "/components/pet-selector/pet-selector"
+  },
+  "navigationStyle": "custom"
+}

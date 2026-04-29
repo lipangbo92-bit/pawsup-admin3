@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/orders", "destination": "/orders.html" },
+    { "source": "/services", "destination": "/services.html" },
+    { "source": "/boarding-rooms", "destination": "/boarding-rooms.html" },
+    { "source": "/groomers", "destination": "/groomers.html" },
+    { "source": "/statistics", "destination": "/statistics.html" },
+    { "source": "/schedule", "destination": "/schedule.html" },
+    { "source": "/admin-schedule", "destination": "/admin-schedule.html" },
+    { "source": "/admin-appointments", "destination": "/admin-appointments.html" },
+    { "source": "/banner", "destination": "/banner.html" },
+    { "source": "/membership-levels", "destination": "/membership-levels.html" },
+    { "source": "/coupons", "destination": "/coupons.html" }
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  }
+}

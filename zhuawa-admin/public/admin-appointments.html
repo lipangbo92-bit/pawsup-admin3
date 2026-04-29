@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>PawsUp 爪哇宠屋 - 预约管理</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .appointments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .appointments-stats {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            min-width: 100px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+        
+        /* 卡片式时间段展示 */
+        .time-slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .time-slot-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+        
+        .time-slot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .time-slot-card.available {
+            border-left-color: #10b981;
+        }
+        
+        .time-slot-card.booked {
+            border-left-color: var(--secondary-color);
+        }
+        
+        .time-slot-card.rest {
+            border-left-color: var(--gray-400);
+            opacity: 0.6;
+        }
+        
+        .slot-time {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+        }
+        
+        .slot-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .slot-status.available {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .slot-status.booked {
+            background: #ede9fe;
+            color: var(--secondary-color);
+        }
+        
+        .slot-appointment-info {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--gray-100);
+        }
+        
+        .slot-appointment-info .customer {
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 14px;
+        }
+        
+        .slot-appointment-info .service {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+        
+        .slot-appointment-info .tech {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 4px;
+        }
+        
+        .tech-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tech-filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--gray-200);
+            background: var(--white);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .tech-filter-btn:hover, .tech-filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--gray-800);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li class="active"><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="boarding-rooms">🏠 房型管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="banner">🖼️ Banner管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>预约管理</h2>
+                    <button class="btn-primary" onclick="openNewAppointmentModal()">+ 新增预约</button>
+                </div>
+                
+                <div class="appointments-header">
+                    <div class="date-selector">
+                        <label>选择日期：</label>
+                        <input type="date" id="summaryDate" class="form-control" onchange="onSummaryDateChange()">
+                    </div>
+                    <div class="appointments-stats">
+                        <div class="stat-card">
+                            <div class="value" id="statTotalOrders">0</div>
+                            <div class="label">今日预约</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="statAvailable">0</div>
+                            <div class="label">可预约时段</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tech-filter" id="techFilter"></div>
+                
+                <div class="section-title">时间段预约情况</div>
+                <div class="time-slots-container" id="timeSlotsContainer">
+                    <div class="empty-state">请选择日期查看预约情况</div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 新增预约弹窗 -->
+    <div class="modal" id="newAppointmentModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>新增预约</h3>
+                <button class="close-btn" onclick="closeNewAppointmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>客户姓名 *</label>
+                            <input type="text" id="customerName" class="form-control" required placeholder="请输入客户姓名">
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话 *</label>
+                            <input type="tel" id="customerPhone" class="form-control" required placeholder="请输入联系电话">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>宠物类型 *</label>
+                            <select id="petType" class="form-control" required>
+                                <option value="">请选择</option>
+                                <option value="dog">狗狗</option>
+                                <option value="cat">猫咪</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>宠物名称</label>
+                            <input type="text" id="petName" class="form-control" placeholder="请输入宠物名称">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>选择服务 *</label>
+                            <select id="serviceId" class="form-control" required onchange="onServiceChange()">
+                                <option value="">请选择服务</option>
+                            </select>
+                            <small id="serviceDurationHint" style="color:#999;font-size:12px;"></small>
+                        </div>
+                        <div class="form-group">
+                            <label>选择美容师 *</label>
+                            <select id="techId" class="form-control" required onchange="onTechChange()">
+                                <option value="">请选择美容师</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>预约日期 *</label>
+                            <input type="date" id="appointmentDate" class="form-control" required onchange="onDateChange()">
+                        </div>
+                        <div class="form-group">
+                            <label>开始时间 *</label>
+                            <select id="appointmentTime" class="form-control" required>
+                                <option value="">请选择时间</option>
+                            </select>
+                            <small id="durationHint" style="color:#999;font-size:12px;"></small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="remark" class="form-control" rows="2" placeholder="可选：特殊要求或备注"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeNewAppointmentModal()">取消</button>
+                <button class="btn-primary" onclick="saveAppointment()">确认预约</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/appointment-new.js"></script>
+</body>
+</html>

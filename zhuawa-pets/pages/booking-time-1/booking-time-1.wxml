@@ -1,0 +1,167 @@
+<!--pages/booking-time-1/booking-time-1.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-back" bindtap="goBack">
+        <text class="back-icon">‹</text>
+      </view>
+      <text class="nav-title">选择时间</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step-item {{currentStep >= 1 ? 'active' : ''}}">
+      <view class="step-dot">1</view>
+      <text class="step-text">选择服务</text>
+    </view>
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 2 ? 'active' : ''}}">
+      <view class="step-dot">2</view>
+      <text class="step-text">选择时间</text>
+    </view>
+    <view class="step-line {{currentStep >= 3 ? 'active' : ''}}"></view>
+    <view class="step-item {{currentStep >= 3 ? 'active' : ''}}">
+      <view class="step-dot">3</view>
+      <text class="step-text">选择技师</text>
+    </view>
+  </view>
+
+  <!-- 已选服务信息卡片 -->
+  <view class="selected-service-card" wx:if="{{selectedService}}">
+    <view class="service-header">
+      <text class="service-icon">{{selectedService.icon}}</text>
+      <view class="service-info">
+        <text class="service-name">{{selectedService.name}}</text>
+        <text class="service-price">¥{{selectedService.price}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 日期选择区 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="title-icon">📅</text>
+      <text>选择日期</text>
+    </view>
+    <scroll-view class="date-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="date-list">
+        <view class="date-item {{selectedDateIndex === index ? 'active' : ''}} {{!item.available ? 'disabled' : ''}}" 
+              wx:for="{{dateList}}" 
+              wx:key="index"
+              bindtap="onDateSelect"
+              data-index="{{index}}">
+          <text class="date-week">{{item.week}}</text>
+          <text class="date-day">{{item.day}}</text>
+          <text class="date-status" wx:if="{{!item.available}}">约满</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 时间选择区 -->
+  <view class="section">
+    <view class="section-title">
+      <text class="title-icon">⏰</text>
+      <text>选择时间</text>
+    </view>
+    <view class="time-sections">
+      <view class="time-section" wx:for="{{timeSections}}" wx:key="period">
+        <view class="period-label">{{item.period}}</view>
+        <view class="time-grid">
+          <view class="time-item {{time.selected ? 'active' : ''}} {{time.disabled ? 'disabled' : ''}}" 
+                wx:for="{{item.times}}" 
+                wx:for-item="time"
+                wx:for-index="tIndex"
+                wx:key="tIndex"
+                bindtap="onTimeSelect"
+                data-period="{{item.period}}"
+                data-index="{{tIndex}}">
+            <text class="time-text">{{time.time}}</text>
+            <text class="time-status" wx:if="{{time.status}}">{{time.status}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位 -->
+  <view class="bottom-space"></view>
+</view>
+
+<!-- 底部确认按钮 -->
+<view class="bottom-bar">
+  <view class="price-info" wx:if="{{selectedTime}}">
+    <text class="price-label">已选时间：</text>
+    <text class="price-value">{{selectedDateStr}} {{selectedTime}}</text>
+  </view>
+  <view class="price-info" wx:else>
+    <text class="price-label">请选择时间</text>
+  </view>
+  <button class="confirm-btn {{selectedTime ? 'active' : ''}}" bindtap="onConfirm" disabled="{{!selectedTime}}">
+    下一步
+  </button>
+</view>
+
+<!-- 技师选择弹窗 -->
+<view class="technician-modal {{showTechnicianModal ? 'show' : ''}}">
+  <!-- 遮罩层 -->
+  <view class="modal-mask" bindtap="closeTechnicianModal"></view>
+  
+  <!-- 弹窗内容 -->
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">选择美容师</text>
+      <view class="modal-close" bindtap="closeTechnicianModal">
+        <text class="close-icon">✕</text>
+      </view>
+    </view>
+    
+    <!-- 美容师列表 -->
+    <scroll-view class="technician-list" scroll-y="true">
+      <view class="technician-item {{selectedTechnician && selectedTechnician.id === item.id ? 'selected' : ''}}" 
+            wx:for="{{modalTechnicians}}" 
+            wx:key="id"
+            bindtap="onTechnicianSelect"
+            data-id="{{item.id}}">
+        <!-- 头像 -->
+        <view class="technician-avatar">
+          <block wx:if="{{item.avatar && item.avatar.length > 10}}">
+            <image src="{{item.avatar}}" mode="aspectFill" class="avatar-img"/>
+          </block>
+          <block wx:else>
+            <text class="avatar-emoji">👤</text>
+          </block>
+        </view>
+        
+        <!-- 信息 -->
+        <view class="technician-info">
+          <view class="technician-name-row">
+            <text class="technician-name">{{item.name}}</text>
+            <text class="technician-position">{{item.position}}</text>
+            <text class="technician-badge">{{item.level}}</text>
+          </view>
+          <view class="technician-stats">
+            <text class="technician-rating">⭐ {{item.rating}}分</text>
+            <text class="technician-orders">{{item.orders}}单</text>
+          </view>
+        </view>
+        
+        <!-- 选中标记 -->
+        <view class="select-indicator" wx:if="{{selectedTechnician && selectedTechnician.id === item.id}}">
+          <text class="check-icon">✓</text>
+        </view>
+      </view>
+    </scroll-view>
+    
+    <!-- 底部按钮 -->
+    <view class="modal-footer">
+      <button class="next-btn {{selectedTechnician ? 'active' : ''}}" bindtap="onNextStep" disabled="{{!selectedTechnician}}">
+        下一步
+      </button>
+    </view>
+  </view>
+</view>

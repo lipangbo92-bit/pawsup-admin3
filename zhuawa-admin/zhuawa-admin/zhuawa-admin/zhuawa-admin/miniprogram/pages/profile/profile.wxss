@@ -1,0 +1,88 @@
+/* pages/profile/profile.wxss */
+page {
+  background: #FDF2F8;
+}
+
+.container {
+  min-height: 100vh;
+}
+
+/* User Card */
+.user-card {
+  background: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  padding: 64rpx 32rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64rpx;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.user-phone {
+  color: rgba(255,255,255,0.8);
+  font-size: 26rpx;
+}
+
+.login-btn {
+  background: #fff;
+  color: #EC4899;
+  padding: 16rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+/* Menu List */
+.menu-list {
+  background: #fff;
+  margin: 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+
+.menu-text {
+  flex: 1;
+  color: #1F2937;
+  font-size: 28rpx;
+}
+
+.menu-arrow {
+  color: #9CA3AF;
+  font-size: 28rpx;
+}

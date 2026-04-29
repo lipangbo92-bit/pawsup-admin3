@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择时间 - 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-300: #FED7AA;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 100px;
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative; }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .header .back {
+            position: absolute;
+            left: 16px;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .header .title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 18px;
+            color: var(--white);
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            gap: 8px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #9CA3AF;
+        }
+        .step.active { color: var(--primary); font-weight: 600; }
+        .step.completed { color: var(--primary); }
+        .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .step.active .step-num { background: var(--primary); color: var(--white); }
+        .step.completed .step-num { background: var(--primary); color: var(--white); }
+        
+        .section {
+            padding: 0 16px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 15px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        
+        .date-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 0 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .date-scroll::-webkit-scrollbar { display: none; }
+        
+        .date-item {
+            flex: 0 0 auto;
+            width: 56px;
+            padding: 10px 8px;
+            background: var(--white);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .date-item.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        .date-day { font-size: 12px; opacity: 0.7; }
+        .date-num { font-size: 18px; font-weight: 700; }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 0 16px;
+        }
+        
+        .time-slot {
+            padding: 12px 8px;
+            background: var(--white);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .time-slot:hover { border-color: var(--gray-300); }
+        .time-slot.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        .time-slot.disabled {
+            background: var(--gray-100);
+            color: #9CA3AF;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        
+        .summary {
+            background: var(--white);
+            margin: 20px 16px;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.1);
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .summary-row:not(:last-child) { border-bottom: 1px solid var(--gray-100); }
+        .summary-label { color: #6B7280; }
+        .summary-value { font-weight: 600; }
+        
+        .fixed-bottom {
+            position: fixed;
+            bottom: 85px;
+            left: 0;
+            right: 0;
+            padding: 16px 20px 30px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        .next-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+        .next-btn.active { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="back" onclick="window.history.back()"><</span>
+        <div class="title">选择时间</div>
+    </div>
+    
+    <div class="steps">
+        <div class="step completed">
+            <span class="step-num">✓</span>
+            <span>服务</span>
+        </div>
+        <div class="step completed">
+            <span class="step-num">✓</span>
+            <span>技师</span>
+        </div>
+        <div class="step active">
+            <span class="step-num">3</span>
+            <span>时间</span>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">📅 选择日期</div>
+    </div>
+    <div class="date-scroll">
+        <div class="date-item">
+            <div class="date-day">周一</div>
+            <div class="date-num">26</div>
+        </div>
+        <div class="date-item active">
+            <div class="date-day">周二</div>
+            <div class="date-num">27</div>
+        </div>
+        <div class="date-item">
+            <div class="date-day">周三</div>
+            <div class="date-num">28</div>
+        </div>
+        <div class="date-item">
+            <div class="date-day">周四</div>
+            <div class="date-num">29</div>
+        </div>
+        <div class="date-item">
+            <div class="date-day">周五</div>
+            <div class="date-num">1</div>
+        </div>
+        <div class="date-item">
+            <div class="date-day">周六</div>
+            <div class="date-num">2</div>
+        </div>
+        <div class="date-item">
+            <div class="date-day">周日</div>
+            <div class="date-num">3</div>
+        </div>
+    </div>
+    
+    <div class="section" style="margin-top: 20px;">
+        <div class="section-title">🕐 选择时间</div>
+    </div>
+    <div class="time-grid">
+        <div class="time-slot">09:00</div>
+        <div class="time-slot">09:30</div>
+        <div class="time-slot">10:00</div>
+        <div class="time-slot">10:30</div>
+        <div class="time-slot disabled">11:00</div>
+        <div class="time-slot disabled">11:30</div>
+        <div class="time-slot">14:00</div>
+        <div class="time-slot">14:30</div>
+        <div class="time-slot">15:00</div>
+        <div class="time-slot active">15:30</div>
+        <div class="time-slot">16:00</div>
+        <div class="time-slot">16:30</div>
+    </div>
+    
+    <div class="summary">
+        <div class="summary-row">
+            <span class="summary-label">服务项目</span>
+            <span class="summary-value">狗狗洗护套餐</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">服务技师</span>
+            <span class="summary-value">小美</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">预约时间</span>
+            <span class="summary-value">02月27日 15:30</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">服务时长</span>
+            <span class="summary-value">60分钟</span>
+        </div>
+    </div>
+    
+    <div class="fixed-bottom">
+        <button class="next-btn active" onclick="window.location.href='booking-confirm.html'">下一步</button>
+    </div>
+    
+    <!-- 底部Tab栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='index.html'">
+            <span class="icon">🏠</span>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='services.html'">
+            <span class="icon">📋</span>
+            <span>服务</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='orders.html'">
+            <span class="icon">📝</span>
+            <span>订单</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+    
+    <style>
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9CA3AF;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: var(--primary);
+        }
+        .tab-item .icon {
+            font-size: 22px;
+        }
+    </style>
+</body>
+</html>

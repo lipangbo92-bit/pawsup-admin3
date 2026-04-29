@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>添加宠物 - 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-500: #EA580C;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 20px;
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .header .back {
+            position: absolute;
+            left: 16px;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .header h1 {
+            font-family: 'Varela Round', sans-serif;
+            color: var(--white);
+            font-size: 18px;
+        }
+        
+        /* 表单区域 */
+        .form-section {
+            padding: 8px 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        
+        .form-label .required {
+            color: #EF4444;
+            margin-left: 2px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+        
+        /* 物种选择 */
+        .species-select {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .species-tag {
+            flex: 1;
+            padding: 10px 8px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .species-tag.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        /* 性别选择 */
+        .gender-select {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .gender-tag {
+            flex: 1;
+            padding: 8px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .gender-tag.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        /* 年龄体重改为每行一个，确保不超出屏幕 */
+        .inline-input {
+            display: flex;
+            align-items: center;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        
+        .inline-input input {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            font-size: 14px;
+            color: var(--text);
+            text-align: center;
+            min-width: 0;
+            width: 100%;
+        }
+        
+        .inline-input input:focus {
+            outline: none;
+        }
+        
+        .inline-input .unit {
+            padding: 0 10px;
+            font-size: 12px;
+            color: var(--text-light);
+            border-left: 1px solid var(--gray-100);
+            white-space: nowrap;
+        }
+        
+        /* 备注 */
+        .remark-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--white);
+            min-height: 60px;
+            resize: none;
+            font-family: 'Nunito Sans', sans-serif;
+        }
+        
+        .remark-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .remark-input::placeholder {
+            color: #9CA3AF;
+        }
+        
+        /* 底部按钮 */
+        .bottom-action {
+            position: fixed;
+            bottom: 85px;
+            left: 0;
+            right: 0;
+            padding: 12px 20px 24px;
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .submit-btn {
+            flex: 2;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .skip-btn {
+            flex: 1;
+            background: var(--primary);
+            color: var(--white);
+            border: 1px solid var(--primary);
+            padding: 12px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .skip-btn:active {
+            background: #EA580C;
+            border-color: #EA580C;
+        }
+        
+        /* Bottom Tab */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            max-width: 375px;
+            margin: 0 auto;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9CA3AF;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        
+        .tab-item.active {
+            color: var(--primary);
+        }
+        
+        .tab-item .icon {
+            font-size: 22px;
+        }
+        
+        .tab-item.active .icon {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="back" onclick="goToIndex()">←</span>
+        <h1>添加宠物</h1>
+    </div>
+    
+    <!-- 表单区域 -->
+    <div class="form-section">
+        <!-- 宠物昵称 -->
+        <div class="form-group">
+            <label class="form-label">宠物昵称<span class="required">*</span></label>
+            <input type="text" class="form-input" id="petName" placeholder="请输入宠物昵称，如：旺财">
+        </div>
+        
+        <!-- 物种选择 -->
+        <div class="form-group">
+            <label class="form-label">物种<span class="required">*</span></label>
+            <div class="species-select">
+                <span class="species-tag active" data-value="dog" onclick="selectSpecies(this)">🐕 狗狗</span>
+                <span class="species-tag" data-value="cat" onclick="selectSpecies(this)">🐈 猫咪</span>
+                <span class="species-tag" data-value="other" onclick="selectSpecies(this)">🐾 其他</span>
+            </div>
+        </div>
+        
+        <!-- 品种 -->
+        <div class="form-group">
+            <label class="form-label">品种</label>
+            <input type="text" class="form-input" id="breed" placeholder="如：金毛、英短、柯基等">
+        </div>
+        
+        <!-- 性别 -->
+        <div class="form-group">
+            <label class="form-label">性别</label>
+            <div class="gender-select">
+                <span class="gender-tag active" data-value="male" onclick="selectGender(this)">♂ 公</span>
+                <span class="gender-tag" data-value="female" onclick="selectGender(this)">♀ 母</span>
+                <span class="gender-tag" data-value="unknown" onclick="selectGender(this)">⚥ 未知</span>
+            </div>
+        </div>
+        
+        <!-- 年龄 -->
+        <div class="form-group">
+            <label class="form-label">年龄</label>
+            <div class="inline-input">
+                <input type="number" id="age" placeholder="0" min="0">
+                <span class="unit">岁</span>
+            </div>
+        </div>
+        
+        <!-- 体重 -->
+        <div class="form-group">
+            <label class="form-label">体重</label>
+            <div class="inline-input">
+                <input type="number" id="weight" placeholder="0" min="0" step="0.1">
+                <span class="unit">kg</span>
+            </div>
+        </div>
+        
+        <!-- 备注 -->
+        <div class="form-group">
+            <label class="form-label">备注</label>
+            <textarea class="remark-input" id="remark" placeholder="性格、注意事项、特殊需求等（选填）"></textarea>
+        </div>
+    </div>
+    
+    <!-- 底部按钮 -->
+    <div class="bottom-action">
+        <div class="btn-row">
+            <button class="skip-btn" onclick="goToIndex()">跳过</button>
+            <button class="submit-btn" onclick="saveAndContinue()">保存并继续</button>
+        </div>
+    </div>
+    
+    <script>
+        // 选择物种
+        function selectSpecies(el) {
+            document.querySelectorAll('.species-tag').forEach(tag => tag.classList.remove('active'));
+            el.classList.add('active');
+        }
+        
+        // 选择性别
+        function selectGender(el) {
+            document.querySelectorAll('.gender-tag').forEach(tag => tag.classList.remove('active'));
+            el.classList.add('active');
+        }
+        
+        // 保存并继续
+        function saveAndContinue() {
+            const petName = document.getElementById('petName').value.trim();
+            
+            if (!petName) {
+                alert('请输入宠物昵称');
+                return;
+            }
+            
+            // 获取表单数据
+            const petData = {
+                name: petName,
+                species: document.querySelector('.species-tag.active').dataset.value,
+                breed: document.getElementById('breed').value.trim(),
+                gender: document.querySelector('.gender-tag.active').dataset.value,
+                age: document.getElementById('age').value,
+                weight: document.getElementById('weight').value,
+                remark: document.getElementById('remark').value.trim()
+            };
+            
+            // 模拟保存到本地存储
+            localStorage.setItem('petRegisterData', JSON.stringify(petData));
+            localStorage.setItem('hasRegisteredPet', 'true');
+            
+            // 跳转到首页
+            window.location.href = 'index.html';
+        }
+        
+        // 跳过
+        function goToIndex() {
+            window.location.href = 'index.html';
+        }
+    </script>
+    
+    <!-- 底部Tab栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='index.html'">
+            <span class="icon">🏠</span>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='services.html'">
+            <span class="icon">📋</span>
+            <span>服务</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='orders.html'">
+            <span class="icon">📝</span>
+            <span>订单</span>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <span class="icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

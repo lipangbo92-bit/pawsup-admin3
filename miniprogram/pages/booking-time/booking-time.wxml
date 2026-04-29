@@ -1,0 +1,64 @@
+<!--pages/booking-time/booking-time.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="back" bindtap="goBack">←</view>
+    <view class="title">选择预约时间</view>
+    <view class="placeholder"></view>
+  </view>
+  
+  <!-- 服务/技师信息 -->
+  <view class="info-card">
+    <view class="info-item" wx:if="{{service}}">
+      <text class="label">服务</text>
+      <text class="value">{{service.name}}</text>
+    </view>
+    <view class="info-item" wx:if="{{technician}}">
+      <text class="label">技师</text>
+      <text class="value">{{technician.name}}</text>
+    </view>
+  </view>
+  
+  <!-- 日期选择 -->
+  <view class="section">
+    <view class="section-title">选择日期</view>
+    <scroll-view class="date-scroll" scroll-x>
+      <view 
+        class="date-item {{item.date === selectedDate ? 'active' : ''}}"
+        wx:for="{{dates}}"
+        wx:key="date"
+        bindtap="onSelectDate"
+        data-date="{{item.date}}"
+      >
+        <view class="date-week">{{item.week}}</view>
+        <view class="date-day">{{item.day}}</view>
+        <view class="date-today" wx:if="{{item.isToday}}">今天</view>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 时间选择 -->
+  <view class="section">
+    <view class="section-title">选择时间</view>
+    <view class="time-grid">
+      <view 
+        class="time-item {{item.time === selectedTime.time ? 'selected' : ''}} {{!item.available ? 'disabled' : ''}}"
+        wx:for="{{timeSlots}}"
+        wx:key="time"
+        bindtap="onSelectTime"
+        data-time="{{item}}"
+      >
+        {{item.time}}
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <view class="selected-info" wx:if="{{selectedTime}}">
+      {{selectedDate}} {{selectedTime.time}}
+    </view>
+    <view class="next-btn {{selectedTime ? 'active' : ''}}" bindtap="goToNext">
+      下一步
+    </view>
+  </view>
+</view>

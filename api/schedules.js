@@ -1,6 +1,4 @@
 // Vercel API Route: /api/schedules
-// 排班管理 API - 管理技师可预约时间
-
 const cloudbase = require('@cloudbase/node-sdk');
 
 const app = cloudbase.init({
@@ -12,7 +10,6 @@ const app = cloudbase.init({
 const db = app.database();
 
 module.exports = async (req, res) => {
-  // 处理 CORS 预检
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
@@ -20,248 +17,86 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
-  const { action = 'list', data, id, date, technicianId } = req.body || {};
-  
-  console.log(`[API Schedules] Action: ${action}`);
+  const { action = 'list', data, date, technicianId } = req.body || {};
+  console.log(`[API Schedules] Action: ${action}`, { date, technicianId });
 
   try {
     let result;
-    
     switch (action) {
       case 'list':
         result = await getSchedules(date, technicianId);
         break;
-      case 'getByDate':
-        result = await getSchedulesByDate(date);
-        break;
-      case 'getAvailableSlots':
-        result = await getAvailableSlots(date, technicianId);
-        break;
       case 'create':
         result = await createSchedule(data);
-        break;
-      case 'update':
-        result = await updateSchedule(id, data);
-        break;
-      case 'bookSlot':
-        result = await bookTimeSlot(date, technicianId, data.time, data.orderId);
-        break;
-      case 'cancelSlot':
-        result = await cancelTimeSlot(date, technicianId, data.time);
-        break;
-      case 'delete':
-        result = await deleteSchedule(id);
         break;
       default:
         result = { success: false, error: 'Unknown action: ' + action };
     }
-
     return res.json(result);
   } catch (error) {
     console.error('[API Schedules] Error:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// 获取排班列表
 async function getSchedules(date, technicianId) {
   let query = db.collection('schedules');
-  
-  if (date) {
-    query = query.where({ date });
+  const conditions = {};
+  if (date) conditions.date = date;
+  if (technicianId) conditions.technicianId = technicianId;
+  if (Object.keys(conditions).length > 0) {
+    query = query.where(conditions);
   }
-  if (technicianId) {
-    query = query.where({ technicianId });
-  }
-  
+  // 按更新时间倒序，确保获取最新记录
+  query = query.orderBy('updatedAt', 'desc');
   const result = await query.get();
-  return {
-    success: true,
-    data: result.data
-  };
-}
-
-// 获取某天的所有排班
-async function getSchedulesByDate(date) {
-  if (!date) {
-    return { success: false, error: 'Date is required' };
-  }
-  
-  const result = await db.collection('schedules').where({ date }).get();
-  return {
-    success: true,
-    data: result.data
-  };
-}
-
-// 获取可预约时间段（用于顾客端）
-async function getAvailableSlots(date, technicianId) {
-  if (!date) {
-    return { success: false, error: 'Date is required' };
-  }
-  
-  let query = db.collection('schedules').where({ date });
-  if (technicianId) {
-    query = query.where({ technicianId });
-  }
-  
-  const result = await query.get();
-  
-  // 整理可预约时间段
-  const availableSlots = [];
-  result.data.forEach(schedule => {
-    const availableTimes = (schedule.timeSlots || [])
-      .filter(slot => slot.available)
-      .map(slot => ({
-        time: slot.time,
-        technicianId: schedule.technicianId,
-        technicianName: schedule.technicianName
-      }));
-    availableSlots.push(...availableTimes);
+  // 如果有重复记录，只返回最新的一条
+  const uniqueMap = new Map();
+  (result.data || []).forEach(item => {
+    const key = `${item.technicianId}_${item.date}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, item);
+    }
   });
-  
-  // 按时间排序
-  availableSlots.sort((a, b) => a.time.localeCompare(b.time));
-  
-  return {
-    success: true,
-    date,
-    data: availableSlots
-  };
+  return { success: true, data: Array.from(uniqueMap.values()) };
 }
 
-// 创建排班
 async function createSchedule(data) {
-  const { technicianId, technicianName, date, timeSlots } = data;
-  
-  if (!technicianId || !date || !timeSlots) {
-    return { success: false, error: 'Missing required fields' };
+  const { technicianId, technicianName, date, timeSlots, isRestDay, workStart, workEnd } = data;
+  if (!technicianId || !date) {
+    return { success: false, error: 'Missing fields' };
   }
-  
-  // 检查是否已存在该日期该技师的排班
-  const existing = await db.collection('schedules')
-    .where({ technicianId, date })
-    .get();
-  
-  if (existing.data.length > 0) {
-    // 更新现有排班
-    const id = existing.data[0]._id;
-    await db.collection('schedules').doc(id).update({
-      timeSlots,
-      updatedAt: new Date()
-    });
-    return {
-      success: true,
-      message: 'Schedule updated',
-      id
-    };
-  }
-  
-  // 创建新排班
-  const result = await db.collection('schedules').add({
-    technicianId,
-    technicianName,
-    date,
-    timeSlots,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
-  
-  return {
-    success: true,
-    id: result.id
-  };
-}
 
-// 更新排班
-async function updateSchedule(id, data) {
-  await db.collection('schedules').doc(id).update({
-    ...data,
+  const scheduleData = {
+    technicianId, technicianName, date,
+    timeSlots: timeSlots || [],
+    isRestDay: isRestDay || false,
     updatedAt: new Date()
-  });
-  return {
-    success: true
   };
-}
 
-// 预约时间段（锁定）
-async function bookTimeSlot(date, technicianId, time, orderId) {
-  const schedule = await db.collection('schedules')
-    .where({ date, technicianId })
-    .get();
-  
-  if (schedule.data.length === 0) {
-    return { success: false, error: 'Schedule not found' };
-  }
-  
-  const scheduleId = schedule.data[0]._id;
-  const timeSlots = schedule.data[0].timeSlots || [];
-  
-  // 找到对应时间段
-  const slotIndex = timeSlots.findIndex(slot => slot.time === time);
-  if (slotIndex === -1) {
-    return { success: false, error: 'Time slot not found' };
-  }
-  
-  if (!timeSlots[slotIndex].available) {
-    return { success: false, error: 'Time slot already booked' };
-  }
-  
-  // 更新为已预约
-  timeSlots[slotIndex].available = false;
-  timeSlots[slotIndex].orderId = orderId;
-  
-  await db.collection('schedules').doc(scheduleId).update({
-    timeSlots,
-    updatedAt: new Date()
-  });
-  
-  return {
-    success: true,
-    message: 'Time slot booked'
-  };
-}
+  if (workStart) scheduleData.workStart = workStart;
+  if (workEnd) scheduleData.workEnd = workEnd;
 
-// 取消时间段预约
-async function cancelTimeSlot(date, technicianId, time) {
-  const schedule = await db.collection('schedules')
-    .where({ date, technicianId })
-    .get();
-  
-  if (schedule.data.length === 0) {
-    return { success: false, error: 'Schedule not found' };
-  }
-  
-  const scheduleId = schedule.data[0]._id;
-  const timeSlots = schedule.data[0].timeSlots || [];
-  
-  const slotIndex = timeSlots.findIndex(slot => slot.time === time);
-  if (slotIndex === -1) {
-    return { success: false, error: 'Time slot not found' };
-  }
-  
-  // 恢复为可预约
-  timeSlots[slotIndex].available = true;
-  timeSlots[slotIndex].orderId = null;
-  
-  await db.collection('schedules').doc(scheduleId).update({
-    timeSlots,
-    updatedAt: new Date()
-  });
-  
-  return {
-    success: true,
-    message: 'Time slot cancelled'
-  };
-}
+  try {
+    const existing = await db.collection('schedules').where({ technicianId, date }).orderBy('updatedAt', 'desc').get();
 
-// 删除排班
-async function deleteSchedule(id) {
-  await db.collection('schedules').doc(id).remove();
-  return {
-    success: true
-  };
+    if (existing.data.length > 0) {
+      // 更新第一条记录
+      await db.collection('schedules').doc(existing.data[0]._id).update(scheduleData);
+      // 如果有重复记录，删除其余的旧记录
+      for (let i = 1; i < existing.data.length; i++) {
+        try {
+          await db.collection('schedules').doc(existing.data[i]._id).remove();
+        } catch (e) {
+          console.error('删除重复排班记录失败:', e);
+        }
+      }
+      return { success: true, message: 'Schedule updated' };
+    }
+  } catch (e) {
+    console.error('[createSchedule] query existing failed:', e);
+  }
+
+  const result = await db.collection('schedules').add({ ...scheduleData, createdAt: new Date() });
+  return { success: true, id: result.id };
 }

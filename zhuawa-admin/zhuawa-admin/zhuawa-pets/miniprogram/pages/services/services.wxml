@@ -1,0 +1,37 @@
+<!--服务项目页-->
+<view class="container">
+  <!--分类筛选-->
+  <view class="category-tabs">
+    <view 
+      wx:for="{{categories}}" 
+      wx:key="*this"
+      class="tab-item {{activeCategory === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="switchCategory"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!--服务列表-->
+  <view class="service-list">
+    <view 
+      wx:for="{{services}}" 
+      wx:key="id"
+      class="service-card"
+      data-id="{{item.id}}"
+      bindtap="goToBooking"
+    >
+      <view class="service-img"></view>
+      <view class="service-content">
+        <text class="service-name">{{item.name}}</text>
+        <text class="service-desc">{{item.description}}</text>
+        <view class="service-meta">
+          <text class="service-price">¥{{item.price}}</text>
+          <text class="service-duration">{{item.duration}}分钟</text>
+        </view>
+      </view>
+      <button class="book-btn">预约</button>
+    </view>
+  </view>
+</view>

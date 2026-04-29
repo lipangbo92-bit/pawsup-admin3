@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录 - PawsUp 爪哇宠屋</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #F97316;
+            --secondary: #FED7AA;
+            --cta: #8B5CF6;
+            --bg: #FFF7ED;
+            --text: #7C2D12;
+            --text-light: #C2410C;
+            --white: #FFFFFF;
+            --gray-100: #FFEDD5;
+            --gray-200: #FED7AA;
+            --gray-500: #EA580C;
+            --shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+            --shadow-lg: 0 8px 30px rgba(249, 115, 22, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            max-width: 375px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Logo区域 */
+        .logo-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--cta) 100%);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 24px;
+        }
+        
+        .brand-name {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .brand-slogan {
+            font-size: 14px;
+            color: var(--text-light);
+            text-align: center;
+        }
+        
+        /* 登录区域 */
+        .login-section {
+            padding: 0 24px 40px;
+        }
+        
+        .wechat-login-btn {
+            width: 100%;
+            background: #07C160;
+            color: var(--white);
+            border: none;
+            padding: 16px;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(7, 193, 96, 0.3);
+            transition: transform 0.2s;
+            margin-bottom: 16px;
+        }
+        
+        .wechat-login-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .wechat-login-btn .icon {
+            font-size: 24px;
+        }
+        
+        .phone-login-btn {
+            width: 100%;
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid var(--gray-200);
+            padding: 16px;
+            border-radius: 28px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .phone-login-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .phone-login-btn .icon {
+            font-size: 20px;
+        }
+        
+        /* 协议 */
+        .agreement {
+            padding: 20px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .agreement a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .checkbox {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 4px;
+            vertical-align: middle;
+            position: relative;
+        }
+        
+        .checkbox::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-section">
+        <div class="logo">🐾</div>
+        <div class="brand-name">PawsUp 爪哇宠屋</div>
+        <div class="brand-slogan">一站式宠物服务平台<br>让爱宠生活更美好</div>
+    </div>
+    
+    <div class="login-section">
+        <button class="wechat-login-btn" onclick="handleLogin()">
+            <span class="icon">💬</span>
+            <span>微信一键登录</span>
+        </button>
+        <button class="phone-login-btn" onclick="handleLogin()">
+            <span class="icon">📱</span>
+            <span>手机号登录</span>
+        </button>
+    </div>
+    
+    <div class="agreement">
+        <span class="checkbox"></span>
+        登录即表示您同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a>
+    </div>
+    
+    <script>
+        function handleLogin() {
+            // 检查是否首次登录（未过登记宠物）
+            const hasRegisteredPet = localStorage.getItem('hasRegisteredPet');
+            
+            if (!hasRegisteredPet) {
+                // 首次登录，跳转到宠物信息登记页面
+                window.location.href = 'pet-register.html';
+            } else {
+                // 已登记过宠物，跳转到首页
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上门服务预约 - 爪哇宠屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        'primary-light': '#FFF7ED',
+                        'primary-dark': '#EA580C',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', system-ui, sans-serif; background: #F8FAFC; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 pb-24">
+        
+        <!-- 顶部导航栏 -->
+        <div class="bg-gradient-to-r from-primary to-primary-dark">
+            <div class="px-4 pt-12 pb-4 flex items-center justify-center relative">
+                <button onclick="history.back()" class="absolute left-4 text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="text-lg font-semibold text-white">上门服务预约</h1>
+            </div>
+        </div>
+        
+        <!-- 步骤指示器 -->
+        <div class="px-4 py-4 bg-white border-b">
+            <div class="flex items-center justify-between">
+                <div class="flex flex-col items-center">
+                    <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-medium">1</div>
+                    <span class="text-[10px] mt-1 text-primary">选择服务</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-gray-200 mx-1"><div class="h-0.5 bg-primary" style="width: 50%"></div></div>
+                <div class="flex flex-col items-center">
+                    <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-medium">2</div>
+                    <span class="text-[10px] mt-1 text-primary">时间</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-gray-200 mx-1"><div class="h-0.5 bg-primary" style="width: 50%"></div></div>
+                <div class="flex flex-col items-center">
+                    <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-xs font-medium">3</div>
+                    <span class="text-[10px] mt-1 text-primary">地址</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-gray-200 mx-1"><div class="h-0.5 bg-primary" style="width: 50%"></div></div>
+                <div class="flex flex-col items-center">
+                    <div class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-medium">4</div>
+                    <span class="text-[10px] mt-1 text-gray-400">需求</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-gray-200 mx-1"><div class="h-0.5 bg-gray-200" style="width: 0%"></div></div>
+                <div class="flex flex-col items-center">
+                    <div class="w-7 h-7 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-xs font-medium">5</div>
+                    <span class="text-[10px] mt-1 text-gray-400">确认</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 步骤1：选择服务 -->
+        <div id="step1" class="p-4">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">选择服务项目</h3>
+            <div class="bg-white rounded-2xl p-4 mb-3 shadow-sm border-2 border-primary">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">🛁</div>
+                        <div>
+                            <div class="font-medium text-gray-800">宠物洗澡</div>
+                            <div class="text-sm text-gray-500">基础洗护服务</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-primary">¥88</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-transparent hover:border-primary">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center text-2xl">✂️</div>
+                        <div>
+                            <div class="font-medium text-gray-800">宠物美容</div>
+                            <div class="text-sm text-gray-500">专业造型设计</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-primary">¥168</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤2：选择时间 -->
+        <div id="step2" class="p-4" style="display:none;">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">选择服务时间</h3>
+            <div class="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-700 font-medium">选择日期</span>
+                    <span class="text-primary text-sm">今天 03-03</span>
+                </div>
+                <div class="grid grid-cols-7 gap-2 text-center">
+                    <div class="py-2 text-xs text-gray-400">一</div>
+                    <div class="py-2 text-xs text-gray-400">二</div>
+                    <div class="py-2 text-xs text-gray-400">三</div>
+                    <div class="py-2 text-xs text-gray-400">四</div>
+                    <div class="py-2 text-xs text-gray-400">五</div>
+                    <div class="py-2 text-xs text-gray-400">六</div>
+                    <div class="py-2 text-xs text-gray-400">日</div>
+                    <div class="py-2 text-sm text-gray-400">24</div>
+                    <div class="py-2 text-sm text-gray-400">25</div>
+                    <div class="py-2 text-sm text-gray-400">26</div>
+                    <div class="py-2 text-sm text-gray-400">27</div>
+                    <div class="py-2 text-sm text-gray-400">28</div>
+                    <div class="py-2 text-sm text-gray-400 bg-primary text-white rounded-full">01</div>
+                    <div class="py-2 text-sm text-gray-400">02</div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-gray-700 font-medium">选择时间</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button class="py-2 px-3 text-sm rounded-lg bg-primary text-white">09:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">10:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">11:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">14:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">15:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">16:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">17:00</button>
+                    <button class="py-2 px-3 text-sm rounded-lg bg-gray-100 text-gray-600">18:00</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤3：填写地址 -->
+        <div id="step3" class="p-4" style="display:none;">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">填写上门地址</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-600 mb-2">联系人</label>
+                    <input type="text" placeholder="请输入联系人姓名" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-2">联系电话</label>
+                    <input type="tel" placeholder="请输入联系电话" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-2">上门地址</label>
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="请输入详细地址" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:outline-none">
+                        <button class="px-4 py-3 bg-primary text-white rounded-xl">📍</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤4：服务需求 -->
+        <div id="step4" class="p-4" style="display:none;">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">填写服务需求</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <textarea placeholder="请详细描述您的服务需求，如宠物品种、年龄、体重、特殊注意事项等..." rows="5" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:outline-none resize-none"></textarea>
+                <div class="text-xs text-gray-400 mt-2">请尽可能详细描述，以便技师做好准备</div>
+            </div>
+        </div>
+
+        <!-- 步骤5：确认 -->
+        <div id="step5" class="p-4" style="display:none;">
+            <h3 class="text-base font-semibold text-gray-800 mb-4">确认预约信息</h3>
+            <div class="bg-white rounded-2xl p-4 shadow-sm mb-4">
+                <div class="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100">
+                    <span class="text-lg">📋</span>
+                    <span class="font-medium text-gray-800">预约信息</span>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">服务项目</span>
+                        <span class="text-gray-800">宠物洗澡 ¥88</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">服务时间</span>
+                        <span class="text-gray-800">03-03 09:00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">上门地址</span>
+                        <span class="text-gray-800 text-right">北京市朝阳区xxx</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-orange-50 rounded-2xl p-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700">应付金额</span>
+                    <span class="text-2xl font-bold text-primary">¥88</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部按钮 -->
+        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 p-4 z-40">
+            <div class="flex gap-3">
+                <button onclick="prevStep()" class="flex-1 py-4 rounded-full border-2 border-primary text-primary font-semibold" id="prevBtn" style="display:none;">
+                    上一步
+                </button>
+                <button onclick="nextStep()" class="flex-1 py-4 rounded-full bg-gradient-to-r from-primary to-primary-dark text-white font-semibold shadow-lg">
+                    下一步
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function updateUI() {
+            // 隐藏所有步骤
+            for(let i = 1; i <= totalSteps; i++) {
+                document.getElementById('step' + i).style.display = 'none';
+            }
+            // 显示当前步骤
+            document.getElementById('step' + currentStep).style.display = 'block';
+            
+            // 更新按钮
+            const prevBtn = document.getElementById('prevBtn');
+            if(currentStep === 1) {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'block';
+            }
+        }
+
+        function nextStep() {
+            if(currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            } else {
+                alert('预约提交成功！');
+            }
+        }
+
+        function prevStep() {
+            if(currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+    </script>
+</body>
+</html>

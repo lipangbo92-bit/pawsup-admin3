@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>数据统计 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --secondary: #F9A8D4;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --text-light: #BE185D;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+            --gray-500: #DB2777;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-item .icon { font-size: 18px; }
+        
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+        }
+        
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--white);
+            padding: 10px 16px;
+            border-radius: 10px;
+        }
+        
+        .date-range select {
+            border: none;
+            font-size: 14px;
+            color: #6B7280;
+            outline: none;
+        }
+        
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .overview-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .overview-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .overview-icon.pink { background: var(--gray-100); }
+        .overview-icon.green { background: #D1FAE5; }
+        .overview-icon.blue { background: #DBEAFE; }
+        .overview-icon.orange { background: #FEF3C7; }
+        
+        .overview-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .overview-label {
+            font-size: 13px;
+            color: #6B7280;
+        }
+        
+        .overview-change {
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .overview-change.up { color: var(--green); }
+        .overview-change.down { color: var(--red); }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .chart-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .chart-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .chart-placeholder {
+            height: 240px;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--white) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+        
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .rank-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #F9FAFB;
+            border-radius: 10px;
+        }
+        
+        .rank-num {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .rank-num.gray {
+            background: #E5E7EB;
+            color: #6B7280;
+        }
+        
+        .rank-info {
+            flex: 1;
+        }
+        
+        .rank-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .rank-count {
+            font-size: 12px;
+            color: #6B7280;
+        }
+        
+        .rank-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+            .stats-overview { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>栖游记管理</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </div>
+            <div class="nav-item active">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">📈 数据统计</h1>
+            <div class="date-range">
+                <span>📅</span>
+                <select>
+                    <option>本周</option>
+                    <option>本月</option>
+                    <option>本季度</option>
+                    <option>本年</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="stats-overview">
+            <div class="overview-card">
+                <div class="overview-icon pink">💰</div>
+                <div class="overview-value">¥86,580</div>
+                <div class="overview-label">总收入</div>
+                <div class="overview-change up">↑ 12.5% 较上周</div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-icon green">📋</div>
+                <div class="overview-value">568</div>
+                <div class="overview-label">预约单数</div>
+                <div class="overview-change up">↑ 8.3% 较上周</div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-icon blue">👥</div>
+                <div class="overview-value">342</div>
+                <div class="overview-label">新增客户</div>
+                <div class="overview-change up">↑ 15.2% 较上周</div>
+            </div>
+            <div class="overview-card">
+                <div class="overview-icon orange">⭐</div>
+                <div class="overview-value">4.8</div>
+                <div class="overview-label">平均评分</div>
+                <div class="overview-change down">↓ 0.1 较上周</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">📊 收入趋势</h3>
+                <div class="chart-placeholder">
+                    📈 收入趋势图表区域
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3 class="chart-title">🏆 技师业绩排行</h3>
+                <div class="rank-list">
+                    <div class="rank-item">
+                        <span class="rank-num">1</span>
+                        <div class="rank-info">
+                            <div class="rank-name">小美</div>
+                            <div class="rank-count">128单</div>
+                        </div>
+                        <span class="rank-value">¥25,280</span>
+                    </div>
+                    <div class="rank-item">
+                        <span class="rank-num">2</span>
+                        <div class="rank-info">
+                            <div class="rank-name">Tony</div>
+                            <div class="rank-count">96单</div>
+                        </div>
+                        <span class="rank-value">¥18,560</span>
+                    </div>
+                    <div class="rank-item">
+                        <span class="rank-num">3</span>
+                        <div class="rank-info">
+                            <div class="rank-name">Lily</div>
+                            <div class="rank-count">78单</div>
+                        </div>
+                        <span class="rank-value">¥14,820</span>
+                    </div>
+                    <div class="rank-item">
+                        <span class="rank-num gray">4</span>
+                        <div class="rank-info">
+                            <div class="rank-name">阿强</div>
+                            <div class="rank-count">45单</div>
+                        </div>
+                        <span class="rank-value">¥8,350</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <h3 class="chart-title">🔥 热门服务排行</h3>
+            <div class="chart-placeholder" style="height: 180px;">
+                📊 服务热度图表区域
+            </div>
+        </div>
+    </div>
+</body>
+</html>

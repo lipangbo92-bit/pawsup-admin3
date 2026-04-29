@@ -1,0 +1,97 @@
+<!--pages/index/index.wxml-->
+<view class="home-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-placeholder"></view>
+      <text class="nav-title">PawsUp爪哇宠屋</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 原header区域 -->
+  <view class="header">
+    <view class="location-box" bindtap="onLocationTap">
+      <text class="location-icon">📍</text>
+      <text class="location-text">{{location}}</text>
+      <text class="location-arrow">▼</text>
+    </view>
+    <view class="search-box" bindtap="onSearchTap">
+      <text class="search-icon">🔍</text>
+      <text class="search-placeholder">搜索服务、技师</text>
+    </view>
+    <view class="message-box" bindtap="onMessageTap">
+      <text class="message-icon">💬</text>
+      <view wx:if="{{unreadCount > 0}}" class="message-badge">{{unreadCount}}</view>
+    </view>
+  </view>
+
+  <!-- Banner轮播图 -->
+  <view class="banner-section">
+    <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500" circular="true" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#F97316">
+      <swiper-item wx:for="{{banners}}" wx:key="id">
+        <view class="banner-item" style="background: {{item.bgColor}}">
+          <text class="banner-title">{{item.title}}</text>
+          <text class="banner-subtitle">{{item.subtitle}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 快速预约区 -->
+  <view class="quick-book-section">
+    <view class="section-title">快速预约</view>
+    <view class="quick-book-list">
+      <view class="quick-book-card quick-book-card-{{index+1}}" wx:for="{{quickBooks}}" wx:key="id" bindtap="onQuickBookTap" data-item="{{item}}">
+        <view class="quick-book-icon">{{item.icon}}</view>
+        <view class="quick-book-info">
+          <text class="quick-book-name">{{item.name}}</text>
+          <text class="quick-book-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 金牌技师推荐 -->
+  <view class="technician-section">
+    <view class="section-header">
+      <text class="section-title">🏅 金牌技师推荐</text>
+      <text class="section-more" bindtap="onMoreTechnicians">查看更多 ></text>
+    </view>
+    <view class="technician-list">
+      <view class="technician-card" wx:for="{{technicians}}" wx:key="id" bindtap="onTechnicianTap" data-id="{{item.id}}">
+        <view class="technician-avatar">{{item.avatar}}</view>
+        <view class="technician-info">
+          <view class="technician-name-row">
+            <text class="technician-name">{{item.name}}</text>
+            <view class="technician-badge">金牌</view>
+          </view>
+          <text class="technician-skill">{{item.skill}}</text>
+          <view class="technician-stats">
+            <text class="technician-rating">⭐ {{item.rating}}</text>
+            <text class="technician-orders">已接{{item.orders}}单</text>
+          </view>
+        </view>
+        <view class="technician-book-btn">预约</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门服务 -->
+  <view class="service-section">
+    <view class="section-header">
+      <text class="section-title">🔥 热门服务</text>
+      <text class="section-more" bindtap="onMoreServices">全部服务 ></text>
+    </view>
+    <view class="service-grid">
+      <view class="service-card" wx:for="{{services}}" wx:key="id" bindtap="onServiceTap" data-id="{{item.id}}">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">{{item.icon}}</text>
+        </view>
+        <text class="service-name">{{item.name}}</text>
+        <text class="service-price">¥{{item.price}}起</text>
+      </view>
+    </view>
+  </view>
+</view>

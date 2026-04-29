@@ -1,0 +1,62 @@
+<!--pages/services/services.wxml - 修复版-->
+<view class="container">
+  <!-- 顶部导航栏 - 修复背景覆盖 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <text class="nav-title">服务项目</text>
+    </view>
+  </view>
+
+  <!-- 左右分栏布局 -->
+  <view class="main-content">
+    <!-- 左侧分类导航 - 6个分类 -->
+    <scroll-view class="category-nav" scroll-y enhanced show-scrollbar="{{false}}">
+      <view 
+        wx:for="{{categories}}" 
+        wx:key="index"
+        class="category-item {{currentCategory === index ? 'active' : ''}}"
+        bindtap="switchCategory"
+        data-index="{{index}}"
+      >
+        <text class="category-text">{{item}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧服务列表 -->
+    <scroll-view class="service-list" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="service-content">
+        <view 
+          wx:for="{{services}}" 
+          wx:key="id"
+          class="service-card"
+        >
+          <view class="service-icon-wrapper {{item.iconClass}}">
+            <text class="icon-text">{{item.iconText}}</text>
+          </view>
+          <view class="service-info">
+            <view>
+              <text class="service-name">{{item.name}}</text>
+              <text class="service-desc">{{item.desc}}</text>
+            </view>
+            <view class="service-bottom">
+              <view class="price-wrapper">
+                <text class="price-symbol">¥</text>
+                <text class="price-value">{{item.price}}</text>
+                <text class="price-unit">{{item.unit}}</text>
+              </view>
+              <view class="book-btn" bindtap="bookService" data-service="{{item.id}}">
+                <text class="book-icon">+</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 无数据提示 -->
+        <view wx:if="{{services.length === 0}}" style="text-align:center;padding:40rpx;color:#999;">
+          暂无服务数据
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

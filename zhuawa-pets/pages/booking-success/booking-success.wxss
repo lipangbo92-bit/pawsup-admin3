@@ -1,0 +1,273 @@
+/* pages/booking-success/booking-success.wxss */
+.page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFF7ED 0%, #FEF3C7 100%);
+  padding-bottom: 60rpx;
+}
+
+/* ========== 顶部导航栏 ========== */
+.custom-nav {
+  position: relative;
+  height: 176rpx;
+  padding-top: 88rpx;
+  box-sizing: border-box;
+}
+
+.nav-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  z-index: 0;
+}
+
+.nav-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 20rpx;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-placeholder {
+  width: 88rpx;
+}
+
+/* ========== 成功提示区 ========== */
+.success-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60rpx;
+  padding-bottom: 40rpx;
+}
+
+.success-icon-wrapper {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.success-icon-circle {
+  width: 140rpx;
+  height: 140rpx;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(16, 185, 129, 0.4);
+  animation: bounceIn 0.6s ease-out;
+  z-index: 2;
+}
+
+.success-icon-check {
+  font-size: 72rpx;
+  color: #FFFFFF;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* 弹跳动画 */
+@keyframes bounceIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 脉冲圆环动画 */
+.pulse-ring {
+  position: absolute;
+  width: 160rpx;
+  height: 160rpx;
+  border: 4rpx solid rgba(16, 185, 129, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s ease-out infinite;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.success-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 12rpx;
+}
+
+.success-subtitle {
+  font-size: 28rpx;
+  color: #6B7280;
+}
+
+/* ========== 预约详情卡片 ========== */
+.detail-card {
+  margin: 0 32rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+}
+
+.card-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #92400E;
+}
+
+.card-divider {
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent 0%, #FCD34D 50%, transparent 100%);
+}
+
+.card-content {
+  padding: 24rpx 32rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #F3F4F6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 28rpx;
+  color: #6B7280;
+}
+
+.info-value {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.info-value-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.technician-avatar {
+  font-size: 32rpx;
+}
+
+.pet-icon {
+  font-size: 32rpx;
+}
+
+.price-row {
+  margin-top: 0;
+  padding-top: 20rpx;
+}
+
+.price-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+/* ========== 按钮组 ========== */
+.action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin: 48rpx 32rpx 0;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 4rpx 16rpx rgba(249, 115, 22, 0.4);
+}
+
+.primary-btn::after {
+  border: none;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  width: 100%;
+  height: 96rpx;
+  background: #FFFFFF;
+  border: 2rpx solid #F97316;
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #F97316;
+}
+
+.secondary-btn::after {
+  border: none;
+}
+
+.secondary-btn:active {
+  background: #FFF7ED;
+}

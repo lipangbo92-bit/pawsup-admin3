@@ -1,0 +1,453 @@
+page {
+  background-color: #F8FAFC;
+  height: 100%;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 导航栏 */
+.custom-nav {
+  height: 176rpx;
+  padding-top: 88rpx;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 88rpx 20rpx 0;
+}
+
+.nav-back {
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+}
+
+.back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-placeholder {
+  width: 88rpx;
+}
+
+/* 信息栏 */
+.info-bar {
+  background: #FFFFFF;
+  padding: 24rpx 32rpx;
+  border-bottom: 2rpx solid #E5E7EB;
+}
+
+.info-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+}
+
+.info-subtext {
+  font-size: 26rpx;
+  color: #6B7280;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 美容师列表 */
+.technician-list {
+  flex: 1;
+  padding: 24rpx;
+}
+
+.technician-card {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.technician-card.disabled {
+  opacity: 0.5;
+}
+
+.card-content {
+  display: flex;
+  padding: 24rpx;
+  align-items: center;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #F3F4F6;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 48rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.level-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid #FFFFFF;
+}
+
+.info-wrapper {
+  flex: 1;
+  margin-left: 24rpx;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.position {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-left: 16rpx;
+  background: #F3F4F6;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 12rpx;
+}
+
+.skill-tag {
+  font-size: 22rpx;
+  color: #F97316;
+  background: #FFF7ED;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-right: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.stats {
+  display: flex;
+}
+
+.stat-item {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-right: 24rpx;
+}
+
+.action-wrapper {
+  margin-left: 24rpx;
+}
+
+.select-btn {
+  padding: 16rpx 32rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 28rpx;
+}
+
+.select-btn text {
+  font-size: 26rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.unavailable-text {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 自动分配卡片 */
+.auto-assign-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  border: 2rpx dashed #6366F1;
+}
+
+.auto-icon {
+  font-size: 48rpx;
+  margin-right: 24rpx;
+}
+
+.auto-info {
+  flex: 1;
+}
+
+.auto-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+}
+
+.auto-desc {
+  font-size: 24rpx;
+  color: #6B7280;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.auto-btn {
+  padding: 16rpx 32rpx;
+  background: #6366F1;
+  border-radius: 28rpx;
+}
+
+.auto-btn text {
+  font-size: 26rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+  position: relative;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.modal-close {
+  position: absolute;
+  right: 32rpx;
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 32rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24rpx;
+}
+
+.modal-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: #F3F4F6;
+}
+
+.modal-avatar-placeholder {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 64rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-info {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.modal-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.modal-tags {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.modal-tag {
+  font-size: 24rpx;
+  color: #6B7280;
+  background: #F3F4F6;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  margin: 0 8rpx;
+}
+
+.modal-tag.tag-level {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
+.modal-stats {
+  display: flex;
+  justify-content: center;
+}
+
+.modal-stats text {
+  font-size: 26rpx;
+  color: #6B7280;
+  margin: 0 24rpx;
+}
+
+.modal-section {
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1F2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.section-content {
+  font-size: 28rpx;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.works-scroll {
+  white-space: nowrap;
+}
+
+.works-list {
+  display: flex;
+}
+
+.work-image {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 16rpx;
+  margin-right: 16rpx;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.skill-item {
+  font-size: 24rpx;
+  color: #F97316;
+  background: #FFF7ED;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  margin-right: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.modal-select-btn {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 48rpx;
+  border: none;
+  margin-top: 32rpx;
+}
+
+.modal-select-btn::after {
+  border: none;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 48rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #9CA3AF;
+}

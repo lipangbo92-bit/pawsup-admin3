@@ -1,0 +1,9 @@
+{
+  "name": "visiting-api",
+  "version": "1.0.0",
+  "description": "上门服务 API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

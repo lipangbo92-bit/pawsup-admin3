@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "collection": {
+      "users": "read",
+      "pets": "read",
+      "services": "read",
+      "technicians": "read",
+      "schedules": "read",
+      "appointments": "read"
+    }
+  }
+}

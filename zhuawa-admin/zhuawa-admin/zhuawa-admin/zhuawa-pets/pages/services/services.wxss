@@ -1,0 +1,198 @@
+/* pages/services/services.wxss - 修复导航栏 */
+page {
+  background-color: #F8FAFC;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; 
+  overflow: hidden;
+}
+
+/* ========== 顶部导航栏 - 修复背景覆盖 ========== */
+.custom-nav {
+  position: relative;
+  height: 176rpx;
+  padding-top: 88rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.nav-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  z-index: 0;
+}
+
+.nav-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  padding: 0 20rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+  text-align: center;
+}
+
+/* ========== 主内容区 ========== */
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ========== 左侧分类导航 ========== */
+.category-nav {
+  width: 200rpx;
+  background-color: #FFFFFF;
+  border-right: 1rpx solid #E5E7EB;
+}
+
+.category-item {
+  padding: 32rpx 20rpx;
+  text-align: center;
+  border-left: 4rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.category-item.active {
+  background-color: #FFF7ED;
+  border-left-color: #F97316;
+}
+
+.category-text {
+  font-size: 26rpx;
+  color: #4B5563;
+}
+
+.category-item.active .category-text {
+  color: #F97316;
+  font-weight: 500;
+}
+
+/* ========== 右侧服务列表 ========== */
+.service-list {
+  flex: 1;
+  background-color: #F8FAFC;
+}
+
+.service-content {
+  padding: 20rpx;
+}
+
+.service-card {
+  display: flex;
+  background-color: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.service-icon-wrapper {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.icon-text {
+  font-size: 48rpx;
+}
+
+.icon-orange { background: linear-gradient(135deg, #FDBA74 0%, #F97316 100%); }
+.icon-pink { background: linear-gradient(135deg, #FBCFE8 0%, #EC4899 100%); }
+.icon-purple { background: linear-gradient(135deg, #DDD6FE 0%, #8B5CF6 100%); }
+.icon-blue { background: linear-gradient(135deg, #BFDBFE 0%, #3B82F6 100%); }
+.icon-teal { background: linear-gradient(135deg, #99F6E4 0%, #14B8A6 100%); }
+.icon-green { background: linear-gradient(135deg, #BBF7D0 0%, #22C55E 100%); }
+.icon-lime { background: linear-gradient(135deg, #D9F99D 0%, #84CC16 100%); }
+
+.service-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.service-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.service-desc {
+  font-size: 24rpx;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+.service-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.price-wrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-symbol {
+  font-size: 24rpx;
+  color: #EF4444;
+  font-weight: 500;
+}
+
+.price-value {
+  font-size: 40rpx;
+  color: #EF4444;
+  font-weight: bold;
+}
+
+.price-unit {
+  font-size: 22rpx;
+  color: #9CA3AF;
+  margin-left: 4rpx;
+}
+
+.book-btn {
+  width: 64rpx;
+  height: 64rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.3);
+}
+
+.book-icon {
+  color: #FFFFFF;
+  font-size: 36rpx;
+  font-weight: 300;
+}

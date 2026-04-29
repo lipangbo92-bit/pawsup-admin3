@@ -1,0 +1,9 @@
+{
+  "name": "users-api",
+  "version": "1.0.0",
+  "description": "用户管理 API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

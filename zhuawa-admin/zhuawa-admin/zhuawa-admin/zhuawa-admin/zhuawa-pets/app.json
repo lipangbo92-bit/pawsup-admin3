@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/services/services",
+    "pages/booking-time-1/booking-time-1",
+    "pages/booking-time-2/booking-time-2",
+    "pages/booking-confirm/booking-confirm",
+    "pages/booking-success/booking-success",
+    "pages/boarding/boarding",
+    "pages/visiting/visiting",
+    "pages/orders/orders",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F97316",
+    "navigationBarTitleText": "PawsUp爪哇宠屋",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFF7ED"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#F97316",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/services/services",
+        "text": "服务",
+        "iconPath": "images/service.png",
+        "selectedIconPath": "images/service-active.png"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单",
+        "iconPath": "images/order.png",
+        "selectedIconPath": "images/order-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png"
+      }
+    ]
+  },
+  "usingComponents": {},
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

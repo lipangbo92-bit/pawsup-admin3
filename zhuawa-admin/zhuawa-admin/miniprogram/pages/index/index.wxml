@@ -1,0 +1,88 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="logo">栖游记</view>
+    <view class="location">
+      <text class="icon">📍</text>
+      <text>距您0.5km</text>
+    </view>
+  </view>
+  
+  <!-- Banner -->
+  <view class="banner">
+    <view class="banner-content">
+      <view class="banner-title">🐾 加入会员</view>
+      <view class="banner-desc">享1元洗护特权，全年省心</view>
+      <view class="banner-btn">立即入会 →</view>
+    </view>
+  </view>
+  
+  <!-- 功能入口 -->
+  <view class="grid-menu">
+    <view class="grid-item" bindtap="goToOrders">
+      <view class="grid-icon">🛁</view>
+      <view class="grid-label">洗美护理</view>
+      <view class="grid-tag">1元起</view>
+    </view>
+    <view class="grid-item">
+      <view class="grid-icon">⭐</view>
+      <view class="grid-label">Prime会员</view>
+    </view>
+    <view class="grid-item">
+      <view class="grid-icon">💳</view>
+      <view class="grid-label">服务年卡</view>
+    </view>
+    <view class="grid-item">
+      <view class="grid-icon">🛒</view>
+      <view class="grid-label">平价商城</view>
+    </view>
+  </view>
+  
+  <!-- 技师列表 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">✨ 星光美容师</text>
+      <text class="section-more">更多 ></text>
+    </view>
+    <scroll-view class="tech-scroll" scroll-x>
+      <view 
+        class="tech-card" 
+        wx:for="{{technicians}}" 
+        wx:key="_id"
+        bindtap="onSelectTechnician"
+        data-id="{{item._id}}"
+      >
+        <view class="tech-avatar">{{item.avatar || '👤'}}</view>
+        <view class="tech-name">{{item.name}}</view>
+        <view class="tech-level">{{item.level}}</view>
+        <view class="tech-rating">⭐ {{item.rating}}</view>
+        <view class="tech-btn">预约</view>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 服务项目 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🔥 热门服务</text>
+      <text class="section-more">全部 ></text>
+    </view>
+    <view class="service-list">
+      <view 
+        class="service-card" 
+        wx:for="{{services}}" 
+        wx:key="_id"
+        bindtap="onSelectService"
+        data-id="{{item._id}}"
+      >
+        <view class="service-img">{{item.icon || '🐕'}}</view>
+        <view class="service-info">
+          <view class="service-name">{{item.name}}</view>
+          <view class="service-meta">约{{item.duration}}分钟</view>
+          <view class="service-price">¥{{item.price}} <text>起</text></view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

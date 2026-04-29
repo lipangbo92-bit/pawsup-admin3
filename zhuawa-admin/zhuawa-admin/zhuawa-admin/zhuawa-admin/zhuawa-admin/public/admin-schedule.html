@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>PawsUp 爪哇宠屋 - 排班管理</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .schedule-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+            height: calc(100vh - 200px);
+        }
+        
+        .tech-panel {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
+        }
+        
+        .tech-panel h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--gray-800);
+        }
+        
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .tech-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .tech-item.active {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-color: var(--primary-color);
+        }
+        
+        .tech-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .tech-info {
+            flex: 1;
+        }
+        
+        .tech-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-800);
+        }
+        
+        .tech-status {
+            font-size: 12px;
+            color: var(--gray-400);
+        }
+        
+        .schedule-panel {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
+        }
+        
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .schedule-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .current-tech {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+        
+        .current-date {
+            background: var(--gray-100);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        .schedule-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .time-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--white);
+            min-height: 70px;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .time-slot.available {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        
+        .time-slot.booked {
+            background: #ede9fe;
+            border-color: var(--secondary-color);
+            cursor: not-allowed;
+        }
+        
+        .time-slot.rest {
+            background: var(--gray-100);
+            border-color: var(--gray-200);
+            opacity: 0.6;
+        }
+        
+        .slot-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .slot-status {
+            font-size: 11px;
+            margin-top: 4px;
+            color: var(--gray-400);
+        }
+        
+        .time-slot.available .slot-status {
+            color: #10b981;
+        }
+        
+        .time-slot.booked .slot-status {
+            color: var(--secondary-color);
+        }
+        
+        .schedule-legend {
+            display: flex;
+            gap: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+        
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+        
+        .legend-dot.available {
+            background: #ecfdf5;
+            border-color: #10b981;
+        }
+        
+        .legend-dot.closed {
+            background: var(--white);
+            border-color: var(--gray-200);
+        }
+        
+        .legend-dot.booked {
+            background: #ede9fe;
+            border-color: var(--secondary-color);
+        }
+        
+        .rest-banner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            color: var(--gray-600);
+        }
+        
+        .rest-banner .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 1024px) {
+            .schedule-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .tech-panel {
+                max-height: 200px;
+            }
+            
+            .tech-list {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .tech-item {
+                min-width: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li><a href="services">🛁 服务管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li class="active"><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>排班管理</h2>
+                    <div class="date-selector">
+                        <input type="date" id="scheduleDate" class="form-control" onchange="onDateChange()">
+                    </div>
+                </div>
+                
+                <div class="schedule-layout">
+                    <div class="tech-panel">
+                        <h3>选择美容师</h3>
+                        <div class="tech-list" id="techList">
+                            <div class="loading">加载中...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-panel" id="scheduleGrid">
+                        <div class="empty-state">
+                            <div style="font-size:48px; margin-bottom:16px;">👈</div>
+                            <div>请从左侧选择美容师</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 快速设置工作时间弹窗 -->
+    <div class="modal" id="workHoursModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>快速设置工作时间</h3>
+                <button class="close-btn" onclick="closeWorkHoursModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>上班时间</label>
+                    <select id="workStart" class="form-control">
+                        <option value="08:00">08:00</option>
+                        <option value="08:30">08:30</option>
+                        <option value="09:00" selected>09:00</option>
+                        <option value="09:30">09:30</option>
+                        <option value="10:00">10:00</option>
+                        <option value="10:30">10:30</option>
+                        <option value="11:00">11:00</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>下班时间</label>
+                    <select id="workEnd" class="form-control">
+                        <option value="17:00">17:00</option>
+                        <option value="17:30">17:30</option>
+                        <option value="18:00">18:00</option>
+                        <option value="18:30">18:30</option>
+                        <option value="19:00">19:00</option>
+                        <option value="19:30">19:30</option>
+                        <option value="20:00" selected>20:00</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeWorkHoursModal()">取消</button>
+                <button class="btn-primary" onclick="saveWorkHours()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/schedule-new.js"></script>
+</body>
+</html>

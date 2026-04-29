@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录 - 爪哇宠屋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#F97316',
+                        'primary-light': '#FFF7ED',
+                        'primary-dark': '#EA580C',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans SC', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-md mx-auto min-h-screen bg-gray-50 shadow-2xl overflow-hidden flex flex-col">
+        
+        <!-- Logo区域 -->
+        <div class="flex-1 flex flex-col items-center justify-center px-6">
+            <div class="w-28 h-28 bg-gradient-to-br from-orange-400 to-orange-600 rounded-3xl flex items-center justify-center shadow-lg mb-6">
+                <svg class="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4.5 12.75l6 6 9-13.5"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">爪哇宠屋</h1>
+            <p class="text-sm text-gray-500 text-center">一站式宠物服务平台<br>让爱宠生活更美好</p>
+        </div>
+        
+        <!-- 登录区域 -->
+        <div class="px-6 pb-6">
+            <button onclick="handleLogin()" class="w-full bg-green-500 text-white py-4 rounded-full text-base font-semibold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform mb-4">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348z"/>
+                </svg>
+                <span>微信一键登录</span>
+            </button>
+            <button onclick="handleLogin()" class="w-full bg-white text-primary border border-orange-200 py-4 rounded-full text-base font-semibold flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span>手机号登录</span>
+            </button>
+        </div>
+        
+        <!-- 协议 -->
+        <div class="px-6 pb-8 text-center text-xs text-gray-500">
+            <label class="flex items-center justify-center gap-1 cursor-pointer">
+                <input type="checkbox" checked class="w-4 h-4 text-primary rounded border-orange-300 focus:ring-primary">
+                <span>登录即表示您同意 <a href="#" class="text-primary">《用户协议》</a> 和 <a href="#" class="text-primary">《隐私政策》</a></span>
+            </label>
+        </div>
+    </div>
+    
+    <script>
+        function handleLogin() {
+            const hasRegisteredPet = localStorage.getItem('hasRegisteredPet');
+            if (!hasRegisteredPet) {
+                window.location.href = 'pet-register.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

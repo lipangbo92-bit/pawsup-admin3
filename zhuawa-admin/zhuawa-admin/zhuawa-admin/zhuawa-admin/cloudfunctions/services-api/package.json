@@ -1,0 +1,9 @@
+{
+  "name": "services-api",
+  "version": "1.0.0",
+  "description": "Services CRUD API for H5 Admin",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "^2.6.3"
+  }
+}

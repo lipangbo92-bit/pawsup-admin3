@@ -1,0 +1,245 @@
+/* 添加宠物页面 - 紧凑一屏设计 */
+.page-container {
+  min-height: 100vh;
+  background: #F9FAFB;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部 */
+.header {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  padding: 32rpx;
+  text-align: center;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+/* 表单区域 */
+.form-section {
+  flex: 1;
+  padding: 24rpx;
+}
+
+/* 表单行 */
+.form-row {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.form-row.three-col {
+  gap: 16rpx;
+}
+
+/* 头像 */
+.avatar-item {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: #F3F4F6;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-icon {
+  font-size: 40rpx;
+}
+
+/* 名称输入 */
+.name-item {
+  flex: 1;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+}
+
+/* 半宽项 */
+.half-item {
+  flex: 1;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+}
+
+/* 三分之一项 */
+.third-item {
+  flex: 1;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  text-align: center;
+}
+
+/* 备注 */
+.notes-item {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+}
+
+/* 标签 */
+.label {
+  font-size: 26rpx;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.label-small {
+  font-size: 24rpx;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+/* 输入框 */
+.input {
+  height: 56rpx;
+  font-size: 32rpx;
+  color: #1F2937;
+}
+
+.input-small {
+  height: 48rpx;
+  font-size: 30rpx;
+  color: #1F2937;
+  text-align: center;
+}
+
+/* 选择器值 */
+.picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56rpx;
+  font-size: 32rpx;
+  color: #9CA3AF;
+}
+
+.picker-value.active {
+  color: #1F2937;
+}
+
+.arrow {
+  font-size: 24rpx;
+  color: #9CA3AF;
+}
+
+/* 小型选择器 */
+.picker-small {
+  height: 48rpx;
+  font-size: 30rpx;
+  color: #1F2937;
+  line-height: 48rpx;
+}
+
+/* 底部 */
+.footer {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+}
+
+.btn-submit {
+  width: 100%;
+  height: 96rpx;
+  line-height: 96rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 600;
+  border-radius: 48rpx;
+  border: none;
+}
+
+.btn-submit::after {
+  border: none;
+}
+
+/* 选择器弹窗 */
+.picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.picker-popup {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FFFFFF;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 1001;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32rpx;
+  border-bottom: 2rpx solid #F3F4F6;
+  position: relative;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.picker-close {
+  position: absolute;
+  right: 32rpx;
+  font-size: 48rpx;
+  color: #9CA3AF;
+  line-height: 1;
+}
+
+.picker-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 16rpx 0;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  font-size: 30rpx;
+  color: #1F2937;
+}
+
+.picker-item.active {
+  color: #F97316;
+  background: #FFF7ED;
+}
+
+.picker-item .check {
+  font-size: 32rpx;
+  font-weight: bold;
+}

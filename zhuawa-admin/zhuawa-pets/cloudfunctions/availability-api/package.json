@@ -1,0 +1,9 @@
+{
+  "name": "availability-api",
+  "version": "1.0.0",
+  "description": "查询可用时间段API",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

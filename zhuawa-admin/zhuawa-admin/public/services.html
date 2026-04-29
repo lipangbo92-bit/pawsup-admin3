@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>PawsUp 爪哇宠屋 - 服务管理</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <span class="logo-icon">🐾</span>
+                <h1>PawsUp 爪哇宠屋</h1>
+            </div>
+            <div class="header-right">
+                <span class="admin-badge">管理员</span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </header>
+        
+        <div class="dashboard-layout">
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li><a href="dashboard">📊 仪表盘</a></li>
+                    <li><a href="admin-appointments">📋 预约管理</a></li>
+                    <li><a href="orders">📦 订单管理</a></li>
+                    <li class="active"><a href="services">🛁 服务管理</a></li>
+                    <li><a href="groomers">👨‍🔧 美容师管理</a></li>
+                    <li><a href="admin-schedule">📅 排班管理</a></li>
+                    <li><a href="statistics">📈 数据统计</a></li>
+                </ul>
+            </nav>
+            
+            <main class="main-content">
+                <div class="page-header">
+                    <h2>服务管理</h2>
+                    <button class="btn-primary" onclick="openServiceModal()">+ 添加服务</button>
+                </div>
+                
+                <div class="services-grid" id="servicesGrid"></div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 添加/编辑服务模态框 -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="serviceModalTitle">添加服务</h3>
+                <button class="close-btn" onclick="closeServiceModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="serviceForm">
+                    <input type="hidden" id="serviceId">
+                    
+                    <!-- 服务图片上传 -->
+                    <div class="form-group">
+                        <label>服务图片</label>
+<<<<<<< Updated upstream
+                        <div class="service-image-upload" id="serviceImageUpload">
+                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)">
+                            <div class="service-image-preview" id="serviceImagePreview">
+                                <span>🖼️</span>
+                                <span class="upload-hint">点击上传服务图片</span>
+                            </div>
+                        </div>
+                        <p class="form-hint">建议尺寸：400x300px，支持 JPG、PNG 格式</p>
+=======
+                        <div class="service-image-upload" id="serviceImageUpload" style="position:relative;width:200px;height:200px;border:2px dashed #ddd;border-radius:12px;overflow:hidden;cursor:pointer;background:#f9f9f9;margin:0 auto;">
+                            <input type="file" id="serviceImageInput" accept="image/*" onchange="previewServiceImage(this)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;">
+                            <div class="service-image-preview" id="serviceImagePreview" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;">
+                                <span style="font-size:48px;margin-bottom:8px;">🖼️</span>
+                                <span style="font-size:14px;">点击上传服务图片</span>
+                            </div>
+                        </div>
+                        <p style="font-size:12px;color:#999;margin-top:8px;text-align:center;">建议尺寸：200x200px（正方形）</p>
+>>>>>>> Stashed changes
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>服务名称 *</label>
+                        <input type="text" id="serviceName" required placeholder="如：基础洗护">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>价格 (元) *</label>
+                            <input type="number" id="servicePrice" required min="0" step="0.01" placeholder="99.00">
+                        </div>
+                        <div class="form-group">
+                            <label>服务时长 (分钟) *</label>
+                            <input type="number" id="serviceDuration" required min="30" step="30" placeholder="60" value="60">
+                            <small style="color:#999;font-size:12px;">预约将占用相应时长的时间段</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>服务分类 *</label>
+                        <select id="serviceCategory" required>
+                            <option value="">请选择分类</option>
+                            <option value="狗狗洗护">🐕 狗狗洗护</option>
+                            <option value="狗狗造型">✂️ 狗狗造型</option>
+                            <option value="狗狗寄养">🏠 狗狗寄养</option>
+                            <option value="猫猫洗护">🐱 猫猫洗护</option>
+                            <option value="猫猫造型">💇 猫猫造型</option>
+                            <option value="猫猫寄养">🏨 猫猫寄养</option>
+                            <option value="上门服务">🚗 上门服务</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>服务描述</label>
+                        <textarea id="serviceDesc" rows="4" placeholder="服务详情描述..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeServiceModal()">取消</button>
+                <button class="btn-primary" onclick="saveService()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/services.js"></script>
+</body>
+</html>

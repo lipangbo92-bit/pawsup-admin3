@@ -1,0 +1,252 @@
+/* pages/booking-confirm/booking-confirm.wxss */
+
+page {
+  background-color: #F8FAFC;
+  height: 100%;
+}
+
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 顶部导航栏 ========== */
+.custom-nav {
+  position: relative;
+  height: 176rpx;
+  padding-top: 88rpx;
+  box-sizing: border-box;
+}
+
+.nav-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  z-index: 0;
+}
+
+.nav-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 20rpx;
+}
+
+.nav-back {
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 52rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.nav-placeholder {
+  width: 88rpx;
+}
+
+/* ========== 主内容区域 ========== */
+.content {
+  flex: 1;
+  padding: 30rpx;
+  padding-bottom: 180rpx;
+}
+
+/* ========== 预约信息卡片 ========== */
+.booking-card {
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  padding: 28rpx 32rpx;
+  display: flex;
+  align-items: center;
+}
+
+.header-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+}
+
+.header-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.card-body {
+  padding: 32rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F3F4F6;
+}
+
+.info-item.last-item {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-label {
+  font-size: 30rpx;
+  color: #6B7280;
+}
+
+.item-value {
+  display: flex;
+  align-items: center;
+}
+
+.item-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.item-avatar {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.item-text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.item-text.highlight {
+  color: #F97316;
+  font-weight: 600;
+}
+
+.pet-type {
+  font-size: 26rpx;
+  color: #9CA3AF;
+  margin-left: 8rpx;
+}
+
+/* ========== 支付金额卡片 ========== */
+.payment-card {
+  background-color: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.payment-label {
+  font-size: 30rpx;
+  color: #6B7280;
+}
+
+.payment-amount {
+  display: flex;
+  align-items: baseline;
+}
+
+.currency {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #F97316;
+  margin-right: 4rpx;
+}
+
+.amount {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #F97316;
+}
+
+/* ========== 取消政策提示 ========== */
+.policy-notice {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  border-radius: 16rpx;
+  padding: 28rpx;
+  display: flex;
+  align-items: flex-start;
+  border: 2rpx solid #FDBA74;
+}
+
+.notice-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
+.notice-text {
+  font-size: 28rpx;
+  color: #92400E;
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* ========== 底部按钮 ========== */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #FFFFFF;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.pay-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(249, 115, 22, 0.35);
+}
+
+.pay-btn::after {
+  border: none;
+}
+
+.pay-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}

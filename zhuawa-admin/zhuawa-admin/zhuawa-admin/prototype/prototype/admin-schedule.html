@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>排班管理 - 管理端</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #EC4899;
+            --secondary: #F9A8D4;
+            --cta: #8B5CF6;
+            --bg: #FDF2F8;
+            --text: #831843;
+            --text-light: #BE185D;
+            --white: #FFFFFF;
+            --gray-100: #FCE7F3;
+            --gray-200: #FBCFE8;
+            --gray-500: #DB2777;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --red: #EF4444;
+            --shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--white);
+            padding: 24px 0;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        
+        .logo-section {
+            padding: 0 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Varela Round', sans-serif;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #6B7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: var(--gray-100);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .nav-item .icon { font-size: 18px; }
+        
+        .main-content {
+            margin-left: 220px;
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-family: 'Varela Round', sans-serif;
+            font-size: 24px;
+        }
+        
+        .tech-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        
+        .tech-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--white);
+            border-radius: 30px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .tech-chip.active {
+            border-color: var(--primary);
+            background: var(--gray-100);
+        }
+        
+        .tech-chip-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--white);
+        }
+        
+        .calendar-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .month-nav button {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--gray-200);
+            background: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .month-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .calendar-day.work {
+            background: #D1FAE5;
+            border-color: var(--green);
+        }
+        
+        .calendar-day.off {
+            background: #F3F4F6;
+            color: #9CA3AF;
+        }
+        
+        .calendar-day.has-booking {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .day-number {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .day-count {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-section">
+            <div class="logo">
+                <span>🐾</span>
+                <span>栖游记管理</span>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-item">
+                <span class="icon">📊</span>
+                <span>仪表盘</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📋</span>
+                <span>预约管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">👥</span>
+                <span>技师管理</span>
+            </div>
+            <div class="nav-item active">
+                <span class="icon">📅</span>
+                <span>排班管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">✂️</span>
+                <span>服务管理</span>
+            </div>
+            <div class="nav-item">
+                <span class="icon">📈</span>
+                <span>数据统计</span>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">📅 排班管理</h1>
+        </div>
+        
+        <div class="tech-selector">
+            <div class="tech-chip active">
+                <div class="tech-chip-avatar">👩</div>
+                <span>小美</span>
+            </div>
+            <div class="tech-chip">
+                <div class="tech-chip-avatar">👨</div>
+                <span>Tony</span>
+            </div>
+            <div class="tech-chip">
+                <div class="tech-chip-avatar">👩</div>
+                <span>Lily</span>
+            </div>
+            <div class="tech-chip">
+                <div class="tech-chip-avatar">👨</div>
+                <span>阿强</span>
+            </div>
+        </div>
+        
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <div class="month-nav">
+                    <button>‹</button>
+                    <span class="month-title">2024年2月</span>
+                    <button>›</button>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-day-header">日</div>
+                <div class="calendar-day-header">一</div>
+                <div class="calendar-day-header">二</div>
+                <div class="calendar-day-header">三</div>
+                <div class="calendar-day-header">四</div>
+                <div class="calendar-day-header">五</div>
+                <div class="calendar-day-header">六</div>
+                
+                <div class="calendar-day off"><span class="day-number">28</span></div>
+                <div class="calendar-day off"><span class="day-number">29</span></div>
+                <div class="calendar-day off"><span class="day-number">30</span></div>
+                <div class="calendar-day off"><span class="day-number">31</span></div>
+                <div class="calendar-day work"><span class="day-number">1</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">2</span><span class="day-count">5单</span></div>
+                <div class="calendar-day off"><span class="day-number">3</span></div>
+                
+                <div class="calendar-day off"><span class="day-number">4</span></div>
+                <div class="calendar-day work"><span class="day-number">5</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">6</span><span class="day-count">6单</span></div>
+                <div class="calendar-day work"><span class="day-number">7</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work"><span class="day-number">8</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">9</span><span class="day-count">5单</span></div>
+                <div class="calendar-day off"><span class="day-number">10</span></div>
+                
+                <div class="calendar-day off"><span class="day-number">11</span></div>
+                <div class="calendar-day work"><span class="day-number">12</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work"><span class="day-number">13</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">14</span><span class="day-count">6单</span></div>
+                <div class="calendar-day work"><span class="day-number">15</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">16</span><span class="day-count">7单</span></div>
+                <div class="calendar-day off"><span class="day-number">17</span></div>
+                
+                <div class="calendar-day off"><span class="day-number">18</span></div>
+                <div class="calendar-day work"><span class="day-number">19</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">20</span><span class="day-count">5单</span></div>
+                <div class="calendar-day work"><span class="day-number">21</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work"><span class="day-number">22</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">23</span><span class="day-count">6单</span></div>
+                <div class="calendar-day off"><span class="day-number">24</span></div>
+                
+                <div class="calendar-day off"><span class="day-number">25</span></div>
+                <div class="calendar-day work"><span class="day-number">26</span><span class="day-count">3单</span></div>
+                <div class="calendar-day work has-booking"><span class="day-number">27</span><span class="day-count">5单</span></div>
+                <div class="calendar-day work"><span class="day-number">28</span><span class="day-count">4单</span></div>
+                <div class="calendar-day work"><span class="day-number">29</span><span class="day-count">3单</span></div>
+                <div class="calendar-day off"><span class="day-number">1</span></div>
+                <div class="calendar-day off"><span class="day-number">2</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

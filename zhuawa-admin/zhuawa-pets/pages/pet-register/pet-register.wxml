@@ -1,0 +1,113 @@
+<!-- 添加宠物页面 - 紧凑一屏设计 -->
+<view class="page-container">
+  <!-- 头部 -->
+  <view class="header">
+    <text class="title">添加宠物</text>
+  </view>
+
+  <!-- 紧凑表单 -->
+  <view class="form-section">
+    <!-- 第一行：头像 + 名称 -->
+    <view class="form-row">
+      <view class="avatar-item" bindtap="onChooseAvatar">
+        <image wx:if="{{avatar}}" src="{{avatar}}" mode="aspectFill" class="avatar-img"/>
+        <view wx:else class="avatar-placeholder">
+          <text class="avatar-icon">📷</text>
+        </view>
+      </view>
+      <view class="name-item">
+        <text class="label">宠物名称 *</text>
+        <input class="input" placeholder="请输入" value="{{petName}}" bindinput="onNameInput"/>
+      </view>
+    </view>
+
+    <!-- 第二行：类型 + 品种 -->
+    <view class="form-row">
+      <view class="half-item" bindtap="onShowTypePicker">
+        <text class="label">类型 *</text>
+        <view class="picker-value {{petType ? 'active' : ''}}">
+          <text>{{petType ? typeOptions[typeValues.indexOf(petType)] : '请选择'}}</text>
+          <text class="arrow">▼</text>
+        </view>
+      </view>
+      <view class="half-item" bindtap="onShowBreedPicker">
+        <text class="label">品种 *</text>
+        <view class="picker-value {{breed ? 'active' : ''}}">
+          <text>{{breed || '请选择'}}</text>
+          <text class="arrow">▼</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第三行：年龄 + 体重 + 性别 -->
+    <view class="form-row three-col">
+      <view class="third-item">
+        <text class="label-small">年龄</text>
+        <input class="input-small" type="digit" placeholder="几岁" value="{{age}}" bindinput="onAgeInput"/>
+      </view>
+      <view class="third-item">
+        <text class="label-small">体重</text>
+        <input class="input-small" placeholder="kg" value="{{weight}}" bindinput="onWeightInput"/>
+      </view>
+      <view class="third-item">
+        <text class="label-small">性别</text>
+        <picker mode="selector" range="{{['弟弟', '妹妹']}}" bindchange="onGenderChange">
+          <view class="picker-small">{{gender === 'male' ? '弟弟' : '妹妹'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="notes-item">
+      <text class="label-small">备注（选填）</text>
+      <input class="input" placeholder="如：胆小、过敏等特殊情况" value="{{notes}}" bindinput="onNotesInput"/>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer">
+    <button class="btn-submit" bindtap="onSubmit">保存</button>
+  </view>
+
+  <!-- 类型选择弹窗 -->
+  <view class="picker-mask" wx:if="{{showTypePicker}}" bindtap="onCloseTypePicker"></view>
+  <view class="picker-popup" wx:if="{{showTypePicker}}">
+    <view class="picker-header">
+      <text>选择宠物类型</text>
+      <text class="picker-close" bindtap="onCloseTypePicker">×</text>
+    </view>
+    <view class="picker-list">
+      <view 
+        wx:for="{{typeOptions}}" 
+        wx:key="index"
+        class="picker-item {{petType === typeValues[index] ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onTypeSelect"
+      >
+        <text>{{item}}</text>
+        <text wx:if="{{petType === typeValues[index]}}" class="check">✓</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 品种选择弹窗 -->
+  <view class="picker-mask" wx:if="{{showBreedPicker}}" bindtap="onCloseBreedPicker"></view>
+  <view class="picker-popup" wx:if="{{showBreedPicker}}">
+    <view class="picker-header">
+      <text>选择品种</text>
+      <text class="picker-close" bindtap="onCloseBreedPicker">×</text>
+    </view>
+    <view class="picker-list">
+      <view 
+        wx:for="{{currentBreedOptions}}" 
+        wx:key="*this"
+        class="picker-item {{breed === item ? 'active' : ''}}"
+        data-breed="{{item}}"
+        bindtap="onBreedSelect"
+      >
+        <text>{{item}}</text>
+        <text wx:if="{{breed === item}}" class="check">✓</text>
+      </view>
+    </view>
+  </view>
+</view>

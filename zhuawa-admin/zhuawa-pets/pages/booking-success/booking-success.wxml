@@ -1,0 +1,69 @@
+<!--pages/booking-success/booking-success.wxml-->
+<view class="page-container">
+  <!-- 顶部导航栏 -->
+  <view class="custom-nav">
+    <view class="nav-bg"></view>
+    <view class="nav-content">
+      <view class="nav-placeholder"></view>
+      <text class="nav-title">预约成功</text>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- 成功提示区 -->
+  <view class="success-section">
+    <view class="success-icon-wrapper">
+      <view class="success-icon-circle">
+        <text class="success-icon-check">✓</text>
+      </view>
+      <!-- 弹跳动画的圆环效果 -->
+      <view class="pulse-ring"></view>
+    </view>
+    <text class="success-title">预约成功</text>
+    <text class="success-subtitle">已发送通知到您的微信</text>
+  </view>
+
+  <!-- 预约详情卡片 -->
+  <view class="detail-card">
+    <view class="card-header">
+      <text class="card-icon">📋</text>
+      <text class="card-title">预约详情</text>
+    </view>
+    <view class="card-divider"></view>
+    <view class="card-content">
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <text class="info-value">{{orderInfo.orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">服务项目</text>
+        <text class="info-value">{{orderInfo.service.name}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">{{orderType === 'boarding' ? '房型' : '美容师'}}</text>
+        <text class="info-value">{{orderInfo.technician.name || '标准间'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">{{orderType === 'boarding' ? '入住时间' : (orderType === 'visiting' ? '服务时间' : '预约时间')}}</text>
+        <text class="info-value">{{orderInfo.date.date}} {{orderInfo.time}}</text>
+      </view>
+      <view class="info-row" wx:if="{{orderInfo.pet.name && orderType !== 'boarding'}}">
+        <text class="info-label">服务宠物</text>
+        <view class="info-value-with-icon">
+          <text class="pet-icon">{{orderInfo.service.icon}}</text>
+          <text class="info-value">{{orderInfo.pet.name}}</text>
+        </view>
+      </view>
+      <view class="info-row price-row">
+        <text class="info-label">支付金额</text>
+        <text class="price-value">¥{{orderInfo.service.price}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 按钮组 -->
+  <view class="action-btns">
+    <button class="primary-btn" bindtap="goOrders">查看预约</button>
+    <button class="secondary-btn" bindtap="goHome">返回首页</button>
+  </view>
+</view>

@@ -1,0 +1,30 @@
+<!--宠物选择页-->
+<view class="container">
+  <view class="title">选择宠物</view>
+  
+  <view class="pet-list">
+    <view 
+      wx:for="{{pets}}" 
+      wx:key="id"
+      class="pet-card {{selectedPet && selectedPet.id === item.id ? 'selected' : ''}}"
+      data-index="{{index}}"
+      bindtap="selectPet"
+    >
+      <view class="pet-avatar"></view>
+      <view class="pet-info">
+        <text class="pet-name">{{item.name}}</text>
+        <text class="pet-breed">{{item.breed}} · {{item.age}}岁</text>
+      </view>
+      <view class="check-icon" wx:if="{{selectedPet && selectedPet.id === item.id}}">✓</view>
+    </view>
+
+    <view class="add-pet-card" bindtap="addPet">
+      <text class="add-icon">+</text>
+      <text class="add-text">添加新宠物</text>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="confirm-btn" bindtap="confirm" disabled="{{!selectedPet}}">下一步</button>
+  </view>
+</view>

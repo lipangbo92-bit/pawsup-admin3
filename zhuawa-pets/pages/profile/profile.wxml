@@ -1,0 +1,102 @@
+<!--pages/profile/profile.wxml-->
+<view class="page-container">
+  <!-- 头部区域 -->
+  <view class="header-section">
+    <view class="header-bg"></view>
+    
+    <!-- 用户信息 -->
+    <view class="user-info-wrap">
+      <view class="user-avatar">
+        <text class="avatar-emoji">{{userInfo.avatar}}</text>
+      </view>
+      <view class="user-detail">
+        <text class="user-name">{{userInfo.name}}</text>
+        <view class="user-level">
+          <image wx:if="{{userInfo.isCustomIcon}}" src="{{userInfo.levelIcon}}" mode="aspectFit" class="level-icon-img"></image>
+          <text wx:else class="level-icon-emoji">{{userInfo.levelIcon}}</text>
+          <text class="level-text">{{userInfo.levelName}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计卡片 - 居中 overlap -->
+  <view class="stats-card">
+    <view class="stat-item" bindtap="onOrders">
+      <text class="stat-value">{{stats.orderCount}}</text>
+      <text class="stat-label">预约次数</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="onMyPets">
+      <text class="stat-value">{{stats.petCount}}</text>
+      <text class="stat-label">我的宠物</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" bindtap="onBalance">
+      <text class="stat-value">¥{{stats.balance}}</text>
+      <text class="stat-label">余额</text>
+    </view>
+  </view>
+
+  <!-- 页面内容区 -->
+  <view class="content-section">
+    <!-- 第一组：我的订单 -->
+    <view class="menu-group">
+      <view class="menu-title">我的订单</view>
+      <view class="menu-list">
+        <view class="menu-item" bindtap="onOrders">
+          <text class="menu-icon">📝</text>
+          <text class="menu-text">预约记录</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onMyPets">
+          <text class="menu-icon">🐾</text>
+          <text class="menu-text">我的宠物</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onFavoriteTech">
+          <text class="menu-icon">❤️</text>
+          <text class="menu-text">收藏技师</text>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第二组：会员中心 -->
+    <view class="menu-group">
+      <view class="menu-title">会员中心</view>
+      <view class="menu-list">
+        <view class="menu-item" bindtap="onMemberCard">
+          <text class="menu-icon">💳</text>
+          <text class="menu-text">会员卡</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onCoupons">
+          <text class="menu-icon">🎫</text>
+          <text class="menu-text">优惠券</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onContact">
+          <text class="menu-icon">📞</text>
+          <text class="menu-text">联系我们</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onShowOpenId">
+          <text class="menu-icon">🔑</text>
+          <text class="menu-text">我的ID</text>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="onSettings">
+          <text class="menu-icon">⚙️</text>
+          <text class="menu-text">设置</text>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 退出按钮 -->
+    <view class="logout-btn" bindtap="onLogout">
+      <text class="logout-text">退出登录</text>
+    </view>
+  </view>
+</view>
